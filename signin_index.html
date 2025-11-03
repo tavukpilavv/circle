@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
+    
+    <link rel="stylesheet" href="style.css" />
+    
+    <title>Login Page | Caged coder</title>
+
+    <style>
+      body {
+        /* Orijinal style.css'ten sildiğimiz kurallar */
+        background-color: #c9d6ff;
+        background: linear-gradient(to right, #e2e2e2, #c9d6ff);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        height: 100vh;
+        margin: 0; /* '*' seçicisinden gelen sıfırlama */
+      }
+    </style>
+    </head>
+
+  <body>
+    <div class="signin_container" id="signin_container">
+      <div class="signin_form-container signin_sign-up">
+        <form>
+          <h1>Create Account</h1>
+          <div class="signin_social-icons">
+            <a href="#" class="signin_icon"
+              ><i class="fa-brands fa-google-plus-g"></i
+            ></a>
+            
+            <a href="#" class="signin_icon"><i class="fa-brands fa-github"></i></a>
+            <a href="#" class="signin_icon"
+              ><i class="fa-brands fa-linkedin-in"></i
+            ></a>
+          </div>
+          <span>or use your email for registeration</span>
+          <input type="text" placeholder="Name" />
+          <input type="email" placeholder="Email" />
+          <input type="password" placeholder="Password" />
+          <button>Sign Up</button>
+        </form>
+      </div>
+      <div class="signin_form-container signin_sign-in">
+        <form>
+          <h1>Sign In</h1>
+          <div class="signin_social-icons">
+            <a href="#" class="signin_icon"
+              ><i class="fa-brands fa-google-plus-g"></i
+            ></a>
+          
+            <a href="#" class="signin_icon"><i class="fa-brands fa-github"></i></a>
+            <a href="#" class="signin_icon"
+              ><i class="fa-brands fa-linkedin-in"></i
+            ></a>
+          </div>
+          <span>or use your email password</span>
+          <input type="email" placeholder="Email" />
+          <input type="password" placeholder="Password" />
+          <a href="#">Forget Your Password?</a>
+          <button>Sign In</button>
+        </form>
+      </div>
+      <div class="signin_toggle-container">
+        <div class="signin_toggle">
+          <div class="signin_toggle-panel signin_toggle-left">
+            <h1>Welcome Back!</h1>
+            <p>Enter your personal details to use all of site features</p>
+            <button class="signin_hidden" id="signin_login">Sign In</button>
+          </div>
+          <div class="signin_toggle-panel signin_toggle-right">
+            <h1>Hello!</h1>
+            <p>
+              Register with your personal details to use all of site features
+            </p>
+            <button class="signin_hidden" id="signin_register">Sign Up</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="signin.js"></script>
+  </body>
+</html>
