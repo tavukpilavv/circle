@@ -7,7 +7,9 @@ from alembic import context
 
 config = context.config
 
-config_path = Path(config.config_file_name) if config.config_file_name else None
+config_path = (
+    Path(config.config_file_name) if config.config_file_name else None
+)
 fallback_path = Path(__file__).resolve().parent.parent / "alembic.ini"
 
 if config_path and config_path.exists():
