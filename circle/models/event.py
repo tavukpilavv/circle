@@ -25,8 +25,8 @@ class Event(BaseModel):
     )
     title = db.Column(db.String(255), nullable=False)
     description = db.Column(db.Text, nullable=True)
-    start_at = db.Column(db.DateTime, nullable=False)
-    end_at = db.Column(db.DateTime, nullable=False)
+    start_at = db.Column(db.DateTime(timezone=True), nullable=False)
+    end_at = db.Column(db.DateTime(timezone=True), nullable=False)
     capacity = db.Column(db.Integer, nullable=True)
     banner_url = db.Column(db.String(512), nullable=True)
 

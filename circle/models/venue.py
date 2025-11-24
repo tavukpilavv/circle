@@ -34,8 +34,8 @@ class VenueBlock(BaseModel):
     venue_id = db.Column(
         db.String(36), db.ForeignKey("venues.id"), nullable=False
     )
-    start_at = db.Column(db.DateTime, nullable=False)
-    end_at = db.Column(db.DateTime, nullable=False)
+    start_at = db.Column(db.DateTime(timezone=True), nullable=False)
+    end_at = db.Column(db.DateTime(timezone=True), nullable=False)
     reason = db.Column(db.String(255), nullable=True)
 
     __table_args__ = (

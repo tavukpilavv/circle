@@ -11,15 +11,15 @@ class BaseModel(db.Model):
         db.String(36), primary_key=True, default=lambda: str(uuid.uuid4())
     )
     created_at = db.Column(
-        db.DateTime, default=datetime.utcnow, nullable=False
+        db.DateTime(timezone=True), default=datetime.utcnow, nullable=False
     )
     updated_at = db.Column(
-        db.DateTime,
+        db.DateTime(timezone=True),
         default=datetime.utcnow,
         onupdate=datetime.utcnow,
         nullable=False,
     )
-    deleted_at = db.Column(db.DateTime, nullable=True)
+    deleted_at = db.Column(db.DateTime(timezone=True), nullable=True)
 
     def soft_delete(self):
         self.deleted_at = datetime.utcnow()
