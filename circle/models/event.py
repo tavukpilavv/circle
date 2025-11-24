@@ -48,5 +48,9 @@ class EventTag(BaseModel):
     tag_id = db.Column(db.String(36), db.ForeignKey("tags.id"), nullable=False)
 
     __table_args__ = (
-        db.UniqueConstraint("event_id", "tag_id", name="uq_event_tag"),
+        db.UniqueConstraint(
+            "event_id",
+            "tag_id",
+            name="uq_event_tag",
+        ),
     )

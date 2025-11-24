@@ -14,7 +14,10 @@ class BaseModel(db.Model):
         db.DateTime, default=datetime.utcnow, nullable=False
     )
     updated_at = db.Column(
-        db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+        db.DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow,
+        nullable=False,
     )
     deleted_at = db.Column(db.DateTime, nullable=True)
 

@@ -1,10 +1,6 @@
 from datetime import datetime
 
 from flask import Blueprint, abort, jsonify, request
-
-from datetime import datetime
-
-from flask import Blueprint, abort, jsonify, request
 from flask_jwt_extended import jwt_required
 
 from circle.auth import require_roles
