@@ -1,9 +1,6 @@
 from circle.extensions import db
 from circle.models.base import BaseModel
 
-from circle.extensions import db
-from circle.models.base import BaseModel
-
 
 class Role(BaseModel):
     __tablename__ = "roles"
@@ -44,7 +41,10 @@ class Tag(BaseModel):
     __tablename__ = "tags"
 
     university_id = db.Column(
-        db.String(36), db.ForeignKey("universities.id"), nullable=False, index=True
+        db.String(36),
+        db.ForeignKey("universities.id"),
+        nullable=False,
+        index=True,
     )
     key = db.Column(db.String(64), nullable=False)
     label = db.Column(db.String(128), nullable=False)

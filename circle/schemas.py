@@ -1,4 +1,11 @@
-from marshmallow import Schema, fields, validates_schema, ValidationError, pre_load
+from marshmallow import (
+    Schema,
+    ValidationError,
+    fields,
+    pre_load,
+    validates_schema,
+)
+
 from utils.helpers import sanitize_html
 
 
@@ -30,8 +37,14 @@ class EventCreateSchema(Schema):
 
     @validates_schema
     def validate_dates(self, data, **kwargs):
-        if data.get("start_at") and data.get("end_at") and data["end_at"] <= data["start_at"]:
-            raise ValidationError("end_at must be after start_at", "end_at")
+        if (
+            data.get("start_at")
+            and data.get("end_at")
+            and data["end_at"] <= data["start_at"]
+        ):
+            raise ValidationError(
+                "end_at must be after start_at", "end_at"
+            )
 
     @pre_load
     def sanitize(self, data, **kwargs):

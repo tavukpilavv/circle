@@ -1,3 +1,4 @@
+# flake8: noqa
 """initial schema with extensions and seed data
 
 Revision ID: 0001_initial_schema

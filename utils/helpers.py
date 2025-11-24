@@ -23,7 +23,9 @@ def filter_by_university(query, university_id):
 
 def refresh_public_events_view():
     try:
-        db.session.execute("REFRESH MATERIALIZED VIEW CONCURRENTLY mv_public_events")
+        db.session.execute(
+            "REFRESH MATERIALIZED VIEW CONCURRENTLY mv_public_events"
+        )
     except Exception:
         # Fallback if concurrently unsupported
         db.session.execute("REFRESH MATERIALIZED VIEW mv_public_events")
@@ -33,7 +35,11 @@ def refresh_public_events_view():
 def sanitize_html(value: str | None) -> str | None:
     if value is None:
         return None
-    return bleach.clean(value, tags=["b", "i", "strong", "em", "u", "p", "br", "ul", "li"], strip=True)
+    return bleach.clean(
+        value,
+        tags=["b", "i", "strong", "em", "u", "p", "br", "ul", "li"],
+        strip=True,
+    )
 
 
 def generate_slug(value: str) -> str:

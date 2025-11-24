@@ -14,11 +14,16 @@ class Campus(BaseModel):
     __tablename__ = "campuses"
 
     university_id = db.Column(
-        db.String(36), db.ForeignKey("universities.id"), nullable=False, index=True
+        db.String(36),
+        db.ForeignKey("universities.id"),
+        nullable=False,
+        index=True,
     )
     name = db.Column(db.String(128), nullable=False)
     address = db.Column(db.String(255), nullable=True)
 
     __table_args__ = (
-        db.UniqueConstraint("university_id", "name", name="uq_campus_name_uni"),
+        db.UniqueConstraint(
+            "university_id", "name", name="uq_campus_name_uni"
+        ),
     )

@@ -6,11 +6,20 @@ class Event(BaseModel):
     __tablename__ = "events"
 
     university_id = db.Column(
-        db.String(36), db.ForeignKey("universities.id"), nullable=False, index=True
+        db.String(36),
+        db.ForeignKey("universities.id"),
+        nullable=False,
+        index=True,
     )
-    club_id = db.Column(db.String(36), db.ForeignKey("clubs.id"), nullable=False)
-    venue_id = db.Column(db.String(36), db.ForeignKey("venues.id"), nullable=True)
-    status_id = db.Column(db.String(36), db.ForeignKey("event_statuses.id"), nullable=False)
+    club_id = db.Column(
+        db.String(36), db.ForeignKey("clubs.id"), nullable=False
+    )
+    venue_id = db.Column(
+        db.String(36), db.ForeignKey("venues.id"), nullable=True
+    )
+    status_id = db.Column(
+        db.String(36), db.ForeignKey("event_statuses.id"), nullable=False
+    )
     visibility_type_id = db.Column(
         db.String(36), db.ForeignKey("visibility_types.id"), nullable=True
     )

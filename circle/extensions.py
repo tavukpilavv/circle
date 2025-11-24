@@ -30,11 +30,20 @@ def init_extensions(app):
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
-    limits = app.config.get("RATE_LIMITS", "").split(";") if app.config.get("RATE_LIMITS") else []
+    limits = (
+        app.config.get("RATE_LIMITS", "").split(";")
+        if app.config.get("RATE_LIMITS")
+        else []
+    )
     limiter.default_limits = [limit for limit in limits if limit]
     limiter.init_app(app)
     cache.init_app(app)
-    cors.init_app(app, resources={r"/api/*": {"origins": app.config.get("CORS_ORIGINS", "*")}})
+    cors.init_app(
+        app,
+        resources={
+            r"/api/*": {"origins": app.config.get("CORS_ORIGINS", "*")}
+        },
+    )
 
 
 __all__ = [

@@ -13,7 +13,9 @@ def require_roles(*roles):
             token_roles = claims.get("roles", [])
             if not any(role in token_roles for role in roles):
                 abort(403, description="Forbidden")
-            if g.get("university_id") and claims.get("university_id") != g.get("university_id"):
+            if g.get("university_id") and claims.get("university_id") != g.get(
+                "university_id"
+            ):
                 abort(403, description="Cross-tenant access denied")
             return fn(*args, **kwargs)
 

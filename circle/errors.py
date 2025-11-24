@@ -23,7 +23,9 @@ def register_error_handlers(app):
 
     @app.errorhandler(ValidationError)
     def handle_validation_error(err: ValidationError):
-        return _format_error("validation_error", "Invalid request", 422, err.messages)
+        return _format_error(
+            "validation_error", "Invalid request", 422, err.messages
+        )
 
     @app.errorhandler(Exception)
     def handle_generic_error(err: Exception):

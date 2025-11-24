@@ -51,7 +51,11 @@ def create_venue():
 @limiter.limit("15 per minute")
 def update_venue(venue_id):
     university = resolve_university()
-    venue = filter_by_university(Venue.query, university.id).filter_by(id=venue_id).first()
+    venue = (
+        filter_by_university(Venue.query, university.id)
+        .filter_by(id=venue_id)
+        .first()
+    )
     if not venue:
         abort(404, description="Venue not found")
     payload = request.get_json(force=True)
@@ -68,7 +72,11 @@ def update_venue(venue_id):
 @limiter.limit("10 per minute")
 def delete_venue(venue_id):
     university = resolve_university()
-    venue = filter_by_university(Venue.query, university.id).filter_by(id=venue_id).first()
+    venue = (
+        filter_by_university(Venue.query, university.id)
+        .filter_by(id=venue_id)
+        .first()
+    )
     if not venue:
         abort(404, description="Venue not found")
     venue.soft_delete()
@@ -84,7 +92,11 @@ def create_block():
     payload = request.get_json(force=True)
     venue_id = payload.get("venue_id")
     university = resolve_university()
-    venue = filter_by_university(Venue.query, university.id).filter_by(id=venue_id).first()
+    venue = (
+        filter_by_university(Venue.query, university.id)
+        .filter_by(id=venue_id)
+        .first()
+    )
     if not venue:
         abort(404, description="Venue not found")
 

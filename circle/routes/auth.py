@@ -19,9 +19,19 @@ token_blocklist: set[str] = set()
 def login():
     university = resolve_university()
     payload = LoginSchema().load(request.get_json(force=True))
-    user = User.query.filter_by(university_id=university.id, email=payload["email"]).first()
+    user = User.query.filter_by(
+        university_id=university.id, email=payload["email"]
+    ).first()
     if not user or not user.check_password(payload["password"]):
-        return jsonify({"code": "invalid_credentials", "message": "Invalid email or password"}), 401
+        return (
+            jsonify(
+                {
+                    "code": "invalid_credentials",
+                    "message": "Invalid email or password",
+                }
+            ),
+            401,
+        )
 
     role_keys = [ur.role.key for ur in user.roles if ur.role]
     claims = {"roles": role_keys, "university_id": university.id}
@@ -35,7 +45,13 @@ def login():
 def refresh():
     claims = get_jwt()
     identity = claims.get("sub")
-    new_access = create_access_token(identity=identity, additional_claims={"roles": claims.get("roles", []), "university_id": claims.get("university_id")})
+    new_access = create_access_token(
+        identity=identity,
+        additional_claims={
+            "roles": claims.get("roles", []),
+            "university_id": claims.get("university_id"),
+        },
+    )
     return jsonify({"access_token": new_access})
 
 

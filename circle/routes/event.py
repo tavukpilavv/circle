@@ -10,7 +10,11 @@ from circle.models.event import Event, EventTag
 from circle.models.lookups import EventStatus, SignupStatus, Tag
 from circle.models.signup import Checkin, EventSignup
 from circle.schemas import EventCreateSchema, EventFilterSchema, SignupSchema
-from utils.helpers import filter_by_university, refresh_public_events_view, resolve_university
+from utils.helpers import (
+    filter_by_university,
+    refresh_public_events_view,
+    resolve_university,
+)
 
 
 events_bp = Blueprint("events", __name__)
@@ -38,7 +42,11 @@ def _get_or_create(model, key, labels):
 
 
 def _get_event_with_university(event_id, university_id):
-    event = filter_by_university(Event.query, university_id).filter_by(id=event_id).first()
+    event = (
+        filter_by_university(Event.query, university_id)
+        .filter_by(id=event_id)
+        .first()
+    )
     if not event:
         abort(404, description="Event not found")
     return event
@@ -76,7 +84,9 @@ def list_events():
         query = query.join(Event.venue).filter_by(campus_id=args["campus"])
     if args.get("q"):
         pattern = f"%{args['q']}%"
-        query = query.filter(or_(Event.title.ilike(pattern), Event.description.ilike(pattern)))
+        query = query.filter(
+            or_(Event.title.ilike(pattern), Event.description.ilike(pattern))
+        )
     if args.get("tag"):
         query = query.join(EventTag).join(Tag).filter(Tag.key == args["tag"])
     if args.get("start_from"):
@@ -84,7 +94,9 @@ def list_events():
     if args.get("end_to"):
         query = query.filter(Event.end_at <= args["end_to"])
 
-    per_page = args.get("per_page") or current_app.config.get("DEFAULT_PER_PAGE", 20)
+    per_page = args.get("per_page") or current_app.config.get(
+        "DEFAULT_PER_PAGE", 20
+    )
     per_page = min(per_page, current_app.config.get("MAX_PER_PAGE", 50))
     pagination = query.order_by(Event.start_at.asc()).paginate(
         page=args.get("page", 1), per_page=per_page, error_out=False
@@ -142,9 +154,21 @@ def create_event():
 def update_event(event_id):
     university = resolve_university()
     event = _get_event_with_university(event_id, university.id)
-    payload = EventCreateSchema(partial=True).load(request.get_json(force=True))
+    payload = EventCreateSchema(partial=True).load(
+        request.get_json(force=True)
+    )
 
-    for field in ["title", "description", "capacity", "banner_url", "venue_id", "visibility_type_id", "club_id", "start_at", "end_at"]:
+    for field in [
+        "title",
+        "description",
+        "capacity",
+        "banner_url",
+        "venue_id",
+        "visibility_type_id",
+        "club_id",
+        "start_at",
+        "end_at",
+    ]:
         if field in payload:
             setattr(event, field, payload[field])
 
@@ -202,7 +226,10 @@ def checkin_attendee(event_id):
     event = _get_event_with_university(event_id, university.id)
     payload = request.get_json(force=True)
     signup_id = payload.get("signup_id")
-    signup = EventSignup.query.filter_by(event_id=event.id, id=signup_id).first()
+    signup = (
+        EventSignup.query.filter_by(event_id=event.id, id=signup_id)
+        .first()
+    )
     if not signup:
         abort(404, description="Signup not found")
     checkin = Checkin(signup_id=signup.id, checked_in_at=datetime.utcnow())
@@ -218,10 +245,16 @@ def create_signup(event_id):
     event = _get_event_with_university(event_id, university.id)
     payload = SignupSchema().load(request.get_json(force=True))
 
-    confirmed_status = _get_or_create(SignupStatus, "confirmed", SIGNUP_STATUS_LABELS)
-    waitlist_status = _get_or_create(SignupStatus, "waitlist", SIGNUP_STATUS_LABELS)
+    confirmed_status = _get_or_create(
+        SignupStatus, "confirmed", SIGNUP_STATUS_LABELS
+    )
+    waitlist_status = _get_or_create(
+        SignupStatus, "waitlist", SIGNUP_STATUS_LABELS
+    )
 
-    existing = EventSignup.query.filter_by(event_id=event.id, email=payload["email"]).first()
+    existing = EventSignup.query.filter_by(
+        event_id=event.id, email=payload["email"]
+    ).first()
     if existing:
         status = SignupStatus.query.get(existing.status_id)
         return (
@@ -235,14 +268,18 @@ def create_signup(event_id):
             200,
         )
 
-    confirmed_count = EventSignup.query.filter_by(event_id=event.id, status_id=confirmed_status.id).count()
+    confirmed_count = EventSignup.query.filter_by(
+        event_id=event.id, status_id=confirmed_status.id
+    ).count()
     waitlist_position = None
     signup_status = confirmed_status
 
     if event.capacity and confirmed_count >= event.capacity:
         signup_status = waitlist_status
         waitlist_position = (
-            EventSignup.query.filter_by(event_id=event.id, status_id=waitlist_status.id).count()
+            EventSignup.query.filter_by(
+                event_id=event.id, status_id=waitlist_status.id
+            ).count()
             + 1
         )
 
@@ -256,7 +293,16 @@ def create_signup(event_id):
     db.session.add(signup)
     db.session.commit()
 
-    return jsonify({"signup_id": signup.id, "status": signup_status.key, "waitlist_position": waitlist_position}), 201
+    return (
+        jsonify(
+            {
+                "signup_id": signup.id,
+                "status": signup_status.key,
+                "waitlist_position": waitlist_position,
+            }
+        ),
+        201,
+    )
 
 
 @events_bp.route("/signups/<signup_id>/cancel", methods=["POST"])
@@ -264,13 +310,20 @@ def cancel_signup(signup_id):
     university = resolve_university()
     signup = (
         EventSignup.query.join(Event)
-        .filter(and_(EventSignup.id == signup_id, Event.university_id == university.id))
+        .filter(
+            and_(
+                EventSignup.id == signup_id,
+                Event.university_id == university.id,
+            )
+        )
         .first()
     )
     if not signup:
         abort(404, description="Signup not found")
 
-    cancelled_status = _get_or_create(SignupStatus, "cancelled", SIGNUP_STATUS_LABELS)
+    cancelled_status = _get_or_create(
+        SignupStatus, "cancelled", SIGNUP_STATUS_LABELS
+    )
     signup.status_id = cancelled_status.id
     db.session.commit()
     return jsonify({"cancelled": signup.id})

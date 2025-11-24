@@ -1,6 +1,15 @@
 from circle import extensions
 from circle.models import base  # noqa: F401
-from circle.models import club, event, lookups, media, signup, university, user, venue  # noqa: F401
+from circle.models import (  # noqa: F401
+    club,
+    event,
+    lookups,
+    media,
+    signup,
+    university,
+    user,
+    venue,
+)
 
 
 def register_models():
