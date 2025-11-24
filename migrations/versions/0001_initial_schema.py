@@ -319,13 +319,29 @@ def upgrade():
 
     op.execute(
         """
-        ALTER TABLE events
-          ADD CONSTRAINT events_no_room_overlap EXCLUDE USING gist (
-            venue_id WITH =,
-            tstzrange(start_at, end_at) WITH &&
-          )
-          WHERE (venue_id IS NOT NULL);
+        INSERT INTO event_statuses (id, created_at, updated_at, key, label) VALUES
+        (uuid_generate_v4(), now(), now(), 'draft', 'Draft'),
+        (uuid_generate_v4(), now(), now(), 'published', 'Published'),
+        (uuid_generate_v4(), now(), now(), 'cancelled', 'Cancelled')
+        ON CONFLICT (key) DO NOTHING;
         """
+    )
+
+    published_id = op.get_bind().scalar(
+        sa.text("SELECT id FROM event_statuses WHERE key='published'")
+    )
+
+    op.execute(
+        sa.text(
+            """
+            ALTER TABLE events
+              ADD CONSTRAINT events_no_room_overlap EXCLUDE USING gist (
+                venue_id WITH =,
+                tstzrange(start_at, end_at) WITH &&
+              )
+              WHERE (venue_id IS NOT NULL AND status_id = :published_id);
+            """
+        ).bindparams(published_id=published_id)
     )
 
     op.execute(
@@ -359,15 +375,6 @@ def upgrade():
         (uuid_generate_v4(), now(), now(), 'public', 'Public'),
         (uuid_generate_v4(), now(), now(), 'private', 'Private'),
         (uuid_generate_v4(), now(), now(), 'campus', 'Campus Only')
-        ON CONFLICT (key) DO NOTHING;
-        """
-    )
-    op.execute(
-        """
-        INSERT INTO event_statuses (id, created_at, updated_at, key, label) VALUES
-        (uuid_generate_v4(), now(), now(), 'draft', 'Draft'),
-        (uuid_generate_v4(), now(), now(), 'published', 'Published'),
-        (uuid_generate_v4(), now(), now(), 'cancelled', 'Cancelled')
         ON CONFLICT (key) DO NOTHING;
         """
     )
