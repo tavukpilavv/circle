@@ -269,19 +269,86 @@ body {
 
 /* ========= RESPONSIVE ========= */
 
-@media (max-width: 960px) {
-  .nav-inner {
-    grid-template-columns: 1fr;
-    gap: 10px;
+@media (max-width: 768px) {
+  /* 1. Aggressively Hide Search */
+  .nav-center,
+  .global-search,
+  .search-bar,
+  header form,
+  header input {
+    display: none !important;
   }
 
-  .nav-center {
-    order: 3;
+  /* 2. Unhide & Style Tabs */
+  .nav-left .tabs {
+    display: flex !important;
+    gap: 12px; /* Consistent gap between links */
+    margin-left: 12px; /* Consistent gap between Logo and Tabs */
+    overflow: visible;
+  }
+
+  .nav-left .tab {
+    display: block !important;
+    font-size: 13px; /* Readable size */
+    padding-bottom: 4px;
+    white-space: nowrap;
+    margin-right: 0 !important;
+  }
+
+  /* 3. Force Horizontal Layout */
+  .nav-inner {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important; /* Logo+Tabs Left, Icon Right */
+    align-items: center !important;
+    padding: 12px 16px;
+    gap: 0;
+  }
+
+  .nav-left {
+    display: flex !important;
+    align-items: center !important;
+    width: auto !important;
+    flex: 1; /* Allow growing to push icon if needed, but space-between handles it */
   }
 
   .nav-right {
-    order: 2;
-    justify-content: flex-start;
+    display: flex !important;
+    justify-content: flex-end !important;
+    width: auto !important;
+    margin-left: 12px; /* Gap between Events and Icon */
+  }
+
+  .logo {
+    margin-right: 0 !important;
+    font-size: 18px; /* Balanced logo size */
+  }
+
+  /* 4. Shrink Icon (User Avatar) */
+  .icon-btn {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .icon-btn :deep(.el-avatar) {
+    --el-avatar-size: 32px !important;
+  }
+
+  /* 5. Sign In Button (Text Mode) */
+  .sign-in-btn {
+    font-size: 12px !important;
+    width: auto !important;
+    height: auto !important;
+    padding: 6px 10px !important;
+    border-radius: 4px !important;
+    background-color: transparent !important;
+    color: #FF654A !important;
+    display: inline-flex !important;
+    text-decoration: none !important;
+  }
+
+  .sign-in-btn::after {
+    display: none !important;
   }
 }
 </style>

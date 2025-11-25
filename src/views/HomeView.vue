@@ -1,5 +1,6 @@
 <template>
   <Announcements/>
+<<<<<<< HEAD
   <div class="content-wrapper">
 <<<<<<< HEAD
       <Filters :filterChange="onFilterChange"/>
@@ -34,6 +35,9 @@
 
         <p style="color: #6b7c74; line-height: 1.6; margin: 20px 0;">
 =======
+=======
+  <div class="content-wrapper container">
+>>>>>>> 309601d (feat: Implement full mobile responsive layout and UI fixes)
       <Filters 
         :filterChange="onFilterChange" 
         v-model:activeType="activeType"
@@ -66,28 +70,31 @@
         <h4 :id="titleId" :class="titleClass" style="margin: 0; font-size: 20px; font-weight: 700; color: #153226;">{{ selectedEvent?.event_name }}</h4>
       </div>
     </template>
-    <div style="display: flex; flex-direction: column; gap: 20px; padding: 10px;">
+    <div class="dialog-content-wrapper">
       
-      <div style="width: 100%;">
+      <div class="dialog-image-container">
         <img 
           :src="selectedEvent.image" 
           :alt="selectedEvent.alt" 
-          style="width: 100%; height: 300px; display: block; border-radius: 12px; object-fit: cover; border: 1px solid #e1f0e3;"
+          class="dialog-image"
         />
       </div>
 
-      <div style="width: 100%; text-align: left;">
+      <div class="dialog-text-container">
         
-        <div style="margin-bottom: 12px; color: #1b8f48; font-weight: bold; font-size: 16px; display: flex; align-items: center; gap: 8px;">
-          <i class="fas fa-calendar"></i> {{ selectedEvent.date }} at {{ selectedEvent.time }}
+        <div class="detail-row">
+          <i class="fas fa-calendar"></i> 
+          <strong>Date:</strong> {{ selectedEvent.date }} at {{ selectedEvent.time }}
         </div>
         
-        <div style="margin-bottom: 12px; color: #1b8f48; font-weight: bold; font-size: 16px; display: flex; align-items: center; gap: 8px;">
-          <i class="fas fa-location-dot"></i> {{ selectedEvent.location }}
+        <div class="detail-row">
+          <i class="fas fa-location-dot"></i> 
+          <strong>Location:</strong> {{ selectedEvent.location }}
         </div>
         
-        <div style="margin-bottom: 12px; color: #1b8f48; font-weight: bold; font-size: 16px; display: flex; align-items: center; gap: 8px;">
-          <i class="fas fa-users"></i> {{ selectedEvent.community_name }}
+        <div class="detail-row">
+          <i class="fas fa-users"></i> 
+          <strong>Community:</strong> {{ selectedEvent.community_name }}
         </div>
 
         <p style="color: #6b7c74; line-height: 1.6; margin: 20px 0; font-size: 15px;">
@@ -247,5 +254,14 @@ const onFilterChange = (val) => {
 :deep(.el-carousel__indicator.is-active .el-carousel__button) {
   opacity: 1 !important;
   background-color: #1b8f48 !important;
+}
+
+/* Responsive: smaller indicators on mobile */
+@media (max-width: 768px) {
+  :deep(.el-carousel__button) {
+    width: 12px !important;
+    height: 6px !important;
+    border-radius: 3px !important;
+  }
 }
 </style>

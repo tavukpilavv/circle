@@ -44,7 +44,7 @@
                 </form>
 
                 <div class="no-account">
-                    Don't have an account? <a href="/signup_index.html">Register.</a>
+                    Don't have an account? <router-link to="/signup">Register.</router-link>
                 </div>
             </div>
         </div>
@@ -123,21 +123,45 @@ main {
 .signin-container {
     flex-grow: 1; /* Ortalamak için boşluğu doldur */
     display: flex;
-    align-items: center;
+    align-items: flex-start; /* Align to top */
     justify-content: center;
-    padding: 40px 20px 10px;
+    padding: 80px 20px 20px; /* Increased top padding to 80px */
+    width: 100%;
 }
 
 .signin-box {
     background-color: #E3F6DB;
     border-radius: 15px;
     padding: 40px 50px;
-    width: 740px;
+    width: 100%;
+    max-width: 740px; /* Fixed width changed to max-width */
     min-height: 561px;
     
     text-align: center;
     position: relative;
     border: 2px dashed #1A916D; /* Kesikli Çizgi Efekti */
+    box-sizing: border-box;
+}
+/* ... (rest of CSS) ... */
+
+/* Hesap Yok Linki */
+.no-account {
+  color: #7F8B9E;
+    font-size: 20px;
+    font-weight: 400; /* Figma'ya göre 500'den 400'e güncellendi */
+    
+    font-family: 'Roboto', sans-serif;
+    word-wrap: break-word;
+    margin-top: 20px;
+    text-align: center;
+}
+
+.no-account a {
+    color: #FF9E4A;
+    font-size: 20px;
+    font-weight: 700;
+    text-decoration: underline;
+    cursor: pointer;
 }
 
 .close-icon {
@@ -166,10 +190,12 @@ main {
 /* Giriş Alanları */
 .input-group {
     margin-bottom: 20px;
+    width: 100%;
 }
 
 .input-group input {
-    width: 642px ;
+    width: 100%; /* Changed from fixed 642px */
+    max-width: 642px;
     height : 69px;
     padding: 15px 20px;
     border: 1px solid #FFFFFF;
@@ -177,6 +203,7 @@ main {
     font-size: 15px;
     outline: none;
     transition: border-color 0.3s;
+    box-sizing: border-box;
 }
 
 .input-group input:focus {
@@ -185,6 +212,14 @@ main {
 
 .password-group {
     position: relative;
+    max-width: 642px;
+    margin: 0 auto 20px; /* Center the input group */
+}
+
+/* Wrapper for the first input to center it as well */
+.input-group:not(.password-group) {
+    display: flex;
+    justify-content: center;
 }
 
 .password-toggle-btn {
@@ -218,7 +253,8 @@ main {
 
 /* Giriş Butonu */
 .signin-button {
-    width: 637px;
+    width: 100%; /* Changed from fixed 637px */
+    max-width: 637px;
     height: 76.18px;
     background-color: #1A916D; /* Figma'daki yeni yeşil renk */
     border-radius: 16px;       /* Figma'daki border-radius */
@@ -235,7 +271,7 @@ main {
     color: white;
     border: none;
     cursor: pointer;
-    margin-top: 10px;
+    margin: 10px auto 0; /* Center button */
     transition: background-color 0.3s;
 }
 
@@ -250,9 +286,12 @@ main {
     align-items: center;
     margin-top: 15px;
     font-size: 14px;
+    width: 100%;
     max-width: 637px; /* Butonla aynı hizada olması için */
     margin-left: auto;
     margin-right: auto;
+    flex-wrap: wrap; /* Allow wrapping on small screens */
+    gap: 10px;
 }
 
 .remember-me {
@@ -364,5 +403,45 @@ color: #FF9E4A;
     
     /* DÜZELTME: Margin'i kaldırıyoruz */
     margin: 0 25px;
+}
+
+/* --- Responsive Media Queries --- */
+@media (max-width: 768px) {
+    .signin-box {
+        padding: 30px 20px;
+        min-height: auto;
+    }
+
+    .title {
+        font-size: 28px;
+    }
+
+    .input-group input {
+        height: 55px;
+        font-size: 14px;
+    }
+
+    .signin-button {
+        height: 60px;
+        font-size: 20px;
+    }
+
+    .options {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .remember-me label,
+    .forgot-password,
+    .no-account,
+    .no-account a {
+        font-size: 16px;
+    }
+
+    .bottom-links a {
+        display: block;
+        margin: 10px 0;
+        letter-spacing: 1px;
+    }
 }
 </style>
