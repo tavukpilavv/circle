@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: aybu
+          POSTGRES_USER: app
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U app" --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libpq-dev python3-dev
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Lint
+        run: |
+          flake8 .
+          ruff check .
+      - name: Compile
+        run: python -m compileall circle utils app.py
+      - name: Alembic heads
+        env:
+          DATABASE_URL: postgresql+psycopg2://app:password@localhost:5432/aybu
+          FLASK_APP: app.py
+        run: |
+          flask db upgrade
+          alembic heads
+      - name: Pytest
+        env:
+          DATABASE_URL: postgresql+psycopg2://app:password@localhost:5432/aybu
+        run: pytest -q
