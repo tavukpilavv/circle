@@ -17,7 +17,11 @@
                 
                 <form id="signin-form" @submit.prevent="handleLogin">
                     <div class="input-group">
+<<<<<<< HEAD
                         <input type="text" placeholder="User name or email">
+=======
+                        <input type="text" v-model="username" placeholder="User name or email">
+>>>>>>> 7becf47 (Final demo preparations complete)
                     </div>
 
                     <div class="input-group password-group">
@@ -60,9 +64,24 @@ import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const showPassword = ref(false)
+<<<<<<< HEAD
 
 const handleLogin = () => {
   localStorage.setItem('user_token', 'logged_in')
+=======
+const username = ref('')
+
+const handleLogin = () => {
+  localStorage.setItem('user_token', 'logged_in')
+  
+  // Simple role logic
+  if (username.value.toLowerCase() === 'admin') {
+    localStorage.setItem('user_role', 'admin')
+  } else {
+    localStorage.setItem('user_role', 'user')
+  }
+
+>>>>>>> 7becf47 (Final demo preparations complete)
   window.dispatchEvent(new Event('auth-changed'))
   router.push('/')
 }

@@ -1,6 +1,7 @@
 <template>
   <Announcements/>
   <div class="content-wrapper">
+<<<<<<< HEAD
       <Filters :filterChange="onFilterChange"/>
       <EventGrid :events="events" :seeAll ="seeAll" />
   </div>
@@ -32,12 +33,75 @@
         </div>
 
         <p style="color: #6b7c74; line-height: 1.6; margin: 20px 0;">
+=======
+      <Filters 
+        :filterChange="onFilterChange" 
+        v-model:activeType="activeType"
+      />
+      
+      <EventGrid 
+        v-if="activeType === 'events'" 
+        :events="events" 
+        :seeAll="seeAll" 
+      />
+      
+      <CommunityGrid 
+        v-else 
+        :communities="store.communities" 
+      />
+  </div>
+  <!-- Global event detail dialog -->
+  <el-dialog 
+    v-model="dialogVisible" 
+    width="90%" 
+    style="max-width: 800px; border-radius: 16px; overflow: hidden;"
+    :show-close="true"
+    :close-on-click-modal="true"
+    :close-on-press-escape="true"
+    :lock-scroll="true"
+    class="event-detail-modal"
+  >
+    <template #header="{ close, titleId, titleClass }">
+      <div class="my-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <h4 :id="titleId" :class="titleClass" style="margin: 0; font-size: 20px; font-weight: 700; color: #153226;">{{ selectedEvent?.event_name }}</h4>
+      </div>
+    </template>
+    <div style="display: flex; flex-direction: column; gap: 20px; padding: 10px;">
+      
+      <div style="width: 100%;">
+        <img 
+          :src="selectedEvent.image" 
+          :alt="selectedEvent.alt" 
+          style="width: 100%; height: 300px; display: block; border-radius: 12px; object-fit: cover; border: 1px solid #e1f0e3;"
+        />
+      </div>
+
+      <div style="width: 100%; text-align: left;">
+        
+        <div style="margin-bottom: 12px; color: #1b8f48; font-weight: bold; font-size: 16px; display: flex; align-items: center; gap: 8px;">
+          <i class="fas fa-calendar"></i> {{ selectedEvent.date }} at {{ selectedEvent.time }}
+        </div>
+        
+        <div style="margin-bottom: 12px; color: #1b8f48; font-weight: bold; font-size: 16px; display: flex; align-items: center; gap: 8px;">
+          <i class="fas fa-location-dot"></i> {{ selectedEvent.location }}
+        </div>
+        
+        <div style="margin-bottom: 12px; color: #1b8f48; font-weight: bold; font-size: 16px; display: flex; align-items: center; gap: 8px;">
+          <i class="fas fa-users"></i> {{ selectedEvent.community_name }}
+        </div>
+
+        <p style="color: #6b7c74; line-height: 1.6; margin: 20px 0; font-size: 15px;">
+>>>>>>> 7becf47 (Final demo preparations complete)
           Join us for this exciting event! Don't miss out on this opportunity to connect with the community and participate in engaging activities.
         </p>
 
         <button 
           @click="dialogVisible = false"
+<<<<<<< HEAD
           style="background: #1b8f48; color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: 600; margin-top: 10px;"
+=======
+          style="background: #1b8f48; color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: 600; margin-top: 10px; width: 100%;"
+>>>>>>> 7becf47 (Final demo preparations complete)
         >
           Close
         </button>
@@ -54,10 +118,15 @@ import { store } from '../store.js'
 import Announcements from '../components/Announcements.vue'
 import Filters from '../components/Filters.vue'
 import EventGrid from '../components/EventGrid.vue'
+<<<<<<< HEAD
+=======
+import CommunityGrid from '../components/CommunityGrid.vue'
+>>>>>>> 7becf47 (Final demo preparations complete)
 
 // Reactive state for selected event and dialog visibility
 const selectedEvent = ref(null)
 const dialogVisible = ref(false)
+<<<<<<< HEAD
 
 const events = ref([])
 
@@ -70,6 +139,18 @@ const getUpcomingEvents = () => {
 
 // Initialize with upcoming events
 events.value = getUpcomingEvents();
+=======
+const activeType = ref('events')
+
+const events = ref([])
+
+const getAllEvents = () => {
+  return [...store.events].sort((a, b) => new Date(a.date) - new Date(b.date));
+}
+
+// Initialize with all events
+events.value = getAllEvents();
+>>>>>>> 7becf47 (Final demo preparations complete)
 
 const seeAll = (event) => {
   // Open the global dialog with the clicked event's details
@@ -79,8 +160,13 @@ const seeAll = (event) => {
 
 const onFilterChange = (val) => {
   if (!val) {
+<<<<<<< HEAD
     // Reset to default (Upcoming)
     events.value = getUpcomingEvents();
+=======
+    // Reset to default (All Events)
+    events.value = getAllEvents();
+>>>>>>> 7becf47 (Final demo preparations complete)
   } else {
     let startDate = moment(val[0]).format("YYYY-MM-DD")
     let endDate = moment(val[1]).format("YYYY-MM-DD")

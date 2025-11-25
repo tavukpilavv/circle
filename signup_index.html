@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="tr">
 
@@ -181,4 +182,189 @@
     </script>
 </body>
 
+=======
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Circle - Sign Up</title>
+    <link rel="stylesheet" href="signin.css">
+    <link rel="stylesheet" href="signup.css">
+    <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+
+<body>
+
+    <div class="top-bar"></div>
+
+    <header class="navbar">
+        <div class="nav-content">
+            <div class="navbar-left">
+                <a href="index.html" class="logo">CirCLe</a>
+                <nav>
+                    <a href="#">Communities</a>
+                    <a href="#" class="active">Events</a>
+                </nav>
+            </div>
+            <div class="navbar-center">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search for an Event">
+                </div>
+            </div>
+            <div class="navbar-right">
+                <a href="index.html#/login" class="sign-in-link">Sign in</a>
+            </div>
+        </div>
+    </header>
+    <div data-layer="Line 1" class="line-1"></div>
+
+    <main>
+
+        <div class="signin-container">
+
+            <div class="signin-box">
+                <svg class="close-icon" width="47" height="47" viewBox="0 0 47 47" fill="none"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path d="M18.6042 18.604L28.3959 28.3957" stroke="currentColor" stroke-width="1.5"
+                        stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M28.3959 18.604L18.6042 28.3957" stroke="currentColor" stroke-width="1.5"
+                        stroke-linecap="round" stroke-linejoin="round" />
+                    <path
+                        d="M33.2917 5.875H13.7083C9.3821 5.875 5.875 9.3821 5.875 13.7083V33.2917C5.875 37.6179 9.3821 41.125 13.7083 41.125H33.2917C37.6179 41.125 41.125 37.6179 41.125 33.2917V13.7083C41.125 9.3821 37.6179 5.875 33.2917 5.875Z"
+                        stroke="var(--Accents-Orange, #FF8D28)" stroke-width="1.5" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                </svg>
+
+                <h2 class="title">SIGN UP</h2>
+
+                <div id="app">
+                    <el-form ref="formRef" :model="form" :rules="rules" label-position="top" class="signup-form">
+                        <div class="form-row">
+                            <el-form-item label="First Name" prop="firstName">
+                                <el-input v-model="form.firstName" placeholder="Enter your first name"></el-input>
+                            </el-form-item>
+                            <el-form-item label="Last Name" prop="lastName">
+                                <el-input v-model="form.lastName" placeholder="Enter your last name"></el-input>
+                            </el-form-item>
+                        </div>
+                        <el-form-item label="Email" prop="email">
+                            <el-input v-model="form.email" placeholder="Enter your e-mail"></el-input>
+                        </el-form-item>
+                        <el-form-item label="Password" prop="password">
+                            <el-input v-model="form.password" type="password" show-password
+                                placeholder="Create a password"></el-input>
+                        </el-form-item>
+                        <el-form-item label="Confirm Password" prop="confirmPassword">
+                            <el-input v-model="form.confirmPassword" type="password" show-password
+                                placeholder="Re-enter your password"></el-input>
+                        </el-form-item>
+                        <el-form-item>
+                            <el-button class="signin-button" type="success" :loading="isSubmitting" @click="submit">
+                                Sign up
+                            </el-button>
+                        </el-form-item>
+                    </el-form>
+                </div>
+
+                <div class="no-account">
+                    Already have an account? <a href="index.html#/login">Sign in.</a>
+                </div>
+            </div>
+        </div>
+
+        <footer class="bottom-links">
+            <a href="#">Help</a>
+            <a href="#">Contact Us</a>
+            <a href="#">Status</a>
+        </footer>
+    </main>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/element-plus/dist/index.full.js"></script>
+    <script>
+        const { createApp, ref, watch } = Vue
+
+        createApp({
+            setup() {
+                const formRef = ref(null)
+                const isSubmitting = ref(false)
+                const form = ref({
+                    firstName: '',
+                    lastName: '',
+                    email: '',
+                    password: '',
+                    confirmPassword: ''
+                })
+
+                const validateConfirmPassword = (rule, value, callback) => {
+                    if (!value) {
+                        callback(new Error('Please confirm your password'))
+                    } else if (value !== form.value.password) {
+                        callback(new Error('Passwords do not match'))
+                    } else {
+                        callback()
+                    }
+                }
+
+                const rules = {
+                    firstName: [
+                        { required: true, message: 'First name is required', trigger: 'blur' }
+                    ],
+                    lastName: [
+                        { required: true, message: 'Last name is required', trigger: 'blur' }
+                    ],
+                    email: [
+                        { required: true, message: 'Email is required', trigger: 'blur' },
+                        { type: 'email', message: 'Enter a valid email', trigger: ['blur', 'change'] }
+                    ],
+                    password: [
+                        { required: true, message: 'Password is required', trigger: 'blur' },
+                        { min: 6, message: 'Password must be at least 6 characters', trigger: 'blur' }
+                    ],
+                    confirmPassword: [
+                        { validator: validateConfirmPassword, trigger: ['blur', 'change'] }
+                    ]
+                }
+
+                watch(
+                    () => form.value.password,
+                    () => {
+                        if (!formRef.value) return
+                        formRef.value.validateField('confirmPassword')
+                    }
+                )
+
+                const submit = () => {
+                    if (!formRef.value) return
+                    formRef.value.validate((valid) => {
+                        if (valid) {
+                            isSubmitting.value = true
+                            ElementPlus.ElMessage.success('Sign up form submitted!')
+                            setTimeout(() => {
+                                isSubmitting.value = false
+                            }, 1200)
+                        }
+                    })
+                }
+
+                return {
+                    form,
+                    rules,
+                    formRef,
+                    submit,
+                    isSubmitting
+                }
+            }
+        })
+            .use(ElementPlus)
+            .mount('#app')
+    </script>
+</body>
+
+>>>>>>> 7becf47 (Final demo preparations complete)
 </html>

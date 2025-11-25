@@ -61,7 +61,10 @@
         <div class="event-actions">
           <button 
             class="event-primary-btn" 
+<<<<<<< HEAD
             :disabled="event.registered" 
+=======
+>>>>>>> 7becf47 (Final demo preparations complete)
             @click="register(event)"
           >
             {{ event.registered ? 'Registered' : 'Register' }}
@@ -197,7 +200,12 @@ const filteredEvents = computed(() => {
 
 onMounted(() => {
   if (localStorage.getItem('user_token')) {
+<<<<<<< HEAD
     isAdmin.value = true;
+=======
+    const role = localStorage.getItem('user_role');
+    isAdmin.value = role === 'admin';
+>>>>>>> 7becf47 (Final demo preparations complete)
   } else {
     isAdmin.value = false;
   }
