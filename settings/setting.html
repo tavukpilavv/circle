@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CirCle • Profile Settings</title>
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="settings.css" />
+</head>
+
+<body>
+  <!-- TOP STRIP -->
+  <div class="top-bar"></div>
+
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <div class="nav-inner">
+      <div class="nav-left">
+        <a href="index.html" class="logo">CirCle</a>
+
+        <nav class="tabs">
+          <a href="communities.html" class="tab">Communities</a>
+          <a href="events.html" class="tab">Events</a>
+        </nav>
+      </div>
+
+      <div class="nav-center">
+        <form class="global-search" role="search">
+          <input type="search" placeholder="Search for an Event or Community" />
+        </form>
+      </div>
+
+      <div class="nav-right">
+        <button class="icon-btn" aria-label="Account">
+          <img id="navbarProfileIcon" src="https://api.dicebear.com/7.x/notionists/svg?seed=circle1" alt="Profile Icon"
+            style="width: 32px; height: 32px; border-radius: 50%;" />
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="nav-bottom-line"></div>
+
+  <!-- MAIN -->
+  <main class="page-wrap">
+    <section class="page-header">
+      <h1 class="page-title">Profile Settings</h1>
+      <p class="page-subtitle">Update your avatar and change your password.</p>
+    </section>
+
+    <section class="settings-grid">
+
+      <!-- AVATAR CARD -->
+      <section class="card">
+        <h2 class="card-title">Profile Avatar</h2>
+        <p class="card-subtitle">Choose your new avatar.</p>
+
+        <div class="current-avatar-wrap">
+          <div class="avatar-label">Current avatar</div>
+          <div class="current-avatar" id="currentAvatar">
+            <img id="currentAvatarImg" src="https://api.dicebear.com/7.x/notionists/svg?seed=circle1"
+              alt="Current avatar" />
+          </div>
+        </div>
+
+        <div class="avatar-grid" id="avatarGrid">
+
+          <button class="avatar-option selected" type="button" data-avatar-seed="circle1">
+            <img src="https://api.dicebear.com/7.x/notionists/svg?seed=circle1" />
+          </button>
+
+          <button class="avatar-option" type="button" data-avatar-seed="circle2">
+            <img src="https://api.dicebear.com/7.x/notionists/svg?seed=circle2" />
+          </button>
+
+          <button class="avatar-option" type="button" data-avatar-seed="circle3">
+            <img src="https://api.dicebear.com/7.x/notionists/svg?seed=circle3" />
+          </button>
+
+          <button class="avatar-option" type="button" data-avatar-seed="circle4">
+            <img src="https://api.dicebear.com/7.x/notionists/svg?seed=circle4" />
+          </button>
+
+          <button class="avatar-option" type="button" data-avatar-seed="circle5">
+            <img src="https://api.dicebear.com/7.x/notionists/svg?seed=circle5" />
+          </button>
+
+          <button class="avatar-option" type="button" data-avatar-seed="circle6">
+            <img src="https://api.dicebear.com/7.x/notionists/svg?seed=circle6" />
+          </button>
+
+          <!-- 7: Girl 1 -->
+          <button class="avatar-option" type="button" data-avatar-seed="girl1">
+            <img src="https://api.dicebear.com/7.x/notionists/svg?seed=girl1&flip=false" />
+          </button>
+
+          <button class="avatar-option" type="button" data-avatar-seed="circle8">
+            <img src="https://api.dicebear.com/7.x/notionists/svg?seed=circle8" />
+          </button>
+
+          <!-- 9: Girl 3 (Your update) -->
+          <button class="avatar-option" type="button" data-avatar-seed="girl3">
+            <img src="https://api.dicebear.com/7.x/notionists/svg?seed=girl3&flip=false" />
+          </button>
+
+          <button class="avatar-option" type="button" data-avatar-seed="circle10">
+            <img src="https://api.dicebear.com/7.x/notionists/svg?seed=circle10" />
+          </button>
+
+          <button class="avatar-option" type="button" data-avatar-seed="circle11">
+            <img src="https://api.dicebear.com/7.x/notionists/svg?seed=circle11" />
+          </button>
+
+          <button class="avatar-option" type="button" data-avatar-seed="circle12">
+            <img src="https://api.dicebear.com/7.x/notionists/svg?seed=circle12" />
+          </button>
+
+        </div>
+
+        <form id="avatarForm" class="section-actions">
+          <input type="hidden" id="selectedAvatarInput" name="avatar_seed" value="circle1" />
+          <button type="submit" class="btn-primary">Save Avatar</button>
+        </form>
+
+        <p class="helper-text" id="avatarMessage"></p>
+      </section>
+
+      <!-- PASSWORD CARD -->
+      <section class="card">
+        <h2 class="card-title">Change Password</h2>
+
+        <form id="passwordForm" class="password-form">
+          <div class="form-field">
+            <label>Current Password</label>
+            <div class="input-with-icon">
+              <input type="password" id="currentPassword" required />
+              <button type="button" class="toggle-visibility" data-target="currentPassword">
+                <i class="fas fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label>New Password</label>
+            <div class="input-with-icon">
+              <input type="password" id="newPassword" required />
+              <button type="button" class="toggle-visibility" data-target="newPassword">
+                <i class="fas fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label>Confirm Password</label>
+            <div class="input-with-icon">
+              <input type="password" id="confirmPassword" required />
+              <button type="button" class="toggle-visibility" data-target="confirmPassword">
+                <i class="fas fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="section-actions">
+            <button type="submit" class="btn-primary">Save Password</button>
+          </div>
+
+          <p class="helper-text error" id="passwordError"></p>
+          <p class="helper-text success" id="passwordSuccess"></p>
+        </form>
+      </section>
+
+    </section>
+  </main>
+
+  <script src="settings.js"></script>
+</body>
+
+</html>

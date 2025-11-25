@@ -1,0 +1,13 @@
+/* Global CSS Overrides */
+
+/* Element Plus Dialog - Dashed Border Style (matching Sign In page) */
+.el-dialog {
+    border: 2px dashed #1A916D !important;
+    box-shadow: none !important;
+    border-radius: 15px !important;
+}
+
+/* Optional: Adjust dialog body background to match sign-in container */
+.el-dialog__body {
+    background-color: #E3F6DB;
+}

@@ -1,0 +1,398 @@
+/* Genel Ayarlar ve Fontlar */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+
+/* Renk Paleti */
+:root {
+     /* Header Arka Plan Rengi */
+     
+    --color-bg-main: #f0f7f0; /* Genel Açık Gri/Beyaz Alan */
+    --color-text-dark: #000000;
+    --color-text-link: #FF9E4A; /* Register ve Şifre Linkleri */
+    --color-green-dark: #1A916D;
+}
+
+/* Sıfırlama ve Temel Stiller */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Roboto', sans-serif;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #FDFDEE; /* sarı arka plan */
+    color: #333;
+}
+
+a {
+    text-decoration: none;
+    color: var(--color-green-dark);
+    font-weight: 500;
+}
+
+/* --- 0. En Üst Çubuk --- */
+.top-bar {
+    width: 100%;
+    height: 12px;
+    background-color: #2E8540;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 9999;
+}
+
+/* --- 1. Üst Kısım (Header/Navbar) --- */
+.navbar {
+    background-color: #FDFDEE;
+    padding: 0;
+    width: 100%;
+    position: fixed;
+    top: 12px;
+    left: 0;
+    z-index: 100;
+}
+
+.nav-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 15px 20px;
+    position: relative;
+    border-bottom: 2px solid #2E8540;
+    padding-bottom: 15px;
+}
+
+.navbar-center {
+    position: absolute;
+    left: 64%;
+    transform: translateX(-50%);
+}
+
+.navbar-left {
+    display: flex;
+    align-items: center;
+}
+
+.logo {
+    font-size: 48px;
+    font-weight: 900;
+    color: #2E8540;
+    text-decoration: none;
+    margin-right: 160px;
+}
+
+.navbar nav a {
+    font-size: 16px;
+    font-weight: 500;
+    color: #555;
+    text-decoration: none;
+    margin-right: 40px;
+    padding-bottom: 5px;
+}
+
+.navbar nav a.active {
+    color: #000;
+    font-weight: 600;
+    border-bottom: 2px solid #2E8540;
+}
+
+.navbar-center .search-bar {
+    display: flex;
+    align-items: center;
+    background-color: #E3F6DB;
+    padding: 10px 15px;
+    border-radius: 32px;
+    width: 731px;
+    height: 50px;
+}
+
+.search-bar i {
+    color: #888;
+    margin-right: 10px;
+}
+
+.search-bar input {
+    border: none;
+    background: transparent;
+    outline: none;
+    width: 100%;
+    font-size: 15px;
+    font-family: 'Roboto', sans-serif;
+}
+
+.navbar-right .sign-in-link {
+    font-size: 16px;
+    font-weight: 600;
+    color: #FF654A;
+    text-decoration: none;
+}
+
+.line-1 {
+    width: 100%;
+    height: 0px;
+    outline: 2px #1A916D solid;
+    outline-offset: -1px;
+    margin-top: 0;
+}
+
+/* --- 2. Ana İçerik ve Arka Plan --- */
+main {
+    padding-top: 120px; /* Top-bar + navbar yüksekliği kadar boşluk */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* --- 3. Giriş Kutusu (Sign In Modal) --- */
+.signin-container {
+    flex-grow: 1; /* Ortalamak için boşluğu doldur */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px 10px;
+}
+
+.signin-box {
+    background-color: #E3F6DB;
+    border-radius: 15px;
+    padding: 40px 50px;
+    width: 740px;
+    min-height: 561px;
+    
+    text-align: center;
+    position: relative;
+    border: 2px dashed #1A916D; /* Kesikli Çizgi Efekti */
+}
+
+.close-icon {
+   position: absolute ;
+    top: 15px;
+    right: 20px;
+    width: 47px; /* HTML'de tanımladık ama CSS ile de garanti edebiliriz */
+    height: 47px;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s, transform 0.2s;
+
+    color: var(--color-green-dark);
+}
+
+
+
+.title {
+    color: #16A34A;     
+    font-size: 36px;   
+    font-weight: 800;  
+    margin-bottom: 30px; 
+    font-family: 'Roboto',
+}
+
+/* Giriş Alanları */
+.input-group {
+    margin-bottom: 20px;
+}
+
+.input-group input {
+    width: 642px ;
+    height : 69px;
+    padding: 15px 20px;
+    border: 1px solid #FFFFFF;
+    border-radius: 8px;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.input-group input:focus {
+    border-color: var(--color-green-dark);
+}
+
+.password-group {
+    position: relative;
+}
+
+.password-toggle-btn {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    font-size: 20px;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.password-toggle-btn:hover {
+    color: #1A916D;
+}
+
+.password-toggle-btn:focus-visible {
+    outline: 2px solid #1A916D;
+    border-radius: 50%;
+}
+
+.password-toggle-btn i {
+    pointer-events: none;
+}
+
+/* Giriş Butonu */
+.signin-button {
+    width: 637px;
+    height: 76.18px;
+    background-color: #1A916D; /* Figma'daki yeni yeşil renk */
+    border-radius: 16px;       /* Figma'daki border-radius */
+    font-size: 24px;           /* Figma'daki font boyutu */
+    font-weight: 800;          /* Figma'daki font kalınlığı */
+
+    /* Metni dikey ve yatay ortalamak için */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    /* --- Korunan Eski Stiller --- */
+    padding: 0; /* Artık padding yerine height kullanıyoruz */
+    color: white;
+    border: none;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.3s;
+}
+
+.signin-button:hover {
+    background-color:#157a5c;
+}
+
+/* Seçenekler (Hatırla Beni / Şifremi Unuttum) */
+.options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+    font-size: 14px;
+    max-width: 637px; /* Butonla aynı hizada olması için */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.remember-me {
+   display: flex;
+    align-items: center;
+    color: #666;
+    position: relative; /* Konumlandırma için */
+    cursor: pointer;
+}
+
+.remember-me input[type="checkbox"] {
+    /* Varsayılan görünümü tamamen kaldır */
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    
+    /* Gizli de olsa tıklama alanını koru */
+    position: absolute;
+    opacity: 0;
+    width: 31px;
+    height: 30px;
+    cursor: pointer;
+}
+.remember-me label {
+    padding-left: 40px;  /* 31px (kutu) + 9px (boşluk) */
+    position: relative;
+    cursor: pointer;
+    line-height: 30px;   /* Metni 30px'lik kutuyla dikeyde hizalar */
+    
+    /* --- Figma'dan Gelen YENİ Stiller --- */
+    font-size: 20px;
+    font-weight: 400;
+    color: #000000;  /* Kutunun yüksekliğiyle metni hizala */
+}
+.remember-me label::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%); /* Dikeyde tam ortala */
+    
+    width: 31px;
+    height: 30px; 
+    background-color: #5871EB; /* Figma SVG'den gelen renk */
+    
+    /* Figma SVG'deki yuvarlak köşelere benzer bir değer */
+    border-radius: 6px; 
+}
+.remember-me input[type="checkbox"]:checked + label::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    
+    width: 31px;
+    height: 30px;
+
+    /* Figma'daki 'tick' SVG path verisini URL-encode ederek 
+      doğrudan CSS'e gömdük.
+    */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 31 30'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M21.8475 10.3662C22.352 10.8544 22.352 11.6458 21.8475 12.134L13.83 20.259C13.3256 20.7471 12.5077 20.7471 12.0033 20.259L8.12832 16.509C7.62389 16.0208 7.62389 15.2294 8.12832 14.7412C8.63275 14.2531 9.45059 14.2531 9.95501 14.7412L12.9167 17.6073L20.0208 10.3662C20.5253 9.87806 21.3431 9.87806 21.8475 10.3662Z' fill='white'/%3E%3C/svg%3E");
+    
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.forgot-password {
+    color: #FF9E4A;
+    font-size: 20px;
+    font-weight: 500;
+}
+
+/* Hesap Yok Linki */
+.no-account {
+  color: #7F8B9E;
+    font-size: 20px;
+    font-weight: 400; /* Figma'ya göre 500'den 400'e güncellendi */
+    
+    font-family: 'Roboto', sans-serif;
+    word-wrap: break-word;
+    margin-top: 20px;
+    text-align: center;
+}
+
+.no-account a {
+color: #FF9E4A;
+    font-size: 20px;
+    font-weight: 700;
+    text-decoration: underline;
+}
+
+/* --- 4. Alt Linkler (Footer) --- */
+.bottom-links {
+    padding: 10px 20px 20px 20px; 
+    width: 100%;
+    
+    /* Figma'dan gelen stil: */
+    text-align: center;
+}
+
+.bottom-links a {
+  color: rgba(0, 0, 0, 0.70);
+    font-size: 16px;
+    font-family: Roboto;
+    font-weight: 600;
+    letter-spacing: 3.84px; /* ÖNEMLİ: Geniş boşluk buradan geliyor */
+    word-wrap: break-word;
+    
+    /* DÜZELTME: Margin'i kaldırıyoruz */
+    margin: 0 25px;
+}
+
+

@@ -1,0 +1,349 @@
+<template>
+  <div class="login-page">
+    <main>
+        
+        <div class="signin-container">
+            
+            <div class="signin-box">
+                  <svg class="close-icon" width="47" height="47" viewBox="0 0 47 47" fill="none" xmlns="http://www.w3.org/2000/svg" @click="$router.push('/')">
+                  <path d="M18.6042 18.604L28.3959 28.3957" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M28.3959 18.604L18.6042 28.3957" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M33.2917 5.875H13.7083C9.3821 5.875 5.875 9.3821 5.875 13.7083V33.2917C5.875 37.6179 9.3821 41.125 13.7083 41.125H33.2917C37.6179 41.125 41.125 37.6179 41.125 33.2917V13.7083C41.125 9.3821 37.6179 5.875 33.2917 5.875Z" stroke="var(--Accents-Orange, #FF8D28)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                
+                <h2 class="title">SIGN IN</h2> 
+                
+            
+                
+                <form id="signin-form" @submit.prevent="handleLogin">
+                    <div class="input-group">
+                        <input type="text" placeholder="User name or email">
+                    </div>
+
+                    <div class="input-group password-group">
+                        <input :type="showPassword ? 'text' : 'password'" id="signin-password" placeholder="Enter password">
+                        <button type="button" class="password-toggle-btn" :aria-label="showPassword ? 'Hide password' : 'Show password'" @click="showPassword = !showPassword">
+                            <i class="fas" :class="showPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
+                        </button>
+                    </div>
+
+                    <button type="submit" class="signin-button">Sign in</button>
+
+                    <div class="options">
+                        <div class="remember-me">
+                            <input type="checkbox" id="remember" checked>
+                            <label for="remember">Remember me</label>
+                        </div>
+                        <a href="#" class="forgot-password">Forget password?</a>
+                        
+                    </div>
+                </form>
+
+                <div class="no-account">
+                    Don't have an account? <a href="/signup_index.html">Register.</a>
+                </div>
+            </div>
+        </div>
+        
+        <footer class="bottom-links">
+            <a href="#">Help</a>
+            <a href="#">Contact Us</a>
+            <a href="#">Status</a>
+        </footer>
+    </main>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+const showPassword = ref(false)
+
+const handleLogin = () => {
+  localStorage.setItem('user_token', 'logged_in')
+  window.dispatchEvent(new Event('auth-changed'))
+  router.push('/')
+}
+</script>
+
+<style scoped>
+/* Genel Ayarlar ve Fontlar */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+
+/* Renk Paleti */
+.login-page {
+    --color-bg-main: #f0f7f0; /* Genel Açık Gri/Beyaz Alan */
+    --color-text-dark: #000000;
+    --color-text-link: #FF9E4A; /* Register ve Şifre Linkleri */
+    --color-green-dark: #1A916D;
+    
+    font-family: 'Roboto', sans-serif;
+    color: #333;
+    min-height: 100vh;
+}
+
+a {
+    text-decoration: none;
+    color: var(--color-green-dark);
+    font-weight: 500;
+}
+
+/* --- Ana İçerik ve Arka Plan --- */
+main {
+    padding-top: 40px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* --- 3. Giriş Kutusu (Sign In Modal) --- */
+.signin-container {
+    flex-grow: 1; /* Ortalamak için boşluğu doldur */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px 10px;
+}
+
+.signin-box {
+    background-color: #E3F6DB;
+    border-radius: 15px;
+    padding: 40px 50px;
+    width: 740px;
+    min-height: 561px;
+    
+    text-align: center;
+    position: relative;
+    border: 2px dashed #1A916D; /* Kesikli Çizgi Efekti */
+}
+
+.close-icon {
+   position: absolute ;
+    top: 15px;
+    right: 20px;
+    width: 47px; /* HTML'de tanımladık ama CSS ile de garanti edebiliriz */
+    height: 47px;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s, transform 0.2s;
+
+    color: var(--color-green-dark);
+}
+
+
+
+.title {
+    color: #16A34A;     
+    font-size: 36px;   
+    font-weight: 800;  
+    margin-bottom: 30px; 
+    font-family: 'Roboto',
+}
+
+/* Giriş Alanları */
+.input-group {
+    margin-bottom: 20px;
+}
+
+.input-group input {
+    width: 642px ;
+    height : 69px;
+    padding: 15px 20px;
+    border: 1px solid #FFFFFF;
+    border-radius: 8px;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.input-group input:focus {
+    border-color: var(--color-green-dark);
+}
+
+.password-group {
+    position: relative;
+}
+
+.password-toggle-btn {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    font-size: 20px;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.password-toggle-btn:hover {
+    color: #1A916D;
+}
+
+.password-toggle-btn:focus-visible {
+    outline: 2px solid #1A916D;
+    border-radius: 50%;
+}
+
+.password-toggle-btn i {
+    pointer-events: none;
+}
+
+/* Giriş Butonu */
+.signin-button {
+    width: 637px;
+    height: 76.18px;
+    background-color: #1A916D; /* Figma'daki yeni yeşil renk */
+    border-radius: 16px;       /* Figma'daki border-radius */
+    font-size: 24px;           /* Figma'daki font boyutu */
+    font-weight: 800;          /* Figma'daki font kalınlığı */
+
+    /* Metni dikey ve yatay ortalamak için */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    /* --- Korunan Eski Stiller --- */
+    padding: 0; /* Artık padding yerine height kullanıyoruz */
+    color: white;
+    border: none;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.3s;
+}
+
+.signin-button:hover {
+    background-color:#157a5c;
+}
+
+/* Seçenekler (Hatırla Beni / Şifremi Unuttum) */
+.options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+    font-size: 14px;
+    max-width: 637px; /* Butonla aynı hizada olması için */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.remember-me {
+   display: flex;
+    align-items: center;
+    color: #666;
+    position: relative; /* Konumlandırma için */
+    cursor: pointer;
+}
+
+.remember-me input[type="checkbox"] {
+    /* Varsayılan görünümü tamamen kaldır */
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    
+    /* Gizli de olsa tıklama alanını koru */
+    position: absolute;
+    opacity: 0;
+    width: 31px;
+    height: 30px;
+    cursor: pointer;
+}
+.remember-me label {
+    padding-left: 40px;  /* 31px (kutu) + 9px (boşluk) */
+    position: relative;
+    cursor: pointer;
+    line-height: 30px;   /* Metni 30px'lik kutuyla dikeyde hizalar */
+    
+    /* --- Figma'dan Gelen YENİ Stiller --- */
+    font-size: 20px;
+    font-weight: 400;
+    color: #000000;  /* Kutunun yüksekliğiyle metni hizala */
+}
+.remember-me label::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%); /* Dikeyde tam ortala */
+    
+    width: 31px;
+    height: 30px; 
+    background-color: #5871EB; /* Figma SVG'den gelen renk */
+    
+    /* Figma SVG'deki yuvarlak köşelere benzer bir değer */
+    border-radius: 6px; 
+}
+.remember-me input[type="checkbox"]:checked + label::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    
+    width: 31px;
+    height: 30px;
+
+    /* Figma'daki 'tick' SVG path verisini URL-encode ederek 
+      doğrudan CSS'e gömdük.
+    */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 31 30'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M21.8475 10.3662C22.352 10.8544 22.352 11.6458 21.8475 12.134L13.83 20.259C13.3256 20.7471 12.5077 20.7471 12.0033 20.259L8.12832 16.509C7.62389 16.0208 7.62389 15.2294 8.12832 14.7412C8.63275 14.2531 9.45059 14.2531 9.95501 14.7412L12.9167 17.6073L20.0208 10.3662C20.5253 9.87806 21.3431 9.87806 21.8475 10.3662Z' fill='white'/%3E%3C/svg%3E");
+    
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.forgot-password {
+    color: #FF9E4A;
+    font-size: 20px;
+    font-weight: 500;
+}
+
+/* Hesap Yok Linki */
+.no-account {
+  color: #7F8B9E;
+    font-size: 20px;
+    font-weight: 400; /* Figma'ya göre 500'den 400'e güncellendi */
+    
+    font-family: 'Roboto', sans-serif;
+    word-wrap: break-word;
+    margin-top: 20px;
+    text-align: center;
+}
+
+.no-account a {
+color: #FF9E4A;
+    font-size: 20px;
+    font-weight: 700;
+    text-decoration: underline;
+}
+
+/* --- 4. Alt Linkler (Footer) --- */
+.bottom-links {
+    padding: 10px 20px 20px 20px; 
+    width: 100%;
+    
+    /* Figma'dan gelen stil: */
+    text-align: center;
+}
+
+.bottom-links a {
+  color: rgba(0, 0, 0, 0.70);
+    font-size: 16px;
+    font-family: Roboto;
+    font-weight: 600;
+    letter-spacing: 3.84px; /* ÖNEMLİ: Geniş boşluk buradan geliyor */
+    word-wrap: break-word;
+    
+    /* DÜZELTME: Margin'i kaldırıyoruz */
+    margin: 0 25px;
+}
+</style>

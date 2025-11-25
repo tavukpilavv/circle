@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CirCle • Events</title>
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="events.css" />
+</head>
+
+<!-- BACKEND MUST SET data-role AND data-club -->
+<!-- Example: president of Computer Science Club -->
+<!-- <body data-role="admin" data-club="Computer Science Club"> -->
+
+<body data-role="admin" data-club="Computer Science Club">
+  <!-- TOP GREEN STRIP -->
+  <div class="top-bar"></div>
+
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <div class="nav-inner">
+      <div class="nav-left">
+        <a href="../index.html" class="logo">CirCle</a>
+
+        <nav class="tabs" aria-label="Primary navigation">
+          <a href="../index.html#/communities" class="tab">Communities</a>
+          <a href="events.html" class="tab is-active">Events</a>
+        </nav>
+      </div>
+
+      <div class="nav-center">
+        <form class="global-search" role="search" aria-label="Search for an Event">
+          <input type="search" placeholder="Search for an Event" aria-label="Search for an Event" />
+        </form>
+      </div>
+
+      <div class="nav-right">
+        <button class="icon-btn" aria-label="Account">
+          <i class="fas fa-user"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="nav-bottom-line"></div>
+
+  <!-- MAIN CONTENT -->
+  <main class="page-wrap">
+    <!-- HEADER ROW -->
+    <section class="events-header">
+      <div>
+        <h1 class="events-title">Events</h1>
+        <p class="events-subtitle">
+          Explore upcoming events and manage your registrations.
+        </p>
+      </div>
+
+      <!-- BACKEND SHOULD ONLY RENDER THIS FOR ADMINS -->
+      <button id="openCreateEventModal" class="primary-btn">
+        + Create Event
+      </button>
+    </section>
+
+    <!-- FILTERS -->
+    <section class="events-filters">
+      <div class="filters-pills">
+        <button class="filter-pill is-active" data-filter="upcoming">Upcoming</button>
+        <button class="filter-pill" data-filter="past">Past</button>
+        <button class="filter-pill" data-filter="all">All</button>
+      </div>
+    </section>
+
+    <!-- EVENTS LIST -->
+    <section class="events-list" id="eventsList">
+      <!-- Example Event 1 – UPCOMING -->
+      <article class="event-card" data-id="1" data-name="Tech Career Fair 2026" data-date="2026-03-15"
+        data-location="Main Hall" data-capacity="200" data-club="Career Services"
+        data-description="Meet recruiters, explore internship opportunities, and network with leading tech companies.">
+        <div class="event-date-pill">
+          <span class="event-date-day">15</span>
+          <span class="event-date-month">MAR</span>
+        </div>
+
+        <div class="event-main">
+          <h2 class="event-name">Tech Career Fair 2026</h2>
+          <p class="event-desc">
+            Meet recruiters, explore internship opportunities, and network with leading tech companies.
+          </p>
+          <div class="event-meta">
+            <span><i class="fas fa-location-dot"></i> Main Hall</span>
+            <span><i class="fas fa-users"></i> 200 seats</span>
+            <span><i class="fas fa-users-viewfinder"></i> Career Services</span>
+          </div>
+        </div>
+
+        <div class="event-actions">
+          <button class="event-primary-btn">Register</button>
+
+          <!-- BACKEND: ONLY RENDER FOR ADMIN -->
+          <button class="event-edit-btn" type="button">
+            <i class="fas fa-pen"></i> Edit
+          </button>
+        </div>
+      </article>
+
+      <!-- Example Event 2 – UPCOMING -->
+      <article class="event-card" data-id="2" data-name="AI & Machine Learning Workshop" data-date="2026-04-02"
+        data-location="Lab 3B" data-capacity="60" data-club="Computer Science Club"
+        data-description="Hands-on session on building and deploying ML models with real-world datasets.">
+        <div class="event-date-pill">
+          <span class="event-date-day">02</span>
+          <span class="event-date-month">APR</span>
+        </div>
+
+        <div class="event-main">
+          <h2 class="event-name">AI &amp; Machine Learning Workshop</h2>
+          <p class="event-desc">
+            Hands-on session on building and deploying ML models with real-world datasets.
+          </p>
+          <div class="event-meta">
+            <span><i class="fas fa-location-dot"></i> Lab 3B</span>
+            <span><i class="fas fa-users"></i> 60 seats</span>
+            <span><i class="fas fa-users-viewfinder"></i> Computer Science Club</span>
+          </div>
+        </div>
+
+        <div class="event-actions">
+          <button class="event-primary-btn">Register</button>
+
+          <button class="event-edit-btn" type="button">
+            <i class="fas fa-pen"></i> Edit
+          </button>
+        </div>
+      </article>
+
+      <!-- Example Event 3 – PAST -->
+      <article class="event-card" data-id="3" data-name="Alumni Networking Night" data-date="2024-05-10"
+        data-location="City Café" data-capacity="120" data-club="Alumni Association"
+        data-description="Connect with alumni, share experiences, and explore mentorship opportunities.">
+        <div class="event-date-pill">
+          <span class="event-date-day">10</span>
+          <span class="event-date-month">MAY</span>
+        </div>
+
+        <div class="event-main">
+          <h2 class="event-name">Alumni Networking Night</h2>
+          <p class="event-desc">
+            Connect with alumni, share experiences, and explore mentorship opportunities.
+          </p>
+          <div class="event-meta">
+            <span><i class="fas fa-location-dot"></i> City Café</span>
+            <span><i class="fas fa-users"></i> 120 seats</span>
+            <span><i class="fas fa-users-viewfinder"></i> Alumni Association</span>
+          </div>
+        </div>
+
+        <div class="event-actions">
+          <button class="event-primary-btn">Registered</button>
+
+          <button class="event-edit-btn" type="button">
+            <i class="fas fa-pen"></i> Edit
+          </button>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <!-- CREATE / EDIT EVENT MODAL -->
+  <div class="modal-overlay" id="eventModal" aria-hidden="true">
+    <div class="modal-card">
+      <button class="modal-close" id="closeEventModal" aria-label="Close">
+        <span>&times;</span>
+      </button>
+
+      <h2 class="modal-title" id="eventModalTitle">Create Event</h2>
+
+      <div class="modal-upload-label">Upload Image</div>
+      <div class="modal-upload-box">
+        <div class="upload-icon">
+          <i class="fas fa-upload"></i>
+        </div>
+        <p class="upload-text">Max 120 MB, PNG, JPEG</p>
+        <label class="upload-btn">
+          Browse File
+          <input type="file" id="eventImageInput" hidden />
+        </label>
+      </div>
+
+      <form id="eventForm" class="modal-form">
+        <input type="hidden" name="id" id="eventIdField" />
+
+        <h3 class="form-section-title">Main Details</h3>
+
+        <div class="form-row">
+          <div class="form-field">
+            <label>Event Name</label>
+            <input type="text" name="name" id="eventNameField" required />
+          </div>
+
+          <div class="form-field">
+            <label>Date</label>
+            <input type="date" name="date" id="eventDateField" required />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-field">
+            <label>Location</label>
+            <input type="text" name="location" id="eventLocationField" />
+          </div>
+
+          <div class="form-field">
+            <label>Club</label>
+            <!-- options will be injected by JS based on clubs + backend user -->
+            <select name="club" id="eventClubField"></select>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label>Kontenjan</label>
+          <input type="number" name="capacity" id="eventCapacityField" min="0" />
+        </div>
+
+        <div class="form-field">
+          <label>Description</label>
+          <textarea name="description" id="eventDescriptionField" rows="4"></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" id="cancelEventBtn">
+            Cancel
+          </button>
+          <button type="submit" class="btn-primary" id="submitEventBtn">
+            Submit
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- JS -->
+  <script src="events.js"></script>
+</body>
+
+</html>

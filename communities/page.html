@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CirCle • Communities</title>
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <!-- Styles (use your global style.css if you prefer) -->
+  <link rel="stylesheet" href="communities.css" />
+</head>
+
+<body>
+  <!-- ✅ SAME TOP STRIP AS OTHER PAGES -->
+  <div class="top-bar"></div>
+
+  <!-- ✅ SAME NAVBAR STRUCTURE AS OTHER PAGES -->
+  <header class="navbar">
+    <div class="nav-inner">
+      <div class="nav-left">
+        <a href="index.html" class="logo">CirCle</a>
+
+        <nav class="tabs" aria-label="Primary navigation">
+          <!-- Communities active on this page -->
+          <a href="communities.html" class="tab is-active">Communities</a>
+          <a href="events.html" class="tab">Events</a>
+        </nav>
+      </div>
+
+      <div class="nav-center">
+        <form class="global-search" role="search" aria-label="Search for an Event">
+          <!-- keep search bar identical to other pages: NO icon inside -->
+          <input type="search" placeholder="Search for an Event" aria-label="Search for an Event" />
+        </form>
+      </div>
+
+      <div class="nav-right">
+        <button class="icon-btn" aria-label="Account">
+          <i class="fas fa-user"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="nav-bottom-line"></div>
+
+  <!-- MAIN CONTENT -->
+  <main class="page-wrap">
+
+    <!-- Intro text -->
+    <section class="intro">
+      <p class="intro-text">
+        Connect with communities and explore new groups
+      </p>
+
+      <!-- big "Search communities..." bar -->
+      <div class="community-search-shell">
+        <i class="fas fa-search" aria-hidden="true"></i>
+        <input id="communitySearchInput" type="search" placeholder="Search communities..."
+          aria-label="Search communities" />
+      </div>
+
+      <!-- filter pills -->
+      <div class="filters-row">
+        <div class="filters-label-space"></div>
+        <div class="filters-pills">
+          <button class="filter-pill is-active" type="button" data-filter="all">
+            All
+          </button>
+          <button class="filter-pill" type="button" data-filter="joined">
+            Joined
+          </button>
+          <button class="filter-pill primary" type="button" data-filter="discover">
+            Discover
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Communities list -->
+    <section class="community-list" id="communityList">
+      <!-- 1 -->
+      <article class="community-card" data-name="Computer Science Club" data-joined="true">
+        <img class="community-image"
+          src="https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=800&q=80" alt="" />
+
+        <div class="community-main">
+          <h2 class="community-name">Computer Science Club</h2>
+          <p class="community-desc">
+            Connect with fellow CS students, attend workshops, and collaborate on projects.
+          </p>
+          <div class="community-meta">
+            <span><i class="fas fa-user-group"></i> 342 members</span>
+          </div>
+        </div>
+
+        <button class="status-pill joined" type="button">
+          <i class="fas fa-check"></i>
+          Joined
+        </button>
+      </article>
+
+      <!-- 2 -->
+      <article class="community-card" data-name="Engineering Society" data-joined="false">
+        <img class="community-image"
+          src="https://images.unsplash.com/photo-1601758124510-52d02ddb7cbd?auto=format&fit=crop&w=800&q=80" alt="" />
+
+        <div class="community-main">
+          <h2 class="community-name">Engineering Society</h2>
+          <p class="community-desc">
+            The largest engineering community on campus. Network, learn, and build together.
+          </p>
+          <div class="community-meta">
+            <span><i class="fas fa-user-group"></i> 567 members</span>
+          </div>
+        </div>
+
+        <button class="status-pill outline" type="button">
+          Join Community
+        </button>
+      </article>
+
+      <!-- 3 -->
+      <article class="community-card" data-name="Alumni Association" data-joined="true">
+        <img class="community-image"
+          src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80" alt="" />
+
+        <div class="community-main">
+          <h2 class="community-name">Alumni Association</h2>
+          <p class="community-desc">
+            Stay connected with alumni and access exclusive networking opportunities.
+          </p>
+          <div class="community-meta">
+            <span><i class="fas fa-user-group"></i> 1243 members</span>
+          </div>
+        </div>
+
+        <button class="status-pill joined" type="button">
+          <i class="fas fa-check"></i>
+          Joined
+        </button>
+      </article>
+
+      <!-- 4 -->
+      <article class="community-card" data-name="Career Services" data-joined="false">
+        <img class="community-image"
+          src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80" alt="" />
+
+        <div class="community-main">
+          <h2 class="community-name">Career Services</h2>
+          <p class="community-desc">
+            Get career guidance, resume reviews, and access to exclusive job postings.
+          </p>
+          <div class="community-meta">
+            <span><i class="fas fa-user-group"></i> 892 members</span>
+          </div>
+        </div>
+
+        <button class="status-pill outline" type="button">
+          Join Community
+        </button>
+      </article>
+    </section>
+  </main>
+
+  <!-- JS -->
+  <script src="communities.js"></script>
+</body>
+
+</html>

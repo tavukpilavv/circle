@@ -1,0 +1,433 @@
+/* ---------------------------------- */
+/* GENEL STİLLER ve TEMEL AYARLAR     */
+/* ---------------------------------- */
+* {
+    box-sizing: border-box
+}
+
+html,
+body {
+    height: 100%
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #FDFDEE;
+    /* sarı arka plan */
+    color: #333;
+}
+
+/* Sayfa içeriğini ortalayan ana taşıyıcı */
+.container {
+    max-width: 1600px;
+    margin: 20px auto;
+    /* Üstten 20px, sağ/sol ortalı */
+    padding: 0 20px;
+}
+
+/* ---------------------------------- */
+/* 0. EN ÜST YEŞİL ÇİZGİ (YENİ EKLENDİ) */
+/* ---------------------------------- */
+.top-bar {
+    width: 100%;
+    height: 12px;
+    /* Kalınlığını buradan ayarlayabilirsiniz */
+    background-color: #2E8540;
+    /* Logodaki koyu yeşil */
+}
+
+
+/* ---------------------------------- */
+/* 1. ÜST MENÜ (NAVBAR)                */
+/* ---------------------------------- */
+.navbar {
+    background-color: #FDFDEE;
+
+    padding: 0;
+    width: 100%;
+}
+
+/* Navbar içeriğini .container ile aynı genişliğe getirmek için */
+.nav-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 15px 20px;
+    position: relative;
+
+    /* YENİ EKLENEN SATIRLAR: */
+    border-bottom: 2px solid #2E8540;
+    /* Çizgiyi buraya taşıdık */
+    padding-bottom: 15px;
+    /* Çizgi ile içerik arasına boşluk */
+}
+
+.navbar-center {
+    position: absolute;
+    /* Onu düzenden çıkarır */
+    left: 64%;
+    /* Sayfanın %50'si kadar soldan iter */
+    transform: translateX(-50%);
+    /* Kendi genişliğinin yarısı kadar geri çeker (tam ortalar) */
+}
+
+.navbar-left {
+    display: flex;
+    align-items: center;
+}
+
+.logo {
+    font-size: 48px;
+    font-weight: 900;
+    color: #2E8540;
+    /* Koyu yeşil */
+    text-decoration: none;
+    margin-right: 160px;
+}
+
+.navbar nav a {
+    font-size: 16px;
+    font-weight: 500;
+    color: #555;
+    text-decoration: none;
+    margin-right: 40px;
+    padding-bottom: 5px;
+}
+
+/* Aktif olan menü linki (Events) */
+.navbar nav a.active {
+    color: #000;
+    font-weight: 600;
+    border-bottom: 2px solid #2E8540;
+    /* Altındaki yeşil çizgi */
+}
+
+.navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.navbar-center .search-bar {
+    display: flex;
+    align-items: center;
+    background-color: #E3F6DB;
+    padding: 10px 15px;
+    border-radius: 32px;
+    width: 500px;
+    height: 50px;
+
+}
+
+.search-bar i {
+    color: #888;
+    margin-right: 10px;
+}
+
+.search-bar input {
+    border: none;
+    background: transparent;
+    outline: none;
+    width: 100%;
+    font-size: 15px;
+    font-family: 'Roboto', sans-serif;
+}
+
+.navbar-right .sign-in-link {
+    font-size: 16px;
+    font-weight: 600;
+    color: #FF654A;
+    /* Resimdeki turuncu-kırmızı renk */
+    text-decoration: none;
+}
+
+.navbar-right .profile-button {
+    display: none;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background-color: #E3F6DB;
+    color: #2E8540;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    text-decoration: none;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.navbar-right .profile-button:hover {
+    background-color: #2E8540;
+    color: #ffffff;
+}
+
+/* ---------------------------------- */
+/* 2. DUYURULAR BANNER'I             */
+/* ---------------------------------- */
+.announcements {
+    width: 100%;
+    height: 250px;
+    border-radius: 16px;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 30px;
+    /* BURADA 'background-image' OLMAMALI */
+}
+
+.announcements .active-banner-image {
+    width: 100%;
+    height: 100%;
+
+    /* SİHİRLİ SATIR BU: */
+    /* Resmi, en-boy oranını koruyarak alanı dolduracak şekilde sığdırır */
+    /* Taşarsa kenarlardan kırpar ama boşluk bırakmaz. */
+    object-fit: cover;
+
+    position: absolute;
+    top: 0;
+    left: 0;
+    border-radius: 16px;
+    /* Ana banner'ın köşe yuvarlatmasıyla aynı olmalı */
+}
+
+.banner-text {
+    position: absolute;
+    bottom: 25px;
+    left: 30px;
+    color: white;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+/* Banner üzerindeki 6'lı gösterge */
+.banner-indicators {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    /* Tam ortaya hizalar */
+    display: flex;
+    gap: 8px;
+}
+
+.indicator-bar {
+    width: 50px;
+    /* Her bir çubuğun genişliği */
+    height: 9px;
+    background-color: rgba(255, 255, 255, 0.5);
+    /* İnaktif renk (soluk beyaz) */
+    border-radius: 16px;
+}
+
+.indicator-bar.active {
+    background-color: #ffffff;
+    /* Aktif renk (tam beyaz) */
+}
+
+
+/* ---------------------------------- */
+/* 3. ANA İÇERİK (FİLTRE + KARTLAR)  */
+/* ---------------------------------- */
+.content-wrapper {
+    display: flex;
+    gap: 30px;
+    /* Filtre ve kartlar arası boşluk */
+}
+
+/* ---------------------------------- */
+/* SOL FİLTRELEME MENÜSÜ         */
+/* ---------------------------------- */
+.filters {
+    flex-basis: 270px;
+    /* Filtre menüsünün sabit genişliği */
+    flex-shrink: 0;
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 25px;
+    height: fit-content;
+    /* Yüksekliği içeriği kadar olsun */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    position: sticky;
+    /* Kaydırmayı takip etmesini sağlar */
+    top: 20px;
+}
+
+.filters h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 22px;
+}
+
+/* Filtre elemanları (School, Community, Date) */
+.filter-item {
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+    padding: 18px 0;
+    border-bottom: 1px solid #e0e0e0;
+    /* Aradaki ayırıcı çizgi */
+    cursor: pointer;
+}
+
+.filter-item:last-child {
+    border-bottom: none;
+    /* Son elemanın alt çizgisi olmasın */
+}
+
+/* ---------------------------------- */
+/* SAĞ ETKİNLİK KARTLARI         */
+/* ---------------------------------- */
+.event-grid {
+    flex-grow: 1;
+    /* Kalan tüm alanı kaplasın */
+    display: grid;
+    /* Resimdeki gibi 3 sütunlu ızgara */
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    /* Kartlar arası boşluk */
+}
+
+/* Tek bir etkinlik kartı */
+.event-card {
+    background-color: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    position: relative;
+    /* "See All" butonunu konumlandırmak için */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    overflow: hidden;
+    /* Resmin köşelerini yuvarlatmak için */
+}
+
+.event-card:hover {
+    transform: translateY(-5px);
+    /* Üzerine gelince yükselme efekti */
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.event-card img {
+    width: 100%;
+    height: 180px;
+    /* Kart resimlerinin yüksekliği */
+    object-fit: cover;
+    /* Resmi bozmadan sığdır */
+}
+
+.card-content {
+    padding: 20px;
+}
+
+.event-name {
+    font-size: 20px;
+    font-weight: 600;
+    color: #000;
+    margin-bottom: 5px;
+}
+
+.community-name {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 15px;
+}
+
+.event-detail {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.event-detail i {
+    width: 15px;
+    margin-right: 8px;
+    text-align: center;
+}
+
+/* Konum rengi (turuncu-kırmızı) */
+.event-detail.location {
+    color: #FF654A;
+    font-weight: 500;
+}
+
+.event-detail.location i {
+    color: #FF654A;
+}
+
+
+/* Kartın sağ altındaki "See All" butonu */
+.see-all-button {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+
+    background-color: #E6F3E9;
+    /* Açık yeşil */
+    color: #2E8540;
+    /* Koyu yeşil */
+    padding: 6px 14px;
+    border-radius: 16px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.see-all-button:hover {
+    background-color: #2E8540
+}
+
+.line-1 {
+    width: 1443px;
+    height: 0px;
+    outline: 2px #1A916D solid;
+    outline-offset: -1px;
+}
+
+/* ---------------------------------- */
+/* TARİH FİLTRESİ STİLLERİ          */
+/* ---------------------------------- */
+
+/* 'filter-item'ın varsayılan padding'ini ezelim */
+.date-filter-container {
+    padding-top: 18px;
+    padding-bottom: 18px;
+    padding-left: 0;
+    padding-right: 0;
+    cursor: default;
+    /* Artık sadece yazı olmadığı için imleci normale döndür */
+}
+
+/* 'Date' etiketi (School ve Community gibi görünür) */
+.date-filter-container label {
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+    display: block;
+    margin-bottom: 10px;
+    /* Etiket ile kutu arasına boşluk */
+}
+
+/* Tarih seçme kutusunun stili */
+.date-filter-container input[type="date"] {
+    width: 100%;
+    /* Bulunduğu alanı tam kaplasın */
+    padding: 10px;
+    font-family: 'Inter', sans-serif;
+    /* Diğerleriyle aynı font */
+    font-size: 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    position: relative;
+}
+
+/* Tarayıcının takvim ikonunu daha belirgin yap (isteğe bağlı) */
+.date-filter-container input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    opacity: 0.7;
+}
+
+.date-filter-container input[type="date"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+}
