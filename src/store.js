@@ -199,11 +199,7 @@ export const store = reactive({
   registerEvent(event) {
     const target = this.events.find(e => e.id === event.id);
     if (target) {
-<<<<<<< HEAD
-      target.registered = true;
-=======
       target.registered = !target.registered;
->>>>>>> 7becf47 (Final demo preparations complete)
     }
   }
 })

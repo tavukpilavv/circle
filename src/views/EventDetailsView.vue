@@ -214,11 +214,7 @@ const toggleRegistration = () => {
 .register-btn.registered {
   background: #d8eadb;
   color: #1b8f48;
-<<<<<<< HEAD
-  cursor: default;
-=======
   cursor: pointer;
->>>>>>> 7becf47 (Final demo preparations complete)
 }
 
 .not-found {

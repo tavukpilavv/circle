@@ -1,43 +1,6 @@
 <template>
   <Announcements/>
-<<<<<<< HEAD
-  <div class="content-wrapper">
-<<<<<<< HEAD
-      <Filters :filterChange="onFilterChange"/>
-      <EventGrid :events="events" :seeAll ="seeAll" />
-  </div>
-  <!-- Global event detail dialog -->
-  <el-dialog v-model="dialogVisible" width="90%" :title="selectedEvent?.event_name">
-    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 20px;">
-      
-      <div style="width: 45%;">
-        <img 
-          :src="selectedEvent.image" 
-          :alt="selectedEvent.alt" 
-          style="width: 100%; display: block; border-radius: 12px; object-fit: cover; border: 2px solid #1b8f48;"
-        />
-      </div>
-
-      <div style="width: 50%; text-align: left;">
-        <h2 style="margin-top: 0; color: #153226; font-size: 24px; margin-bottom: 16px;">{{ selectedEvent.event_name }}</h2>
-        
-        <div style="margin-bottom: 12px; color: #1b8f48; font-weight: bold; font-size: 16px;">
-          📅 {{ selectedEvent.date }} at {{ selectedEvent.time }}
-        </div>
-        
-        <div style="margin-bottom: 12px; color: #1b8f48; font-weight: bold; font-size: 16px;">
-          📍 {{ selectedEvent.location }}
-        </div>
-        
-        <div style="margin-bottom: 12px; color: #1b8f48; font-weight: bold; font-size: 16px;">
-          👥 {{ selectedEvent.community_name }}
-        </div>
-
-        <p style="color: #6b7c74; line-height: 1.6; margin: 20px 0;">
-=======
-=======
   <div class="content-wrapper container">
->>>>>>> 309601d (feat: Implement full mobile responsive layout and UI fixes)
       <Filters 
         :filterChange="onFilterChange" 
         v-model:activeType="activeType"
@@ -98,17 +61,12 @@
         </div>
 
         <p style="color: #6b7c74; line-height: 1.6; margin: 20px 0; font-size: 15px;">
->>>>>>> 7becf47 (Final demo preparations complete)
           Join us for this exciting event! Don't miss out on this opportunity to connect with the community and participate in engaging activities.
         </p>
 
         <button 
           @click="dialogVisible = false"
-<<<<<<< HEAD
-          style="background: #1b8f48; color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: 600; margin-top: 10px;"
-=======
           style="background: #1b8f48; color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: 600; margin-top: 10px; width: 100%;"
->>>>>>> 7becf47 (Final demo preparations complete)
         >
           Close
         </button>
@@ -125,15 +83,12 @@ import { store } from '../store.js'
 import Announcements from '../components/Announcements.vue'
 import Filters from '../components/Filters.vue'
 import EventGrid from '../components/EventGrid.vue'
-<<<<<<< HEAD
-=======
 import CommunityGrid from '../components/CommunityGrid.vue'
->>>>>>> 7becf47 (Final demo preparations complete)
 
 // Reactive state for selected event and dialog visibility
 const selectedEvent = ref(null)
 const dialogVisible = ref(false)
-<<<<<<< HEAD
+const activeType = ref('events')
 
 const events = ref([])
 
@@ -144,20 +99,12 @@ const getUpcomingEvents = () => {
     .sort((a, b) => new Date(a.date) - new Date(b.date));
 }
 
-// Initialize with upcoming events
-events.value = getUpcomingEvents();
-=======
-const activeType = ref('events')
-
-const events = ref([])
-
 const getAllEvents = () => {
   return [...store.events].sort((a, b) => new Date(a.date) - new Date(b.date));
 }
 
 // Initialize with all events
 events.value = getAllEvents();
->>>>>>> 7becf47 (Final demo preparations complete)
 
 const seeAll = (event) => {
   // Open the global dialog with the clicked event's details
@@ -167,13 +114,8 @@ const seeAll = (event) => {
 
 const onFilterChange = (val) => {
   if (!val) {
-<<<<<<< HEAD
     // Reset to default (Upcoming)
     events.value = getUpcomingEvents();
-=======
-    // Reset to default (All Events)
-    events.value = getAllEvents();
->>>>>>> 7becf47 (Final demo preparations complete)
   } else {
     let startDate = moment(val[0]).format("YYYY-MM-DD")
     let endDate = moment(val[1]).format("YYYY-MM-DD")

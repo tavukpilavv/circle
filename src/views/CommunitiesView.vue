@@ -135,11 +135,7 @@ const filteredCommunities = computed(() => {
 const toggleJoin = (community) => {
   // Check if user is logged in
   if (!localStorage.getItem('user_token')) {
-<<<<<<< HEAD
-    alert('Lütfen katılmak için önce giriş yapın!')
-=======
     alert('Please sign in first to join!')
->>>>>>> 7becf47 (Final demo preparations complete)
     router.push('/login')
     return
   }

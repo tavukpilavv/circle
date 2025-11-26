@@ -95,10 +95,7 @@
             v-for="event in registeredEvents" 
             :key="event.id"
           >
-<<<<<<< HEAD
-=======
             <img :src="event.image" class="event-cover" alt="" />
->>>>>>> 7becf47 (Final demo preparations complete)
             <div class="activity-content">
               <h4>{{ event.name }}</h4>
               <p>{{ event.date }} • {{ event.location }}</p>
@@ -575,17 +572,10 @@ const slide = (trackName, direction) => {
 .activity-card {
   background: var(--card-soft);
   height: 220px;
-<<<<<<< HEAD
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-=======
   padding: 10px;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
->>>>>>> 7becf47 (Final demo preparations complete)
 }
 
 .activity-content h4 {

@@ -1,10 +1,6 @@
 <template>
   <aside class="filters">
       <h3>Filter</h3>
-<<<<<<< HEAD
-      <div class="filter-item">School</div>
-      <div class="filter-item">Community</div>
-=======
       <div 
         class="filter-item" 
         :class="{ 'active': activeType === 'events' }"
@@ -13,12 +9,12 @@
         Events
       </div>
       <div 
-        class="filter-item disabled" 
+        class="filter-item" 
         :class="{ 'active': activeType === 'communities' }"
+        @click="updateType('communities')"
       >
-        Community
+        Communities
       </div>
->>>>>>> 7becf47 (Final demo preparations complete)
       
       <div class="filter-item date-filter-container">
           <label for="event-date">Date</label>
@@ -41,13 +37,6 @@ import { ref, watch } from 'vue'
 const props = defineProps({
   filterChange: {
     type: Function
-<<<<<<< HEAD
-  }
-})
-
-const dateRange = ref([])
-
-=======
   },
   activeType: {
     type: String,
@@ -63,15 +52,12 @@ const updateType = (type) => {
   emit('update:activeType', type)
 }
 
->>>>>>> 7becf47 (Final demo preparations complete)
 watch(dateRange, (nv) => {
   if (props.filterChange) {
     props.filterChange(nv)
   }
 })
 </script>
-<<<<<<< HEAD
-=======
 
 <style scoped>
 .filters {
@@ -134,4 +120,3 @@ watch(dateRange, (nv) => {
   font-weight: 600;
 }
 </style>
->>>>>>> 7becf47 (Final demo preparations complete)
