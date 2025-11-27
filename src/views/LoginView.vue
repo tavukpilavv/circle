@@ -46,9 +46,6 @@
         </div>
         
         <footer class="bottom-links">
-            <router-link to="/help">Help</router-link>
-            <router-link to="/about">About Us</router-link>
-            <router-link to="/apply">Apply</router-link>
         </footer>
     </main>
   </div>
@@ -191,7 +188,7 @@ main {
     font-size: 36px;   
     font-weight: 800;  
     margin-bottom: 30px; 
-    font-family: 'Roboto',
+    font-family: 'Roboto', sans-serif;
 }
 
 /* Giriş Alanları */

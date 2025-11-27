@@ -20,6 +20,14 @@
                             <el-input v-model="form.lastName" placeholder="Enter your last name"></el-input>
                         </el-form-item>
                     </div>
+                    <el-form-item label="Username" prop="username">
+                        <el-input v-model="form.username" placeholder="Enter your username"></el-input>
+                    </el-form-item>
+
+                    <el-form-item label="Major" prop="major">
+                        <el-input v-model="form.major" placeholder="e.g. Computer Science"></el-input>
+                    </el-form-item>
+
                     <el-form-item label="Email" prop="email">
                         <el-input v-model="form.email" placeholder="Enter your e-mail"></el-input>
                     </el-form-item>
@@ -43,9 +51,6 @@
         </div>
         
         <footer class="bottom-links">
-            <router-link to="/help">Help</router-link>
-            <router-link to="/about">About Us</router-link>
-            <a href="#">Apply</a>
         </footer>
     </main>
   </div>
@@ -60,8 +65,10 @@ const router = useRouter()
 const formRef = ref(null)
 const isSubmitting = ref(false)
 const form = ref({
+    username: '',
     firstName: '',
     lastName: '',
+    major: '',
     email: '',
     password: '',
     confirmPassword: ''
@@ -78,11 +85,17 @@ const validateConfirmPassword = (rule, value, callback) => {
 }
 
 const rules = {
+    username: [
+        { required: true, message: 'Username is required', trigger: 'blur' }
+    ],
     firstName: [
         { required: true, message: 'First name is required', trigger: 'blur' }
     ],
     lastName: [
         { required: true, message: 'Last name is required', trigger: 'blur' }
+    ],
+    major: [
+        { required: true, message: 'Major is required', trigger: 'blur' }
     ],
     email: [
         { required: true, message: 'Email is required', trigger: 'blur' },
@@ -110,6 +123,12 @@ const submit = () => {
     formRef.value.validate((valid) => {
         if (valid) {
             isSubmitting.value = true
+            
+            // Save user info to localStorage
+            // Save user info to localStorage
+            localStorage.setItem('user_username', form.value.username)
+            localStorage.setItem('user_major', form.value.major)
+            
             ElMessage.success('Sign up form submitted!')
             setTimeout(() => {
                 isSubmitting.value = false
@@ -233,11 +252,11 @@ main {
 /* Button */
 .signup-button {
     width: 100%;
-    height: 60px;
+    height: 76.18px;
     border-radius: 16px;
     background-color: #1A916D;
     border-color: #1A916D;
-    font-size: 20px;
+    font-size: 24px;
     font-weight: 800;
     font-family: 'Roboto', sans-serif;
     color: #ffffff;
@@ -252,7 +271,7 @@ main {
 /* Links */
 .no-account {
     color: #7F8B9E;
-    font-size: 16px;
+    font-size: 20px;
     font-weight: 400;
     margin-top: 20px;
     text-align: center;
@@ -260,6 +279,7 @@ main {
 
 .no-account a {
     color: #FF9E4A;
+    font-size: 20px;
     font-weight: 700;
     text-decoration: underline;
 }

@@ -233,8 +233,15 @@ const loadUserData = () => {
   if (token) {
     user.name = localStorage.getItem('user_name') || 'User'
     user.role = localStorage.getItem('user_role') || 'user'
-    // Mock subtitle for now, or could store it too
-    user.sub = 'Computer Science • Class of 2025' 
+    
+    const major = localStorage.getItem('user_major') || 'Student'
+    const gradYear = localStorage.getItem('user_grad_year')
+    
+    if (gradYear) {
+      user.sub = `${major} • Class of ${gradYear}`
+    } else {
+      user.sub = major
+    }
   }
 }
 
@@ -829,22 +836,70 @@ const slide = (trackName, direction) => {
   }
 }
 
+@media (max-width: 768px) {
+  .profile-banner {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 20px;
+  }
+
+  .profile-left {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .identity .name-row {
+    justify-content: center;
+  }
+  
+  .profile-right {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .dual-tabs {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  
+  .community-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100%, 1fr));
+  }
+}
+
 @media (max-width: 600px) {
+  .page-wrap {
+    padding: 0 16px;
+    margin-top: 10px;
+  }
+
   .card {
     flex: 0 0 100%;
   }
 
+  .slide-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+
   .slide-btn.left {
-    left: 0;
+    left: -6px;
   }
 
   .slide-btn.right {
-    right: 0;
+    right: -6px;
   }
 
   .seeall-inner {
     width: 94%;
     max-height: 85vh;
+    padding: 16px;
+  }
+  
+  .seeall-grid {
+    grid-template-columns: 1fr;
   }
 }
 </style>
