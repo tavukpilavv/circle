@@ -159,11 +159,12 @@
 </template>
 <script setup>
 import { ref, reactive, computed, onMounted, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { store } from '../store.js'
 import ConfettiOverlay from '../components/ConfettiOverlay.vue'
 
 const route = useRoute()
+const router = useRouter()
 const showCelebration = ref(false)
 
 const CLUBS = [
@@ -314,7 +315,8 @@ const deleteEvent = (event) => {
 const register = (event) => {
   // Check if user is logged in
   if (!localStorage.getItem('user_token')) {
-    alert('You have to sign in first!')
+    alert('Please sign in to register.')
+    router.push('/login')
     return
   }
   

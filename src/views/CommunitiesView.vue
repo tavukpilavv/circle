@@ -138,11 +138,14 @@ import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { store } from '../store.js'
 
+import ConfettiOverlay from '../components/ConfettiOverlay.vue'
+
 const router = useRouter()
 const route = useRoute()
 const searchQuery = ref('')
 const activeFilter = ref('all')
 const isSuperAdmin = ref(false)
+const showCelebration = ref(false)
 
 // Modal State
 const isModalOpen = ref(false)
@@ -190,7 +193,6 @@ const filteredCommunities = computed(() => {
 const toggleJoin = (community) => {
   // Check if user is logged in
   if (!localStorage.getItem('user_token')) {
-    alert('Please sign in first to join!')
     router.push('/login')
     return
   }

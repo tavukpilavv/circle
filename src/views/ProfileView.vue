@@ -13,18 +13,24 @@
 
         <div class="identity">
           <div class="name-row">
-            <div class="name" :class="{ 'is-admin': user.role === 'admin' }">
+            <div class="name" :class="{ 'is-admin': user.role === 'admin' || user.role === 'super_admin' }">
               {{ user.name }}
             </div>
             
             <!-- Verified Icon for Admin -->
-            <el-icon v-if="user.role === 'admin'" class="verified-icon" :size="20" color="#409EFF">
+            <el-icon v-if="user.role === 'admin' || user.role === 'super_admin'" class="verified-icon" :size="20" color="#409EFF">
               <CircleCheckFilled />
             </el-icon>
 
             <!-- Admin Badge -->
-            <el-tag v-if="user.role === 'admin'" type="success" size="small" effect="dark" round>
-              Admin
+            <el-tag 
+              v-if="user.role === 'admin' || user.role === 'super_admin'" 
+              :type="user.role === 'super_admin' ? 'warning' : 'success'" 
+              size="small" 
+              effect="dark" 
+              round
+            >
+              {{ user.role === 'super_admin' ? 'Super Admin' : 'Admin' }}
             </el-tag>
           </div>
           <div class="sub">{{ user.sub }}</div>
@@ -194,7 +200,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { ref, reactive, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { store } from '../store.js'
 import { CircleCheckFilled } from '@element-plus/icons-vue'
@@ -208,12 +214,22 @@ const activitiesTrack = ref(null)
 // Reactive source for avatar
 const storedAvatar = ref('')
 
-// Mock user data
-const user = ref({
-  name: 'Ezgi İşgüzar',
-  role: 'admin',
-  sub: 'Computer Science • Class of 2025'
+// User data from localStorage
+const user = reactive({
+  name: 'Guest',
+  role: 'user',
+  sub: 'Student'
 })
+
+const loadUserData = () => {
+  const token = localStorage.getItem('user_token')
+  if (token) {
+    user.name = localStorage.getItem('user_name') || 'User'
+    user.role = localStorage.getItem('user_role') || 'user'
+    // Mock subtitle for now, or could store it too
+    user.sub = 'Computer Science • Class of 2025' 
+  }
+}
 
 const joinedCommunities = computed(() => {
   return store.communities.filter(c => c.joined)
@@ -237,8 +253,8 @@ const userAvatar = computed(() => {
   if (storedAvatar.value) {
     return storedAvatar.value
   }
-  // Default DiceBear avatar (matching header)
-  return 'https://api.dicebear.com/7.x/notionists/svg?seed=circle1&flip=false'
+  // Default Letter Avatar using DiceBear Initials
+  return `https://api.dicebear.com/7.x/initials/svg?seed=${user.name}&backgroundColor=1b8f48&textColor=ffffff`
 })
 
 const loadAvatar = () => {
@@ -246,6 +262,7 @@ const loadAvatar = () => {
 }
 
 onMounted(() => {
+  loadUserData()
   loadAvatar()
   window.addEventListener('avatar-changed', loadAvatar)
 })

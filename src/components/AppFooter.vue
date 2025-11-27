@@ -22,7 +22,7 @@
         <ul>
           <li><router-link to="/about">About Us</router-link></li>
           <li><router-link to="/apply">Apply</router-link></li>
-          <li><router-link to="/contact">Help & Support</router-link></li>
+          <li><router-link to="/help">Help & Support</router-link></li>
         </ul>
       </div>
     </div>

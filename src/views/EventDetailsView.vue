@@ -60,16 +60,19 @@
       <h2>Event not found</h2>
       <button @click="$router.push('/events')">Go to Events</button>
     </div>
+    <ConfettiOverlay v-if="showCelebration" @close="showCelebration = false" />
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { store } from '../store.js'
+import ConfettiOverlay from '../components/ConfettiOverlay.vue'
 
 const route = useRoute()
 const router = useRouter()
+const showCelebration = ref(false)
 
 const event = computed(() => {
   const id = parseInt(route.params.id)
@@ -80,12 +83,16 @@ const toggleRegistration = () => {
   if (!event.value) return
   
   if (!localStorage.getItem('user_token')) {
-    alert('Please login to register')
+    alert('Please sign in to register.')
     router.push('/login')
     return
   }
 
   store.registerEvent(event.value)
+  
+  if (event.value.registered) {
+    showCelebration.value = true
+  }
 }
 </script>
 

@@ -57,8 +57,9 @@ const loadAvatar = () => {
   if (stored) {
     userAvatar.value = stored
   } else {
-    // Default avatar if none set
-    userAvatar.value = "https://api.dicebear.com/7.x/notionists/svg?seed=circle1&flip=false"
+    // Default avatar if none set - MATCH PROFILE PAGE LOGIC
+    const name = localStorage.getItem('user_name') || 'User'
+    userAvatar.value = `https://api.dicebear.com/7.x/initials/svg?seed=${name}&backgroundColor=1b8f48&textColor=ffffff`
   }
 }
 

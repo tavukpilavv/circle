@@ -44,11 +44,13 @@
       </div>
       </template>
   </el-dialog>
+  <ConfettiOverlay v-if="showCelebration" @close="showCelebration = false" />
 </template>
 
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import ConfettiOverlay from './ConfettiOverlay.vue'
 
 const router = useRouter()
 
@@ -60,18 +62,21 @@ const props = defineProps({
 })
 
 const dialogVisible = ref(false)
+const showCelebration = ref(false)
 
 const registerForEvent = () => {
   // Check if user is logged in
   if (!localStorage.getItem('user_token')) {
-    alert('Lütfen katılmak için önce giriş yapın!')
+    alert('Please sign in to register.')
     dialogVisible.value = false
     router.push('/login')
     return
   }
   
   // User is authenticated, proceed with registration
-  alert(`Successfully registered for ${props.event?.event_name}!`)
+  // In a real app we would call store.registerEvent(props.event)
+  // For now we just show the celebration
+  showCelebration.value = true
   dialogVisible.value = false
 }
 </script>

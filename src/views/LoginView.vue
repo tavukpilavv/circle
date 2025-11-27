@@ -21,7 +21,7 @@
                     </div>
 
                     <div class="input-group password-group">
-                        <input :type="showPassword ? 'text' : 'password'" id="signin-password" placeholder="Enter password">
+                        <input :type="showPassword ? 'text' : 'password'" id="signin-password" placeholder="Enter password" v-model="password">
                         <button type="button" class="password-toggle-btn" :aria-label="showPassword ? 'Hide password' : 'Show password'" @click="showPassword = !showPassword">
                             <i class="fas" :class="showPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
                         </button>
@@ -61,23 +61,36 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 const showPassword = ref(false)
 const username = ref('')
+const password = ref('')
 
 const handleLogin = () => {
-  localStorage.setItem('user_token', 'logged_in')
-  
-  // Simple role logic
   const user = username.value.toLowerCase();
-  
+  const pass = password.value;
+
+  // Mock Credential Check
   if (user === 'superadmin') {
-    localStorage.setItem('user_role', 'super_admin')
+    if (pass !== 'superadmin') {
+      alert('Invalid password for Super Admin');
+      return;
+    }
+    localStorage.setItem('user_role', 'super_admin');
   } else if (user === 'admin') {
-    localStorage.setItem('user_role', 'admin')
+    if (pass !== 'admin') {
+      alert('Invalid password for Admin');
+      return;
+    }
+    localStorage.setItem('user_role', 'admin');
   } else {
-    localStorage.setItem('user_role', 'user')
+    // Regular user - allow any password for demo
+    localStorage.setItem('user_role', 'user');
   }
 
+  localStorage.setItem('user_token', 'logged_in')
+  localStorage.setItem('user_name', username.value) 
+  
   window.dispatchEvent(new Event('auth-changed'))
-  router.push('/')
+  // Force reload to ensure all components pick up the new role/token
+  window.location.href = '/'
 }
 </script>
 
