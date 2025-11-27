@@ -69,6 +69,10 @@
           <button v-if="isAdmin" class="event-edit-btn" type="button" @click="openModal('edit', event)">
             <i class="fas fa-pen"></i> Edit
           </button>
+          
+          <button v-if="isAdmin" class="event-delete-btn" type="button" @click="deleteEvent(event)">
+            <i class="fas fa-trash"></i>
+          </button>
         </div>
       </article>
       
@@ -150,13 +154,17 @@
       </form>
     </div>
   </div>
+  
+  <ConfettiOverlay v-if="showCelebration" @close="showCelebration = false" />
 </template>
 <script setup>
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { store } from '../store.js'
+import ConfettiOverlay from '../components/ConfettiOverlay.vue'
 
 const route = useRoute()
+const showCelebration = ref(false)
 
 const CLUBS = [
   "Computer Science Club",
@@ -197,7 +205,7 @@ const filteredEvents = computed(() => {
 onMounted(() => {
   if (localStorage.getItem('user_token')) {
     const role = localStorage.getItem('user_role');
-    isAdmin.value = role === 'admin';
+    isAdmin.value = role === 'admin' || role === 'super_admin';
   } else {
     isAdmin.value = false;
   }
@@ -272,9 +280,35 @@ const closeModal = () => {
 }
 
 const submitForm = () => {
-  // Handle form submission logic here
-  console.log("Form submitted:", formData);
+  if (modalMode.value === 'create') {
+    store.createEvent({
+      name: formData.name,
+      date: formData.date,
+      location: formData.location,
+      club: formData.club,
+      capacity: formData.capacity,
+      description: formData.description,
+      // Default image for now
+      image: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=800&q=80'
+    });
+  } else {
+    store.updateEvent({
+      id: formData.id,
+      name: formData.name,
+      date: formData.date,
+      location: formData.location,
+      club: formData.club,
+      capacity: formData.capacity,
+      description: formData.description
+    });
+  }
   closeModal();
+}
+
+const deleteEvent = (event) => {
+  if (confirm('Are you sure you want to delete this event?')) {
+    store.deleteEvent(event.id);
+  }
 }
 
 const register = (event) => {
@@ -286,6 +320,12 @@ const register = (event) => {
   
   // User is authenticated, proceed with registration
   store.registerEvent(event);
+  
+  // If registration was successful (it toggles, so check if it's now true)
+  // Note: store.registerEvent modifies the object in place.
+  if (event.registered) {
+    showCelebration.value = true;
+  }
 }
 </script>
 
@@ -367,38 +407,40 @@ const register = (event) => {
 
 .event-card {
   display: grid;
-  grid-template-columns: 80px minmax(0, 1fr) auto;
-  align-items: stretch;
+  grid-template-columns: 40px minmax(0, 1fr) auto; /* Extremely reduced first column */
+  align-items: center;
   background: var(--card);
-  border-radius: 16px;
+  border-radius: 8px;
   box-shadow: var(--shadow);
-  padding: 14px 18px;
+  padding: 6px 10px; /* Minimal padding */
 }
 
 /* date pill */
 
 .event-date-pill {
-  width: 64px;
-  height: 64px;
-  border-radius: 14px;
+  width: 36px; /* Micro pill */
+  height: 36px;
+  border-radius: 6px;
   background: #f3f6e9;
   border: 1px solid #d7dfc2;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin-right: 12px;
+  margin-right: 8px;
   font-weight: 700;
   color: #31402b;
 }
 
 .event-date-day {
-  font-size: 20px;
+  font-size: 13px;
+  line-height: 1;
 }
 
 .event-date-month {
-  font-size: 11px;
-  letter-spacing: 1px;
+  font-size: 7px;
+  letter-spacing: 0.5px;
+  line-height: 1;
 }
 
 /* middle */
@@ -406,30 +448,37 @@ const register = (event) => {
 .event-main {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 0;
+  justify-content: center;
 }
 
 .event-name {
-  font-size: 16px;
+  font-size: 13px; /* Small title */
   font-weight: 700;
+  line-height: 1.2;
 }
 
 .event-desc {
-  font-size: 13px;
+  font-size: 10px; /* Tiny desc */
   color: var(--muted);
+  line-height: 1.2;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .event-meta {
-  margin-top: 4px;
-  font-size: 12px;
+  margin-top: 1px;
+  font-size: 9px; /* Micro meta */
   color: #556b5f;
   display: flex;
   flex-wrap: wrap;
-  gap: 14px;
+  gap: 6px;
 }
 
 .event-meta i {
-  margin-right: 6px;
+  margin-right: 2px;
 }
 
 /* right */
@@ -438,8 +487,9 @@ const register = (event) => {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 6px;
-  margin-left: 12px;
+  gap: 4px;
+  margin-left: 6px;
+  justify-content: center;
 }
 
 .event-primary-btn {
@@ -463,6 +513,19 @@ const register = (event) => {
   border: 1px solid var(--outline);
   background: #f7fbf8;
   color: #34493a;
+  font-size: 12px;
+  padding: 4px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.event-delete-btn {
+  border-radius: 20px;
+  border: 1px solid #fee2e2;
+  background: #fff5f5;
+  color: #dc2626;
   font-size: 12px;
   padding: 4px 10px;
   display: inline-flex;
@@ -648,17 +711,74 @@ const register = (event) => {
 }
 
 /* Responsive */
-@media (max-width: 960px) {
-  .event-card {
-    grid-template-columns: 70px minmax(0, 1fr);
-    grid-template-rows: auto auto;
+@media (max-width: 1200px) {
+  .events-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
   }
-
+  
+  .event-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  
+  .event-main {
+    flex: 1;
+    margin: 10px 0;
+  }
+  
+  .event-card {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto;
+    gap: 10px;
+    height: auto; /* Allow height to fit content */
+    padding: 16px;
+  }
+  
+  .event-date-pill {
+    grid-column: 1;
+    grid-row: 1;
+    margin-right: 0;
+  }
+  
+  .event-main {
+    grid-column: 2;
+    grid-row: 1;
+    margin: 0;
+  }
+  
   .event-actions {
     grid-column: 1 / -1;
+    grid-row: 2;
     flex-direction: row;
     justify-content: flex-end;
-    margin-top: 8px;
+    width: 100%;
+    margin-left: 0;
+    margin-top: 10px;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 768px) {
+  .events-list {
+    grid-template-columns: 1fr;
+  }
+
+  .nav-inner {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .nav-center {
+    order: 3;
+  }
+
+  .nav-right {
+    order: 2;
+    justify-content: flex-start;
   }
 }
 
@@ -668,16 +788,8 @@ const register = (event) => {
     padding: 0 14px 30px;
   }
 
-  .event-card {
-    grid-template-columns: 1fr;
-  }
-
   .event-date-pill {
     margin-bottom: 10px;
-  }
-
-  .event-actions {
-    justify-content: flex-start;
   }
 }
 </style>

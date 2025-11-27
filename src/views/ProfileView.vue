@@ -237,8 +237,8 @@ const userAvatar = computed(() => {
   if (storedAvatar.value) {
     return storedAvatar.value
   }
-  // Default DiceBear avatar
-  return 'https://api.dicebear.com/9.x/adventurer/svg?seed=Ezgi'
+  // Default DiceBear avatar (matching header)
+  return 'https://api.dicebear.com/7.x/notionists/svg?seed=circle1&flip=false'
 })
 
 const loadAvatar = () => {
@@ -256,8 +256,9 @@ onUnmounted(() => {
 
 const logout = () => {
   localStorage.removeItem('user_token')
-  router.push('/')
-  window.location.reload()
+  localStorage.removeItem('user_role')
+  localStorage.removeItem('user_avatar')
+  window.location.href = '/'
 }
 
 const openSeeAll = (target) => {

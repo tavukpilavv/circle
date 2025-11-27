@@ -48,7 +48,7 @@
         <footer class="bottom-links">
             <router-link to="/help">Help</router-link>
             <router-link to="/about">About Us</router-link>
-            <a href="#">Apply</a>
+            <router-link to="/apply">Apply</router-link>
         </footer>
     </main>
   </div>
@@ -66,7 +66,11 @@ const handleLogin = () => {
   localStorage.setItem('user_token', 'logged_in')
   
   // Simple role logic
-  if (username.value.toLowerCase() === 'admin') {
+  const user = username.value.toLowerCase();
+  
+  if (user === 'superadmin') {
+    localStorage.setItem('user_role', 'super_admin')
+  } else if (user === 'admin') {
     localStorage.setItem('user_role', 'admin')
   } else {
     localStorage.setItem('user_role', 'user')

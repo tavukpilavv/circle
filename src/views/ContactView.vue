@@ -1,5 +1,4 @@
 <template>
-  <MainLayout>
     <div class="page-wrap">
       <section class="support-card">
         <!-- LEFT: NEW TECH SUPPORT DASHBOARD FIGURE -->
@@ -192,12 +191,10 @@
         </div>
       </section>
     </div>
-  </MainLayout>
 </template>
 
 <script setup>
 import { ref } from 'vue'
-import MainLayout from '../layouts/MainLayout.vue'
 
 const form = ref({
   name: '',

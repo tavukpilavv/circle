@@ -46,7 +46,12 @@
           >
             Discover
           </button>
+          
+          <button v-if="isSuperAdmin" class="add-club-btn" @click="openModal">
+            + Add Club
+          </button>
         </div>
+
       </div>
     </section>
 
@@ -89,10 +94,47 @@
       </div>
     </section>
   </main>
+
+  <!-- ADD CLUB MODAL -->
+  <div class="modal-overlay" :class="{ 'is-open': isModalOpen }" aria-hidden="true" @click.self="closeModal">
+    <div class="modal-card">
+      <button class="modal-close" aria-label="Close" @click="closeModal">
+        <span>&times;</span>
+      </button>
+
+      <h2 class="modal-title">Create Club</h2>
+
+      <form @submit.prevent="submitClub" class="modal-form">
+        <div class="form-field">
+          <label>Club Name</label>
+          <input type="text" v-model="formData.name" required />
+        </div>
+
+        <div class="form-field">
+          <label>Description</label>
+          <textarea v-model="formData.description" rows="3" required></textarea>
+        </div>
+
+        <div class="form-field">
+          <label>Image URL</label>
+          <input type="text" v-model="formData.image" placeholder="https://..." />
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" @click="closeModal">
+            Cancel
+          </button>
+          <button type="submit" class="btn-primary">
+            Create Club
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { store } from '../store.js'
 
@@ -100,6 +142,15 @@ const router = useRouter()
 const route = useRoute()
 const searchQuery = ref('')
 const activeFilter = ref('all')
+const isSuperAdmin = ref(false)
+
+// Modal State
+const isModalOpen = ref(false)
+const formData = reactive({
+  name: '',
+  description: '',
+  image: ''
+})
 
 const applyFilters = () => {
   if (route.query.filter === 'joined') {
@@ -111,6 +162,10 @@ const applyFilters = () => {
 
 onMounted(() => {
   applyFilters()
+  
+  // Check for Super Admin role
+  const role = localStorage.getItem('user_role')
+  isSuperAdmin.value = role === 'super_admin'
 })
 
 watch(() => route.query.filter, () => {
@@ -142,6 +197,33 @@ const toggleJoin = (community) => {
   
   // User is authenticated, proceed with toggle
   store.joinCommunity(community)
+}
+
+// Modal Methods
+const openModal = () => {
+  formData.name = ''
+  formData.description = ''
+  formData.image = ''
+  isModalOpen.value = true
+  document.body.style.overflow = 'hidden'
+}
+
+const closeModal = () => {
+  isModalOpen.value = false
+  document.body.style.overflow = ''
+}
+
+const submitClub = () => {
+  // Use default image if none provided
+  const image = formData.image || 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=800&q=80'
+  
+  store.createClub({
+    name: formData.name,
+    description: formData.description,
+    image: image
+  })
+  
+  closeModal()
 }
 </script>
 
@@ -247,6 +329,19 @@ const toggleJoin = (community) => {
   color: #fff;
 }
 
+/* Add Club Button */
+.add-club-btn {
+  margin-left: 10px;
+  border: none;
+  border-radius: 6px;
+  background: var(--brand);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+  cursor: pointer;
+}
+
 /* Community List */
 .community-list {
   display: flex;
@@ -334,6 +429,118 @@ const toggleJoin = (community) => {
   padding: 40px;
   color: var(--muted);
   font-style: italic;
+}
+
+/* ========= MODAL ========= */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.modal-overlay.is-open {
+  display: flex;
+}
+
+.modal-card {
+  width: 420px;
+  max-width: 95%;
+  background: #fefbea;
+  border-radius: 18px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2);
+  padding: 20px 22px 18px;
+  position: relative;
+}
+
+.modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  border: 1px solid #ffcc7a;
+  background: #fff4e1;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.modal-close span {
+  font-size: 18px;
+  line-height: 1;
+  color: #f08c00;
+}
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.modal-form {
+  font-size: 12px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-bottom: 10px;
+}
+
+.form-field label {
+  font-size: 11px;
+  color: #777f7a;
+}
+
+.modal-form input,
+.modal-form textarea {
+  border-radius: 4px;
+  border: 1px solid #dadfd4;
+  padding: 6px 8px;
+  font-size: 12px;
+  font-family: inherit;
+  outline: none;
+  background: #ffffff;
+}
+
+.modal-form input:focus,
+.modal-form textarea:focus {
+  border-color: var(--brand);
+}
+
+.modal-actions {
+  margin-top: 14px;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.btn-secondary,
+.btn-primary {
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 4px;
+  border: none;
+  padding: 8px 18px;
+  cursor: pointer;
+  flex: 1;
+}
+
+.btn-secondary {
+  background: #e4e4e0;
+  color: #333;
+}
+
+.btn-primary {
+  background: var(--brand);
+  color: #ffffff;
 }
 
 /* Responsive */

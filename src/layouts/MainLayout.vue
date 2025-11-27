@@ -38,12 +38,15 @@
     <main class="page-content">
       <slot />
     </main>
+
+    <AppFooter />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
+import AppFooter from '../components/AppFooter.vue'
 
 const router = useRouter()
 const isLoggedIn = ref(false)
@@ -85,8 +88,13 @@ onUnmounted(() => {
 const toggleAuth = () => {
   // Logout logic
   localStorage.removeItem('user_token')
+  localStorage.removeItem('user_role')
+  localStorage.removeItem('user_avatar')
+  
   isLoggedIn.value = false
-  router.push('/')
+  
+  // Force reload to clear any state
+  window.location.href = '/'
 }
 </script>
 
@@ -227,10 +235,13 @@ body {
 .nav-right {
   display: flex;
   justify-content: flex-end;
+  align-items: center; /* Fix vertical alignment */
 }
 
 .icon-btn-link {
   text-decoration: none;
+  display: flex; /* Ensure link behaves as flex container */
+  align-items: center;
 }
 
 .icon-btn {

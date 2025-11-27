@@ -213,5 +213,46 @@ export const store = reactive({
     if (target) {
       target.registered = !target.registered;
     }
+  },
+  createClub(clubData) {
+    const newId = this.communities.length > 0
+      ? Math.max(...this.communities.map(c => c.id)) + 1
+      : 1;
+
+    const newClub = {
+      id: newId,
+      ...clubData,
+      members: 0, // Default start
+      joined: false
+    };
+
+    this.communities.push(newClub);
+  },
+  // Event Actions
+  createEvent(eventData) {
+    const newId = this.events.length > 0
+      ? Math.max(...this.events.map(e => e.id)) + 1
+      : 1;
+
+    const newEvent = {
+      id: newId,
+      ...eventData,
+      registered: false
+    };
+
+    this.events.push(newEvent);
+  },
+  updateEvent(eventData) {
+    const index = this.events.findIndex(e => e.id === eventData.id);
+    if (index !== -1) {
+      // Merge existing data with updates
+      this.events[index] = { ...this.events[index], ...eventData };
+    }
+  },
+  deleteEvent(eventId) {
+    const index = this.events.findIndex(e => e.id === eventId);
+    if (index !== -1) {
+      this.events.splice(index, 1);
+    }
   }
 })

@@ -1,6 +1,5 @@
 <script setup>
 import { onMounted } from 'vue';
-import MainLayout from '../layouts/MainLayout.vue';
 
 onMounted(() => {
   const statEls = document.querySelectorAll(".about-stat-number");
@@ -69,7 +68,6 @@ onMounted(() => {
 </script>
 
 <template>
-  <MainLayout>
     <div class="about-us-container">
       <!-- MAIN CONTENT -->
       <div class="page-wrap">
@@ -230,7 +228,6 @@ onMounted(() => {
         </section>
       </div>
     </div>
-  </MainLayout>
 </template>
 
 <style scoped>
