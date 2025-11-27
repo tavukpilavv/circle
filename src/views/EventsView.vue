@@ -409,40 +409,53 @@ const register = (event) => {
 
 .event-card {
   display: grid;
-  grid-template-columns: 40px minmax(0, 1fr) auto; /* Extremely reduced first column */
-  align-items: center;
-  background: var(--card);
-  border-radius: 8px;
-  box-shadow: var(--shadow);
-  padding: 6px 10px; /* Minimal padding */
+  grid-template-columns: 64px minmax(0, 1fr) auto;
+  align-items: flex-start;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  padding: 20px 24px;
+  gap: 24px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.event-card:hover {
+  box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+  transform: translateY(-1px);
 }
 
 /* date pill */
 
 .event-date-pill {
-  width: 36px; /* Micro pill */
-  height: 36px;
-  border-radius: 6px;
-  background: #f3f6e9;
-  border: 1px solid #d7dfc2;
+  width: 64px;
+  height: 64px;
+  border-radius: 14px;
+  background: #f0fdf4; /* Very light green */
+  border: 1px solid #dcfce7;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin-right: 8px;
-  font-weight: 700;
-  color: #31402b;
+  color: #15803d; /* Green-700 */
+  flex-shrink: 0;
 }
 
 .event-date-day {
-  font-size: 13px;
+  font-size: 20px;
   line-height: 1;
+  font-weight: 800;
+  color: #166534; /* Green-800 */
+  margin-bottom: 2px;
 }
 
 .event-date-month {
-  font-size: 7px;
+  font-size: 11px;
   letter-spacing: 0.5px;
   line-height: 1;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #15803d;
 }
 
 /* middle */
@@ -450,37 +463,49 @@ const register = (event) => {
 .event-main {
   display: flex;
   flex-direction: column;
-  gap: 0;
-  justify-content: center;
+  gap: 6px;
+  padding-top: 2px;
 }
 
 .event-name {
-  font-size: 13px; /* Small title */
-  font-weight: 700;
-  line-height: 1.2;
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1.3;
+  color: #0f172a; /* Slate-900 */
+  margin: 0;
 }
 
 .event-desc {
-  font-size: 10px; /* Tiny desc */
-  color: var(--muted);
-  line-height: 1.2;
+  font-size: 14px;
+  color: #64748b; /* Slate-500 */
+  line-height: 1.5;
+  margin: 0;
   display: -webkit-box;
-  -webkit-line-clamp: 1;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
 .event-meta {
-  margin-top: 1px;
-  font-size: 9px; /* Micro meta */
-  color: #556b5f;
+  margin-top: 8px;
+  font-size: 13px;
+  color: #475569; /* Slate-600 */
   display: flex;
   flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  font-weight: 500;
+}
+
+.event-meta span {
+  display: flex;
+  align-items: center;
   gap: 6px;
 }
 
 .event-meta i {
-  margin-right: 2px;
+  color: #64748b;
+  font-size: 14px;
 }
 
 /* right */
@@ -489,51 +514,73 @@ const register = (event) => {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 4px;
-  margin-left: 6px;
-  justify-content: center;
+  gap: 10px;
+  padding-top: 4px;
+  min-width: 100px;
 }
 
 .event-primary-btn {
-  border-radius: 20px;
+  border-radius: 999px;
   border: none;
-  background: var(--brand);
+  background: #16a34a; /* Green-600 */
   color: #ffffff;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 24px;
   cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+  text-align: center;
+}
+
+.event-primary-btn:hover {
+  background: #15803d;
+  transform: translateY(-1px);
 }
 
 .event-primary-btn:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
+  opacity: 0.8;
+  cursor: default;
+  transform: none;
+  background: #16a34a;
 }
 
 .event-edit-btn {
-  border-radius: 20px;
-  border: 1px solid var(--outline);
-  background: #f7fbf8;
-  color: #34493a;
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #475569;
   font-size: 12px;
-  padding: 4px 10px;
+  font-weight: 600;
+  padding: 6px 16px;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+  justify-content: center;
+}
+
+.event-edit-btn:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+  color: #334155;
 }
 
 .event-delete-btn {
-  border-radius: 20px;
+  border-radius: 999px;
   border: 1px solid #fee2e2;
   background: #fff5f5;
   color: #dc2626;
   font-size: 12px;
-  padding: 4px 10px;
+  padding: 6px 12px;
   display: inline-flex;
   align-items: center;
   gap: 4px;
   cursor: pointer;
+  width: 100%;
+  justify-content: center;
 }
 
 /* ========= MODAL ========= */

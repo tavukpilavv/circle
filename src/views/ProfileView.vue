@@ -161,8 +161,15 @@
           </div>
         </article>
         
-        <div v-if="joinedCommunities.length === 0" class="no-data-msg">
-          You haven't joined any communities yet.
+        <div v-if="joinedCommunities.length === 0" class="empty-state">
+          <div class="empty-icon">
+            <i class="fas fa-users"></i>
+          </div>
+          <h3>No communities yet</h3>
+          <p>Join a community to connect with others and see their events here.</p>
+          <router-link to="/communities" class="empty-btn">
+            Browse Communities
+          </router-link>
         </div>
       </section>
     </div>
@@ -660,6 +667,66 @@ const slide = (trackName, direction) => {
   font-style: italic;
   width: 100%;
   text-align: center;
+}
+
+/* Empty State Enhanced */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  background: var(--card-soft);
+  border-radius: var(--r-lg);
+  border: 1px dashed var(--outline);
+}
+
+.empty-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 24px;
+  color: var(--brand);
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+
+.empty-state h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 8px;
+}
+
+.empty-state p {
+  font-size: 14px;
+  color: var(--muted);
+  margin: 0 0 20px;
+  max-width: 300px;
+  line-height: 1.5;
+}
+
+.empty-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 24px;
+  background: var(--brand);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 999px;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.empty-btn:hover {
+  background: var(--brand-600);
+  transform: translateY(-1px);
 }
 
 /* Arrows */

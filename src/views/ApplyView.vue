@@ -57,7 +57,7 @@
                 <label class="form-label" for="university">University <span>*</span></label>
                 <select id="university" v-model="form.university" class="form-select" required>
                   <option value="">Select university</option>
-                  <option value="Ostim Technical University">OSTIM Technical University</option>
+                  <option value="Ankara Yıldırım Beyazıt University">Ankara Yıldırım Beyazıt University</option>
                   <option value="Other">Other</option>
                 </select>
                 <div v-if="errors.university" class="form-error-inline">
@@ -155,7 +155,7 @@
                   id="studentNumber"
                   v-model="form.studentNumber"
                   class="form-input"
-                  placeholder="If you are from OSTIM, you can add it."
+                  :placeholder="studentNumberPlaceholder"
                 />
               </div>
             </div>
@@ -247,7 +247,7 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
 
 const form = reactive({
   clubName: '',
@@ -267,6 +267,15 @@ const form = reactive({
 
 const errors = reactive({})
 const showSuccess = ref(false)
+
+const studentNumberPlaceholder = computed(() => {
+  if (form.university === 'Ankara Yıldırım Beyazıt University') {
+    return 'If you are from AYBU, you can add it.'
+  } else if (form.university === 'Other') {
+    return 'Enter your student number if applicable.'
+  }
+  return 'Select university first.'
+})
 
 const handleFileChange = (event) => {
   form.proof = event.target.files[0]
@@ -329,6 +338,7 @@ const handleSubmit = () => {
   const fileInput = document.getElementById('proof')
   if (fileInput) fileInput.value = ''
 
+  alert('Application sent to help@circleevent.app')
   showSuccess.value = true
   setTimeout(() => {
     showSuccess.value = false

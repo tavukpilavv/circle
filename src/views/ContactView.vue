@@ -211,6 +211,7 @@ const handleSubmit = () => {
   form.value = { name: '', email: '', issue: '' }
   
   // Show success message
+  alert('Message sent to help@circleevent.app')
   showSuccess.value = true
   setTimeout(() => {
     showSuccess.value = false
