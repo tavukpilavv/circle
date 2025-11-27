@@ -463,7 +463,7 @@ const register = (event) => {
   border: 1px solid var(--outline);
   background: #f7fbf8;
   color: #34493a;
-  font-size: 11px;
+  font-size: 12px;
   padding: 4px 10px;
   display: inline-flex;
   align-items: center;
@@ -551,7 +551,7 @@ const register = (event) => {
 }
 
 .upload-text {
-  font-size: 11px;
+  font-size: 12px;
   color: #909aa0;
   margin-bottom: 10px;
 }

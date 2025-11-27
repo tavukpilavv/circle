@@ -286,6 +286,396 @@ body {
     font-weight: 500;
     color: #333;
     padding: 18px 0;
+    text-decoration: none;
+    margin-right: 40px;
+    padding-bottom: 5px;
+}
+
+/* Aktif olan menü linki (Events) */
+.navbar nav a.active {
+    color: #000;
+    font-weight: 600;
+    border-bottom: 2px solid #2E8540;
+    /* Altındaki yeşil çizgi */
+}
+
+.navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.navbar-center .search-bar {
+    display: flex;
+    align-items: center;
+    background-color: #E3F6DB;
+    padding: 10px 15px;
+    border-radius: 32px;
+    width: 500px;
+    height: 50px;
+
+}
+
+.search-bar i {
+    color: #888;
+    margin-right: 10px;
+}
+
+.search-bar input {
+    border: none;
+    background: transparent;
+    outline: none;
+    width: 100%;
+    font-size: 15px;
+    font-family: 'Roboto', sans-serif;
+}
+
+.navbar-right .sign-in-link {
+    font-size: 16px;
+    font-weight: 600;
+    color: #FF654A;
+    /* Resimdeki turuncu-kırmızı renk */
+    text-decoration: none;
+}
+
+.navbar-right .profile-button {
+    display: none;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background-color: #E3F6DB;
+    color: #2E8540;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    text-decoration: none;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.navbar-right .profile-button:hover {
+    background-color: #2E8540;
+    color: #ffffff;
+}
+
+/* ---------------------------------- */
+/* 2. DUYURULAR BANNER'I             */
+/* ---------------------------------- */
+.announcements {
+    width: 100%;
+    height: 400px;
+    /* Increased from 250px */
+    border-radius: 16px;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 30px;
+    margin-top: 30px;
+    /* Added spacing from header */
+    /* BURADA 'background-image' OLMAMALI */
+}
+
+@media (max-width: 768px) {
+    .announcements {
+        height: 320px !important;
+        /* Increased from 160px */
+        margin-bottom: 20px;
+    }
+
+    /* Override Element Plus carousel height */
+    .announcements :deep(.el-carousel__container) {
+        height: 320px !important;
+    }
+
+    /* If :deep doesn't work in global css (it shouldn't be needed here), target directly */
+    .announcements .el-carousel__container {
+        height: 320px !important;
+    }
+}
+
+.announcements .active-banner-image {
+    width: 100%;
+    height: 100%;
+
+    /* SİHİRLİ SATIR BU: */
+    /* Resmi, en-boy oranını koruyarak alanı dolduracak şekilde sığdırır */
+    /* Taşarsa kenarlardan kırpar ama boşluk bırakmaz. */
+    object-fit: cover;
+
+    position: absolute;
+    top: 0;
+    left: 0;
+    border-radius: 16px;
+    /* Ana banner'ın köşe yuvarlatmasıyla aynı olmalı */
+}
+
+.banner-text {
+    position: absolute;
+    bottom: 25px;
+    left: 30px;
+    color: white;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+/* Banner üzerindeki 6'lı gösterge */
+.banner-indicators {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    /* Tam ortaya hizalar */
+    display: flex;
+    gap: 8px;
+}
+
+.indicator-bar {
+    width: 50px;
+    /* Her bir çubuğun genişliği */
+    height: 9px;
+    background-color: rgba(255, 255, 255, 0.5);
+    /* İnaktif renk (soluk beyaz) */
+    border-radius: 16px;
+}
+
+.indicator-bar.active {
+    background-color: #ffffff;
+    /* Aktif renk (tam beyaz) */
+}
+
+
+/* ---------------------------------- */
+/* 3. ANA İÇERİK (FİLTRE + KARTLAR)  */
+/* ---------------------------------- */
+.content-wrapper {
+    display: flex;
+    gap: 30px;
+    /* Filtre ve kartlar arası boşluk */
+}
+
+/* ---------------------------------- */
+/* SOL FİLTRELEME MENÜSÜ         */
+/* ---------------------------------- */
+.filters {
+    flex-basis: 270px;
+    /* Filtre menüsünün sabit genişliği */
+    flex-shrink: 0;
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 25px;
+    height: fit-content;
+    /* Yüksekliği içeriği kadar olsun */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    position: sticky;
+    /* Kaydırmayı takip etmesini sağlar */
+    top: 20px;
+}
+
+.filters h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 22px;
+}
+
+/* Filtre elemanları (School, Community, Date) */
+.filter-item {
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+    padding: 18px 0;
+    border-bottom: 1px solid #e0e0e0;
+    /* Aradaki ayırıcı çizgi */
+    cursor: pointer;
+}
+
+.filter-item:last-child {
+    border-bottom: none;
+    /* Son elemanın alt çizgisi olmasın */
+    font-weight: 600;
+    border-bottom: 2px solid #2E8540;
+    /* Altındaki yeşil çizgi */
+}
+
+.navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.navbar-center .search-bar {
+    display: flex;
+    align-items: center;
+    background-color: #E3F6DB;
+    padding: 10px 15px;
+    border-radius: 32px;
+    width: 500px;
+    height: 50px;
+
+}
+
+.search-bar i {
+    color: #888;
+    margin-right: 10px;
+}
+
+.search-bar input {
+    border: none;
+    background: transparent;
+    outline: none;
+    width: 100%;
+    font-size: 15px;
+    font-family: 'Roboto', sans-serif;
+}
+
+.navbar-right .sign-in-link {
+    font-size: 16px;
+    font-weight: 600;
+    color: #FF654A;
+    /* Resimdeki turuncu-kırmızı renk */
+    text-decoration: none;
+}
+
+.navbar-right .profile-button {
+    display: none;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background-color: #E3F6DB;
+    color: #2E8540;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    text-decoration: none;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.navbar-right .profile-button:hover {
+    background-color: #2E8540;
+    color: #ffffff;
+}
+
+/* ---------------------------------- */
+/* 2. DUYURULAR BANNER'I             */
+/* ---------------------------------- */
+.announcements {
+    width: 100%;
+    height: 400px;
+    /* Increased from 250px */
+    border-radius: 16px;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 30px;
+    margin-top: 30px;
+    /* Added spacing from header */
+    /* BURADA 'background-image' OLMAMALI */
+}
+
+@media (max-width: 768px) {
+    .announcements {
+        height: 320px !important;
+        /* Increased from 160px */
+        margin-bottom: 20px;
+    }
+
+    /* Override Element Plus carousel height */
+    .announcements :deep(.el-carousel__container) {
+        height: 320px !important;
+    }
+
+    /* If :deep doesn't work in global css (it shouldn't be needed here), target directly */
+    .announcements .el-carousel__container {
+        height: 320px !important;
+    }
+}
+
+.announcements .active-banner-image {
+    width: 100%;
+    height: 100%;
+
+    /* SİHİRLİ SATIR BU: */
+    /* Resmi, en-boy oranını koruyarak alanı dolduracak şekilde sığdırır */
+    /* Taşarsa kenarlardan kırpar ama boşluk bırakmaz. */
+    object-fit: cover;
+
+    position: absolute;
+    top: 0;
+    left: 0;
+    border-radius: 16px;
+    /* Ana banner'ın köşe yuvarlatmasıyla aynı olmalı */
+}
+
+.banner-text {
+    position: absolute;
+    bottom: 25px;
+    left: 30px;
+    color: white;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+/* Banner üzerindeki 6'lı gösterge */
+.banner-indicators {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    /* Tam ortaya hizalar */
+    display: flex;
+    gap: 8px;
+}
+
+.indicator-bar {
+    width: 50px;
+    /* Her bir çubuğun genişliği */
+    height: 9px;
+    background-color: rgba(255, 255, 255, 0.5);
+    /* İnaktif renk (soluk beyaz) */
+    border-radius: 16px;
+}
+
+.indicator-bar.active {
+    background-color: #ffffff;
+    /* Aktif renk (tam beyaz) */
+}
+
+
+/* ---------------------------------- */
+/* 3. ANA İÇERİK (FİLTRE + KARTLAR)  */
+/* ---------------------------------- */
+.content-wrapper {
+    display: flex;
+    gap: 30px;
+    /* Filtre ve kartlar arası boşluk */
+}
+
+/* ---------------------------------- */
+/* SOL FİLTRELEME MENÜSÜ         */
+/* ---------------------------------- */
+.filters {
+    flex-basis: 270px;
+    /* Filtre menüsünün sabit genişliği */
+    flex-shrink: 0;
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 25px;
+    height: fit-content;
+    /* Yüksekliği içeriği kadar olsun */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    position: sticky;
+    /* Kaydırmayı takip etmesini sağlar */
+    top: 20px;
+}
+
+.filters h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 22px;
+}
+
+/* Filtre elemanları (School, Community, Date) */
+.filter-item {
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+    padding: 18px 0;
     border-bottom: 1px solid #e0e0e0;
     /* Aradaki ayırıcı çizgi */
     cursor: pointer;
@@ -311,100 +701,68 @@ body {
 
 /* Tek bir etkinlik kartı */
 .event-card {
-    background-color: #ffffff;
+    background-color: #E9F5E6;
+    /* Light green background from reference */
     border-radius: 16px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     position: relative;
-    /* "See All" butonunu konumlandırmak için */
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     overflow: hidden;
-    /* Resmin köşelerini yuvarlatmak için */
+    display: flex;
+    /* Horizontal layout */
+    height: 220px;
+    /* Fixed height - slightly increased to accommodate padding */
+    padding: 15px;
+    /* Added padding to contain everything */
+    align-items: center;
+    /* Vertically center content */
 }
 
 .event-card:hover {
     transform: translateY(-5px);
-    /* Üzerine gelince yükselme efekti */
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
 }
 
-.event-card img {
+.card-image-wrapper {
+    width: 160px;
+    /* Fixed width for image */
+    flex-shrink: 0;
+    height: 100%;
+    border-radius: 12px;
+    /* Rounded corners for the image container */
+    overflow: hidden;
+    /* Clip the image */
+}
+
+.card-image-wrapper img {
     width: 100%;
-    height: 280px;
-    /* Increased height for portrait look */
-    /* Kart resimlerinin yüksekliği */
-    object-fit: cover;
-    /* Resmi bozmadan sığdır */
-}
-
-.card-content {
-    padding: 20px;
-}
-
-.event-name {
-    font-size: 20px;
-    font-weight: 600;
-    color: #000;
-    margin-bottom: 5px;
-}
-
-.community-name {
-    font-size: 14px;
-    color: #666;
-    margin-bottom: 15px;
-}
-
-.event-detail {
-    display: flex;
+    height: 100%;
     align-items: center;
     font-size: 14px;
-    color: #666;
-    margin-bottom: 8px;
+    color: #555;
+    margin-bottom: 6px;
 }
 
 .event-detail i {
-    width: 15px;
-    margin-right: 8px;
+    width: 18px;
+    margin-right: 6px;
     text-align: center;
 }
 
 /* Konum rengi (turuncu-kırmızı) */
 .event-detail.location {
     color: #FF654A;
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .event-detail.location i {
     color: #FF654A;
 }
 
-
-/* Kartın sağ altındaki "See All" butonu */
-.see-all-button {
-    position: absolute;
-    bottom: 15px;
-    right: 15px;
-
-    background-color: #E6F3E9;
-    /* Açık yeşil */
-    color: #2E8540;
-    /* Koyu yeşil */
-    padding: 6px 14px;
-    border-radius: 16px;
-    text-decoration: none;
-    font-size: 13px;
-    font-weight: 500;
-    transition: all 0.2s ease;
-}
-
-.see-all-button:hover {
-    background-color: #2E8540
-}
-
-.line-1 {
-    width: 1443px;
-    height: 0px;
-    outline: 2px #1A916D solid;
-    outline-offset: -1px;
+.card-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: auto;
 }
 
 /* ---------------------------------- */

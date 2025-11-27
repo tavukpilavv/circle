@@ -1,9 +1,7 @@
 <template>
-  <div class="button-wrapper">
-    <button class="see-all-btn" @click="dialogVisible = true">
-        See All
-    </button>
-  </div>    
+  <button class="see-all-btn" @click="dialogVisible = true">
+      See All
+  </button>
   <el-dialog
       v-model="dialogVisible"
       :title="event?.event_name"
@@ -14,24 +12,26 @@
       <div class="event-details">
         <img v-if="event?.image" :src="event.image" :alt="event.alt" class="event-image" />
         
-        <div class="detail-row">
-          <i class="fas fa-users"></i>
-          <strong>Community:</strong> {{ event?.community_name }}
-        </div>
-        
-        <div class="detail-row">
-          <i class="fas fa-map-marker-alt"></i>
-          <strong>Location:</strong> {{ event?.location }}
-        </div>
-        
-        <div class="detail-row">
-          <i class="fas fa-calendar"></i>
-          <strong>Date:</strong> {{ event?.date }}
-        </div>
-        
-        <div class="detail-row">
-          <i class="fas fa-clock"></i>
-          <strong>Time:</strong> {{ event?.time }}
+        <div class="info-column">
+          <div class="detail-row">
+            <i class="fas fa-users"></i>
+            <strong>Community:</strong> {{ event?.community_name }}
+          </div>
+          
+          <div class="detail-row">
+            <i class="fas fa-map-marker-alt"></i>
+            <strong>Location:</strong> {{ event?.location }}
+          </div>
+          
+          <div class="detail-row">
+            <i class="fas fa-calendar"></i>
+            <strong>Date:</strong> {{ event?.date }}
+          </div>
+          
+          <div class="detail-row">
+            <i class="fas fa-clock"></i>
+            <strong>Time:</strong> {{ event?.time }}
+          </div>
         </div>
       </div>
       
@@ -79,18 +79,24 @@ const registerForEvent = () => {
 <style scoped>
 .event-details {
   padding: 8px 0;
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
 }
 
 .event-image {
-  max-width: 600px;
-  max-height: 400px;
-  width: 100%;
+  flex: 0 0 45%;
+  width: 45%;
   height: auto;
   object-fit: cover;
   border-radius: 16px;
-  margin: 0 auto 20px;
+  margin: 0;
   display: block;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+}
+
+.info-column {
+  flex: 1;
 }
 
 .detail-row {
@@ -98,16 +104,29 @@ const registerForEvent = () => {
   align-items: center;
   gap: 8px;
   margin-bottom: 12px;
-  font-size: 14px;
+  font-size: 16px; /* Increased font size slightly for better readability in split view */
 }
 
 .detail-row i {
-  width: 20px;
+  width: 24px; /* Increased icon width */
   color: #1b8f48;
+  text-align: center;
 }
 
 .detail-row strong {
   margin-right: 4px;
+}
+
+@media (max-width: 768px) {
+  .event-details {
+    flex-direction: column;
+  }
+  
+  .event-image {
+    width: 100%;
+    flex: none;
+    margin-bottom: 20px;
+  }
 }
 
 /* Modal container styling */
@@ -200,28 +219,23 @@ const registerForEvent = () => {
   color: #1b8f48;
 }
 
-/* Button wrapper for alignment */
-.button-wrapper {
-  padding: 0 20px 20px 20px;
-  display: flex;
-  justify-content: flex-end;
-}
-
 /* See All button styling */
 .see-all-btn {
-  background-color: #E6F3E9;
-  color: #2E8540;
+  background-color: #2E8540;
+  color: #ffffff;
   border: none;
-  padding: 6px 14px;
-  border-radius: 16px;
+  padding: 8px 20px;
+  border-radius: 20px;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(46, 133, 64, 0.2);
 }
 
 .see-all-btn:hover {
-  background-color: #2E8540;
-  color: #ffffff;
+  background-color: #167a3d;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(46, 133, 64, 0.3);
 }
 </style>

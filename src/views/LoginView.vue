@@ -46,9 +46,9 @@
         </div>
         
         <footer class="bottom-links">
-            <a href="#">Help</a>
-            <a href="#">Contact Us</a>
-            <a href="#">Status</a>
+            <router-link to="/help">Help</router-link>
+            <router-link to="/about">About Us</router-link>
+            <a href="#">Apply</a>
         </footer>
     </main>
   </div>

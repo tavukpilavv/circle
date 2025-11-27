@@ -47,6 +47,16 @@ const routes = [
         path: '/settings',
         name: 'Settings',
         component: SettingsView
+    },
+    {
+        path: '/help',
+        name: 'Help',
+        component: () => import('../views/ContactView.vue')
+    },
+    {
+        path: '/about',
+        name: 'About',
+        component: () => import('../views/AboutView.vue')
     }
 ]
 

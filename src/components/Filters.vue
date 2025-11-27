@@ -1,19 +1,36 @@
 <template>
   <aside class="filters">
       <h3>Filter</h3>
-      <div 
-        class="filter-item" 
-        :class="{ 'active': activeType === 'events' }"
-        @click="updateType('events')"
-      >
-        Events
+      <div class="filter-group">
+        <label class="filter-label">University</label>
+        <el-select 
+          :model-value="activeType" 
+          @update:model-value="updateType" 
+          placeholder="Select University" 
+          style="width: 100%"
+          size="large"
+        >
+          <el-option
+            v-for="school in schools"
+            :key="school"
+            :label="school === 'All' ? 'All Schools' : school"
+            :value="school"
+          />
+        </el-select>
       </div>
-      <div 
-        class="filter-item" 
-        :class="{ 'active': activeType === 'communities' }"
-        @click="updateType('communities')"
-      >
-        Communities
+
+      <div class="filter-group">
+        <label class="filter-label">Sort by Date</label>
+        <el-select 
+          :model-value="sortOrder" 
+          @update:model-value="updateSort" 
+          placeholder="Sort Order" 
+          style="width: 100%"
+          size="large"
+        >
+          <el-option label="Nearest Date" value="nearest" />
+          <el-option label="Farthest Date" value="farthest" />
+        </el-select>
       </div>
       
       <div class="filter-item date-filter-container">
@@ -40,16 +57,26 @@ const props = defineProps({
   },
   activeType: {
     type: String,
-    default: 'events'
+    default: 'All'
+  },
+  sortOrder: {
+    type: String,
+    default: 'nearest'
   }
 })
 
-const emit = defineEmits(['update:activeType'])
+const schools = ['All', 'AYBU', 'ODTÜ', 'Hacettepe', 'Bilkent', 'Gazi Üni']
+
+const emit = defineEmits(['update:activeType', 'update:sortOrder'])
 
 const dateRange = ref([])
 
 const updateType = (type) => {
   emit('update:activeType', type)
+}
+
+const updateSort = (order) => {
+  emit('update:sortOrder', order)
 }
 
 watch(dateRange, (nv) => {
@@ -76,31 +103,22 @@ watch(dateRange, (nv) => {
   color: #153226;
 }
 
-.filter-item {
-  padding: 10px 14px;
+.filter-group {
+  margin-bottom: 24px;
+}
+
+.filter-label {
+  display: block;
   margin-bottom: 8px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 500;
-  color: #6b7c74;
-  transition: all 0.2s;
-}
-
-.filter-item:hover {
-  background: #f4faf4;
-  color: #1b8f48;
-}
-
-.filter-item.active {
-  background: #e1f3e3;
-  color: #1b8f48;
+  font-size: 14px;
   font-weight: 600;
+  color: #153226;
 }
 
-.filter-item.disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  pointer-events: none;
+.filter-item {
+  /* Kept for date filter container compatibility if needed, 
+     though date-filter-container overrides most things. */
+  margin-bottom: 8px;
 }
 
 .date-filter-container {

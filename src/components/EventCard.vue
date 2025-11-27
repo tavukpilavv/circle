@@ -1,19 +1,25 @@
 <template>
   <div class="event-card" v-if="event">
-      <img :src="event.image" :alt="event.alt">
+      <div class="card-image-wrapper">
+        <img :src="event.image" :alt="event.alt">
+      </div>
       <div class="card-content">
-          <h4 class="event-name">&nbsp;{{event.event_name}}</h4>
-          <p class="community-name">&nbsp;{{event.community_name}}</p>
-          <div class="event-detail location">
-              <i class="fas fa-map-marker-alt"></i>
-              <span>{{event.location}}</span>
+          <div class="card-info">
+            <p class="community-name">{{event.community_name}}</p>
+            <h4 class="event-name">{{event.event_name}}</h4>
+            <div class="event-detail location">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>{{event.location}}</span>
+            </div>
+            <div class="event-detail time">
+                <i class="fas fa-clock"></i>
+                <span>{{event.time || '00:00'}}</span>
+            </div>
           </div>
-          <div class="event-detail time">
-              <i class="fas fa-clock"></i>
-              <span>{{event.date}}</span>
+          <div class="card-actions">
+            <EventDialog :event="event" />
           </div>
       </div>
-      <EventDialog :event="event" />                        
   </div>
 </template>
 
@@ -29,3 +35,33 @@ const props = defineProps({
   }
 })
 </script>
+
+<style scoped>
+/* Scoped styles can be used here if needed, but we are relying on global style.css for consistency */
+/* However, for component-specific structure, we can add some here */
+
+.card-content {
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  flex: 1;
+}
+
+.card-actions {
+  margin-top: auto;
+}
+
+.event-name {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 8px 0; /* Added small bottom margin for spacing between title and details */
+}
+
+.community-name {
+  margin-bottom: 16px;
+  font-size: 14px; /* Optional: make it look like a label */
+  color: #666; /* Optional: make it subtle */
+  margin-top: 0;
+}
+</style>

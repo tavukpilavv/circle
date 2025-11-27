@@ -1,10 +1,25 @@
 <template>
-  <section class="announcements">
-      <el-carousel height="400px">
-          <el-carousel-item v-for="item in 10" :key="item" style="text-align:center">
-              <el-image :src="getImage('image' + item + '.jpg')" fit="cover" style="width: 100%; height: 100%; display: block;" />
-          </el-carousel-item>
-      </el-carousel>                
+  <section class="announcements-wrapper">
+    <div class="custom-container">
+      <el-carousel 
+        trigger="click" 
+        height="500px" 
+        indicator-position="outside" 
+        :interval="5000" 
+        arrow="hover"
+        class="custom-carousel"
+      >
+        <el-carousel-item v-for="item in 4" :key="item">
+          <div class="banner-item">
+            <el-image 
+              :src="getImage('image' + item + '.jpg')" 
+              fit="cover" 
+              class="banner-image"
+            />
+          </div>
+        </el-carousel-item>
+      </el-carousel>
+    </div>
   </section>
 </template>
 
@@ -13,37 +28,80 @@ import { ref } from 'vue'
 
 // Helper to resolve image URLs from the project root "images" folder
 const getImage = (fileName) => new URL(`../../images/${fileName}`, import.meta.url).href
-
-const items = ref([])
 </script>
 
 <style scoped>
-/* Mobile: Add side padding to the banner */
-@media (max-width: 768px) {
-  .announcements {
-    padding-left: 16px;
-    padding-right: 16px;
-  }
-}
-
-/* Fix carousel indicators position */
-:deep(.el-carousel__indicators--horizontal) {
-  bottom: 10px;
-  left: 50%;
-  transform: translateX(-50%);
+.announcements-wrapper {
+  width: 100%;
   display: flex;
-  gap: 5px;
+  justify-content: center;
+  padding: 24px 0; /* Increased vertical spacing */
 }
 
-:deep(.el-carousel__indicator--horizontal .el-carousel__button) {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.7);
-  opacity: 1;
+.custom-container {
+  width: 100%;
+  max-width: 1200px;
+  padding: 0 16px;
+  box-sizing: border-box;
 }
 
-:deep(.el-carousel__indicator.is-active .el-carousel__button) {
-  background-color: #ffffff;
+.banner-item {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  border-radius: 24px;
+  overflow: hidden;
+}
+
+.banner-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* --- Carousel Indicator Customization (Wide Bars) --- */
+:deep(.el-carousel__indicators--outside) {
+  margin-top: 16px !important;
+  display: flex !important;
+  justify-content: center !important;
+  gap: 12px !important;
+}
+
+:deep(.el-carousel__indicator--outside) {
+  padding: 0 !important; /* Remove default padding */
+}
+
+:deep(.el-carousel__indicator--outside .el-carousel__button) {
+  width: 200px !important; /* Force wide bars */
+  height: 9px !important; /* Force thicker */
+  border-radius: 4px !important;
+  background-color: #E8F5E9 !important; /* Inactive color */
+  opacity: 1 !important;
+  transition: all 0.3s !important;
+}
+
+:deep(.el-carousel__indicator--outside.is-active .el-carousel__button) {
+  background-color: #81C784 !important; /* Active color */
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .custom-container {
+    padding: 0 16px;
+  }
+  
+  .banner-item {
+    border-radius: 16px;
+  }
+  
+  :deep(.el-carousel__container) {
+    height: 200px !important;
+  }
+
+  /* Smaller indicators on mobile */
+  :deep(.el-carousel__indicator--outside .el-carousel__button) {
+    width: 40px;
+    height: 6px;
+  }
 }
 </style>

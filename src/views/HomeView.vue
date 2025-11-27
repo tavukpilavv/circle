@@ -4,17 +4,12 @@
       <Filters 
         :filterChange="onFilterChange" 
         v-model:activeType="activeType"
+        v-model:sortOrder="sortOrder"
       />
       
       <EventGrid 
-        v-if="activeType === 'events'" 
-        :events="events" 
+        :events="filteredEvents" 
         :seeAll="seeAll" 
-      />
-      
-      <CommunityGrid 
-        v-else 
-        :communities="store.communities" 
       />
   </div>
   <!-- Global event detail dialog -->
@@ -77,34 +72,49 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import moment from 'moment'
 import { store } from '../store.js'
 import Announcements from '../components/Announcements.vue'
 import Filters from '../components/Filters.vue'
 import EventGrid from '../components/EventGrid.vue'
-import CommunityGrid from '../components/CommunityGrid.vue'
 
 // Reactive state for selected event and dialog visibility
 const selectedEvent = ref(null)
 const dialogVisible = ref(false)
-const activeType = ref('events')
+const activeType = ref('All')
+const dateFilter = ref(null)
+const sortOrder = ref('nearest')
 
-const events = ref([])
+const filteredEvents = computed(() => {
+  let result = [...store.events];
 
-const getUpcomingEvents = () => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return store.events.filter(e => new Date(e.date) >= today)
-    .sort((a, b) => new Date(a.date) - new Date(b.date));
-}
+  // Filter by School (activeType)
+  if (activeType.value !== 'All') {
+    result = result.filter(e => e.organizer === activeType.value);
+  }
 
-const getAllEvents = () => {
-  return [...store.events].sort((a, b) => new Date(a.date) - new Date(b.date));
-}
+  // Filter by Date
+  if (dateFilter.value) {
+    const startDate = moment(dateFilter.value[0]).format("YYYY-MM-DD")
+    const endDate = moment(dateFilter.value[1]).format("YYYY-MM-DD")
+    result = result.filter(item => {
+      return item.date >= startDate && item.date <= endDate
+    })
+  }
 
-// Initialize with all events
-events.value = getAllEvents();
+  // Sort by Date
+  return result.sort((a, b) => {
+    const dateA = new Date(a.date);
+    const dateB = new Date(b.date);
+    
+    if (sortOrder.value === 'nearest') {
+      return dateA - dateB; // Ascending
+    } else {
+      return dateB - dateA; // Descending (Farthest first)
+    }
+  });
+})
 
 const seeAll = (event) => {
   // Open the global dialog with the clicked event's details
@@ -113,17 +123,7 @@ const seeAll = (event) => {
 }
 
 const onFilterChange = (val) => {
-  if (!val) {
-    // Reset to default (Upcoming)
-    events.value = getUpcomingEvents();
-  } else {
-    let startDate = moment(val[0]).format("YYYY-MM-DD")
-    let endDate = moment(val[1]).format("YYYY-MM-DD")
-    let newList = store.events.filter(item => {
-      return item.date >= startDate && item.date <= endDate
-    }).sort((a, b) => new Date(a.date) - new Date(b.date));
-    events.value = newList;
-  }
+  dateFilter.value = val;
 }
 </script>
 
@@ -146,6 +146,7 @@ const onFilterChange = (val) => {
   height: auto;
   border-radius: 8px;
   object-fit: cover;
+  margin-bottom: 12px;
 }
 
 /* Text container on the right */

@@ -11,3 +11,16 @@
 .el-dialog__body {
     background-color: #E3F6DB;
 }
+
+/* Accessibility: Enforce minimum font size */
+p,
+span,
+a,
+li,
+button,
+input,
+label,
+select,
+textarea {
+    font-size: max(12px, 1em);
+}

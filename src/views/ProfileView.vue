@@ -3,13 +3,31 @@
     <!-- PROFILE BANNER -->
     <section class="profile-banner">
       <div class="profile-left">
-        <img class="avatar"
-          :src="userAvatar" alt=""
-          role="presentation" />
+        <!-- Dynamic Avatar using Element Plus -->
+        <el-avatar 
+          :size="100" 
+          :src="userAvatar" 
+          class="avatar-shadow"
+          role="presentation" 
+        />
 
         <div class="identity">
-          <div class="name">Alara Özürk</div>
-          <div class="sub">Computer Science • Class of 2025</div>
+          <div class="name-row">
+            <div class="name" :class="{ 'is-admin': user.role === 'admin' }">
+              {{ user.name }}
+            </div>
+            
+            <!-- Verified Icon for Admin -->
+            <el-icon v-if="user.role === 'admin'" class="verified-icon" :size="20" color="#409EFF">
+              <CircleCheckFilled />
+            </el-icon>
+
+            <!-- Admin Badge -->
+            <el-tag v-if="user.role === 'admin'" type="success" size="small" effect="dark" round>
+              Admin
+            </el-tag>
+          </div>
+          <div class="sub">{{ user.sub }}</div>
         </div>
       </div>
 
@@ -179,13 +197,23 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { store } from '../store.js'
+import { CircleCheckFilled } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const activePanel = ref('events')
 const seeAllTarget = ref(null)
 const upcomingTrack = ref(null)
 const activitiesTrack = ref(null)
-const userAvatar = ref('')
+
+// Reactive source for avatar
+const storedAvatar = ref('')
+
+// Mock user data
+const user = ref({
+  name: 'Ezgi İşgüzar',
+  role: 'admin',
+  sub: 'Computer Science • Class of 2025'
+})
 
 const joinedCommunities = computed(() => {
   return store.communities.filter(c => c.joined)
@@ -204,14 +232,17 @@ const upcomingEvents = computed(() => {
   }).sort((a, b) => new Date(a.date) - new Date(b.date));
 })
 
-const loadAvatar = () => {
-  const stored = localStorage.getItem('user_avatar')
-  if (stored) {
-    userAvatar.value = stored
-  } else {
-    // Default avatar if none set
-    userAvatar.value = "https://images.unsplash.com/photo-1628157588553-5eeea00c5caa?q=80&w=160&auto=format&fit=crop"
+// Computed property for User Avatar
+const userAvatar = computed(() => {
+  if (storedAvatar.value) {
+    return storedAvatar.value
   }
+  // Default DiceBear avatar
+  return 'https://api.dicebear.com/9.x/adventurer/svg?seed=Ezgi'
+})
+
+const loadAvatar = () => {
+  storedAvatar.value = localStorage.getItem('user_avatar') || ''
 }
 
 onMounted(() => {
@@ -312,17 +343,31 @@ const slide = (trackName, direction) => {
   gap: 16px;
 }
 
-.avatar {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  object-fit: contain;
+.avatar-shadow {
   box-shadow: var(--shadow);
+  border: 4px solid #ffffff;
+  background: #fff;
+}
+
+.identity .name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .identity .name {
   font-size: 20px;
   font-weight: 700;
+}
+
+.identity .name.is-admin {
+  color: var(--brand);
+  font-weight: 800;
+}
+
+.verified-icon {
+  display: flex;
+  align-items: center;
 }
 
 .identity .sub {
@@ -544,7 +589,7 @@ const slide = (trackName, direction) => {
 }
 
 .event-body p {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
   margin: 2px 0 0;
 }
