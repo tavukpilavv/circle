@@ -1,0 +1,68 @@
+from app import db
+from datetime import datetime
+
+# Ara Tablo: Hangi Öğrenci Hangi Topluluğa Üye?
+user_community = db.Table('user_community',
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+    db.Column('community_id', db.Integer, db.ForeignKey('community.id'))
+)
+
+# Ara Tablo: Hangi Öğrenci Hangi Etkinliğe Gidiyor?
+user_event = db.Table('user_event',
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+    db.Column('event_id', db.Integer, db.ForeignKey('event.id'))
+)
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    first_name = db.Column(db.String(64))
+    last_name = db.Column(db.String(64))
+    email = db.Column(db.String(120), unique=True, index=True)
+    password_hash = db.Column(db.String(128))
+    role = db.Column(db.String(20), default='student') # student, admin, superadmin
+    avatar_url = db.Column(db.String(255)) # Profil Resmi
+
+    # İlişkiler
+    joined_communities = db.relationship('Community', secondary=user_community, backref=db.backref('members', lazy='dynamic'))
+    registered_events = db.relationship('Event', secondary=user_event, backref=db.backref('participants', lazy='dynamic'))
+
+    def set_password(self, password):
+        from werkzeug.security import generate_password_hash
+        self.password_hash = generate_password_hash(password)
+    
+    def check_password(self, password):
+        from werkzeug.security import check_password_hash
+        return check_password_hash(self.password_hash, password)
+
+class Community(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), unique=True)
+    university = db.Column(db.String(100))        # Formdaki Üniversite
+    category = db.Column(db.String(50))           # Kategori
+    short_description = db.Column(db.String(255)) # Kısa Açıklama
+    description = db.Column(db.Text)              # Uzun Açıklama
+    
+    contact_email = db.Column(db.String(120))
+    contact_person = db.Column(db.String(100))
+    instagram_link = db.Column(db.String(255))
+    
+    image_url = db.Column(db.String(255))         # Kulüp Logosu
+    proof_document_url = db.Column(db.String(255)) # Kanıt Belgesi
+
+    # YENİ ÖZELLİK: Bu topluluğun başkanı (Admin) kim?
+    admin_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    admin = db.relationship('User', backref=db.backref('managed_community', uselist=False))
+
+    events = db.relationship('Event', backref='host_community', lazy='dynamic')
+
+class Event(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100))
+    date = db.Column(db.String(20))
+    time = db.Column(db.String(20)) # Saat eklendi (09:00 gibi)
+    location = db.Column(db.String(100))
+    capacity = db.Column(db.Integer) # Kapasite eklendi
+    description = db.Column(db.Text)
+    image_url = db.Column(db.String(255))
+    
+    community_id = db.Column(db.Integer, db.ForeignKey('community.id'))
