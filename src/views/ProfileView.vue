@@ -134,6 +134,51 @@
           <i class="fas fa-chevron-right"></i>
         </button>
       </section>
+
+      <!-- PAST EVENTS -->
+      <section class="section-head" v-if="pastEvents.length > 0">
+        <h3>Past Events</h3>
+        <button class="see-all" @click="openSeeAll('past')">
+          See All <i class="fas fa-caret-right"></i>
+        </button>
+      </section>
+
+      <section class="slider-shell" aria-label="Past Events" v-if="pastEvents.length > 0">
+        <button class="slide-btn left" type="button" @click="slide('past', -1)">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+
+        <div class="slider-track" ref="pastTrack">
+          <article class="card event-card" v-for="event in pastEvents" :key="event.id">
+            <img :src="event.image" class="event-cover" alt="" />
+            <div class="event-body">
+              <h4>{{ event.name }}</h4>
+              <p>{{ event.date }}</p>
+            </div>
+            <button 
+              v-if="isAdmin"
+              class="view-registrations-btn"
+              @click="openRegistrations(event)"
+            >
+              <i class="fas fa-users"></i> View Registrations
+            </button>
+            <button 
+              v-else
+              class="rate-pill" 
+              :class="{ 'is-rated': isRated(event.id) }"
+              @click="openRating(event)"
+              :disabled="isRated(event.id)"
+            >
+              <i class="fas" :class="isRated(event.id) ? 'fa-check' : 'fa-star'"></i> 
+              {{ isRated(event.id) ? 'Rated' : 'Rate' }}
+            </button>
+          </article>
+        </div>
+
+        <button class="slide-btn right" type="button" @click="slide('past', 1)">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </section>
     </div>
 
     <div v-show="activePanel === 'communities'" class="panel is-active">
@@ -203,6 +248,75 @@
       </div>
     </div>
 
+    <div class="seeall-overlay" :class="{ 'is-open': seeAllTarget === 'past' }" @click.self="closeSeeAll">
+      <div class="seeall-inner">
+        <div class="seeall-header">
+          <h2>All Past Events</h2>
+          <button class="seeall-close" type="button" aria-label="Close" @click="closeSeeAll">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="seeall-grid">
+          <article class="card event-card" v-for="event in pastEvents" :key="event.id">
+            <img :src="event.image" class="event-cover" alt="" />
+            <div class="event-body">
+              <h4>{{ event.name }}</h4>
+              <p>{{ event.date }}</p>
+            </div>
+            <button 
+              v-if="isAdmin"
+              class="view-registrations-btn"
+              @click="openRegistrations(event)"
+            >
+              <i class="fas fa-users"></i> View Registrations
+            </button>
+            <button 
+              v-else
+              class="rate-pill" 
+              :class="{ 'is-rated': isRated(event.id) }"
+              @click="openRating(event)"
+              :disabled="isRated(event.id)"
+            >
+              <i class="fas" :class="isRated(event.id) ? 'fa-check' : 'fa-star'"></i> 
+              {{ isRated(event.id) ? 'Rated' : 'Rate' }}
+            </button>
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <RatingPopup 
+      v-if="ratingEvent"
+      v-model="showRatingPopup"
+      :event="ratingEvent"
+      @close="closeRatingPopup"
+      @submit="handleRatingSubmit"
+    />
+
+    <!-- Admin Registration Popup -->
+    <el-dialog
+      v-model="showRegistrationPopup"
+      :title="registrationEvent?.name + ' - Registrations'"
+      width="90%"
+      class="event-detail-modal"
+      append-to-body
+    >
+      <div class="registration-list">
+        <div class="registration-summary">
+          <strong>Total Registrations:</strong> {{ mockRegistrations.length }} / {{ registrationEvent?.capacity || 'Not Given' }}
+        </div>
+        <div class="attendee-list">
+          <div v-for="user in mockRegistrations" :key="user.id" class="attendee-item">
+            <img :src="user.avatar" alt="Avatar" class="attendee-avatar" />
+            <div class="attendee-info">
+              <div class="attendee-name">{{ user.name }}</div>
+              <div class="attendee-email">{{ user.email }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </el-dialog>
+
   </div>
 </template>
 
@@ -211,12 +325,35 @@ import { ref, reactive, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { store } from '../store.js'
 import { CircleCheckFilled } from '@element-plus/icons-vue'
+import RatingPopup from '../components/RatingPopup.vue'
 
 const router = useRouter()
 const activePanel = ref('events')
 const seeAllTarget = ref(null)
 const upcomingTrack = ref(null)
 const activitiesTrack = ref(null)
+const pastTrack = ref(null)
+const showRatingPopup = ref(false)
+const ratingEvent = ref(null)
+const ratedEvents = ref(new Set())
+
+// Admin Registration Logic
+const showRegistrationPopup = ref(false)
+const registrationEvent = ref(null)
+const mockRegistrations = [
+  { id: 1, name: 'Alice Johnson', email: 'alice@example.com', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Alice' },
+  { id: 2, name: 'Bob Smith', email: 'bob@example.com', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Bob' },
+  { id: 3, name: 'Charlie Brown', email: 'charlie@example.com', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Charlie' },
+  { id: 4, name: 'Diana Prince', email: 'diana@example.com', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Diana' },
+  { id: 5, name: 'Evan Wright', email: 'evan@example.com', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Evan' },
+  { id: 6, name: 'Fiona Gallagher', email: 'fiona@example.com', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Fiona' },
+  { id: 7, name: 'George Michael', email: 'george@example.com', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=George' },
+]
+
+const openRegistrations = (event) => {
+  registrationEvent.value = event
+  showRegistrationPopup.value = true
+}
 
 // Reactive source for avatar
 const storedAvatar = ref('')
@@ -227,6 +364,8 @@ const user = reactive({
   role: 'user',
   sub: 'Student'
 })
+
+const isAdmin = computed(() => user.role === 'admin' || user.role === 'super_admin')
 
 const loadUserData = () => {
   const token = localStorage.getItem('user_token')
@@ -245,12 +384,42 @@ const loadUserData = () => {
   }
 }
 
+const loadRatedEvents = () => {
+  const keys = Object.keys(localStorage)
+  const rated = new Set()
+  keys.forEach(key => {
+    if (key.startsWith('rated_event_')) {
+      const id = parseInt(key.replace('rated_event_', ''))
+      rated.add(id)
+    }
+  })
+  ratedEvents.value = rated
+}
+
+const isRated = (eventId) => {
+  return ratedEvents.value.has(eventId)
+}
+
 const joinedCommunities = computed(() => {
   return store.communities.filter(c => c.joined)
 })
 
 const registeredEvents = computed(() => {
-  return store.events.filter(e => e.registered)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return store.events.filter(e => {
+    const eventDate = new Date(e.date);
+    return e.registered && eventDate >= today;
+  }).sort((a, b) => new Date(a.date) - new Date(b.date));
+})
+
+const pastEvents = computed(() => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return store.events.filter(e => {
+    const eventDate = new Date(e.date);
+    return e.registered && eventDate < today;
+  }).sort((a, b) => new Date(b.date) - new Date(a.date)); // Newest past event first
 })
 
 const upcomingEvents = computed(() => {
@@ -278,6 +447,7 @@ const loadAvatar = () => {
 onMounted(() => {
   loadUserData()
   loadAvatar()
+  loadRatedEvents()
   window.addEventListener('avatar-changed', loadAvatar)
 })
 
@@ -319,6 +489,33 @@ const slide = (trackName, direction) => {
     left: direction * step,
     behavior: "smooth"
   })
+}
+
+const openRating = (event) => {
+  if (isRated(event.id)) return
+  ratingEvent.value = event
+  showRatingPopup.value = true
+}
+
+const closeRatingPopup = () => {
+  showRatingPopup.value = false
+  ratingEvent.value = null
+}
+
+const handleRatingSubmit = (payload) => {
+  if (ratingEvent.value) {
+    const rating = typeof payload === 'object' ? payload.rating : payload
+    const feedback = typeof payload === 'object' ? payload.feedback : ''
+    
+    localStorage.setItem(`rated_event_${ratingEvent.value.id}`, rating)
+    if (feedback) {
+      localStorage.setItem(`feedback_event_${ratingEvent.value.id}`, feedback)
+    }
+    ratedEvents.value.add(ratingEvent.value.id)
+    console.log(`Rated event ${ratingEvent.value.id} with ${rating} stars. Feedback: ${feedback}`)
+  }
+  showRatingPopup.value = false
+  ratingEvent.value = null
 }
 </script>
 
@@ -566,6 +763,10 @@ const slide = (trackName, direction) => {
   align-items: center;
   gap: 4px;
   cursor: pointer;
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-family: inherit;
 }
 
 /* =========================
@@ -590,8 +791,9 @@ const slide = (trackName, direction) => {
   border-radius: var(--r-lg);
   background: var(--card);
   box-shadow: var(--shadow);
-  height: 170px;
+  height: 220px;
   position: relative;
+  scroll-snap-align: start;
 }
 
 /* Upcoming events look */
@@ -666,6 +868,59 @@ const slide = (trackName, direction) => {
   margin: 0;
   font-size: 12px;
   color: #556b5f;
+}
+
+.rate-btn {
+  margin-top: 8px;
+  background: #f08c00;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  align-self: flex-start;
+}
+
+.rate-btn:hover {
+  background: #d67a00;
+}
+
+.rate-pill {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  border: none;
+  border-radius: 999px;
+  background: #f08c00;
+  color: white;
+  padding: 0 18px;
+  height: 30px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.rate-pill:hover {
+  background: #d67a00;
+}
+
+.rate-pill.is-rated {
+  background: #e2e8f0;
+  color: #64748b;
+  cursor: default;
+}
+
+.rate-pill.is-rated:hover {
+  background: #e2e8f0;
 }
 
 .no-data-msg {
@@ -768,57 +1023,86 @@ const slide = (trackName, direction) => {
 .seeall-overlay {
   position: fixed;
   inset: 0;
-  display: none;
+  z-index: 2000;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, .35);
-  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
 }
 
 .seeall-overlay.is-open {
-  display: flex;
+  opacity: 1;
+  visibility: visible;
 }
 
 .seeall-inner {
-  background: var(--page);
-  /* same as page background */
-  max-width: 1000px;
+  background: #ffffff;
   width: 90%;
-  max-height: 80vh;
-  border-radius: 18px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, .2);
-  padding: 20px 22px 24px;
-  overflow: auto;
+  max-width: 900px;
+  max-height: 85vh;
+  border-radius: 24px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transform: scale(0.95) translateY(10px);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.seeall-overlay.is-open .seeall-inner {
+  transform: scale(1) translateY(0);
 }
 
 .seeall-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--outline);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
+  background: #ffffff;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .seeall-header h2 {
-  margin: 0;
   font-size: 20px;
   font-weight: 800;
+  color: var(--ink);
+  margin: 0;
 }
 
 .seeall-close {
-  border: none;
-  background: #f5e8e8;
-  border-radius: 999px;
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--outline);
+  background: #f8fafc;
+  color: var(--muted);
   display: grid;
   place-items: center;
   cursor: pointer;
+  transition: all 0.2s;
+}
+
+.seeall-close:hover {
+  background: #fee2e2;
+  color: #dc2626;
+  border-color: #fecaca;
 }
 
 .seeall-grid {
+  padding: 24px;
+  overflow-y: auto;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 20px;
+  flex: 1;
 }
 
 /* Make cards in overlay a bit taller */
@@ -879,17 +1163,23 @@ const slide = (trackName, direction) => {
   }
 
   .slide-btn {
-    width: 32px;
-    height: 32px;
-    font-size: 14px;
+    display: none;
   }
 
-  .slide-btn.left {
-    left: -6px;
+  .slider-track {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 12px; /* Space for scrollbar if visible, or just breathing room */
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .slider-track::-webkit-scrollbar {
+    display: none;
   }
 
-  .slide-btn.right {
-    right: -6px;
+  .card {
+    flex: 0 0 85%; /* Show part of the next card to encourage swipe */
+    scroll-snap-align: start;
   }
 
   .seeall-inner {
@@ -901,5 +1191,110 @@ const slide = (trackName, direction) => {
   .seeall-grid {
     grid-template-columns: 1fr;
   }
+}
+
+.view-registrations-btn {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  border: none;
+  border-radius: 999px;
+  background: var(--brand);
+  color: #ffffff;
+  padding: 0 18px;
+  height: 30px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.2s;
+}
+
+.view-registrations-btn:hover {
+  background: var(--brand-600);
+}
+
+.registration-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.registration-summary {
+  font-size: 16px;
+  color: var(--ink);
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--outline);
+}
+
+.attendee-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.attendee-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  border-radius: 8px;
+  background: var(--card-soft);
+}
+
+.attendee-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.attendee-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.attendee-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.attendee-email {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* Custom styles for the registration popup close button to match seeall-close */
+:global(.event-detail-modal .el-dialog__headerbtn) {
+  top: 20px;
+  right: 20px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--outline);
+  background: #f8fafc;
+  display: grid;
+  place-items: center;
+  transition: all 0.2s;
+}
+
+:global(.event-detail-modal .el-dialog__headerbtn:hover) {
+  background: #fee2e2;
+  border-color: #fecaca;
+}
+
+:global(.event-detail-modal .el-dialog__close) {
+  color: var(--muted);
+  font-size: 16px;
+}
+
+:global(.event-detail-modal .el-dialog__headerbtn:hover .el-dialog__close) {
+  color: #dc2626;
 }
 </style>

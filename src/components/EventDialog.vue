@@ -6,7 +6,7 @@
       v-model="dialogVisible"
       :title="event?.event_name"
       width="90%"
-      class="full-screen-modal"
+      class="event-detail-modal"
       append-to-body
   >
       <div class="event-details">
@@ -32,6 +32,10 @@
             <i class="fas fa-clock"></i>
             <strong>Time:</strong> {{ event?.time }}
           </div>
+
+          <p class="event-description">
+            Join us for this exciting event! Don't miss out on this opportunity to connect with the community and participate in engaging activities.
+          </p>
         </div>
       </div>
       
@@ -94,7 +98,7 @@ const registerForEvent = () => {
   width: 45%;
   height: auto;
   object-fit: cover;
-  border-radius: 16px;
+  border-radius: 12px;
   margin: 0;
   display: block;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
@@ -109,17 +113,26 @@ const registerForEvent = () => {
   align-items: center;
   gap: 8px;
   margin-bottom: 12px;
-  font-size: 16px; /* Increased font size slightly for better readability in split view */
+  font-size: 15px;
+  color: #153226;
 }
 
 .detail-row i {
-  width: 24px; /* Increased icon width */
+  width: 20px;
   color: #1b8f48;
   text-align: center;
 }
 
 .detail-row strong {
   margin-right: 4px;
+  color: #000;
+}
+
+.event-description {
+  margin-top: 20px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #6b7c74;
 }
 
 @media (max-width: 768px) {
@@ -135,93 +148,81 @@ const registerForEvent = () => {
 }
 
 /* Modal container styling */
-:global(.full-screen-modal) {
-  display: flex;
-  flex-direction: column;
-  margin: 0 !important;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 90vw !important;
-  height: 90vh !important;
-  max-width: 90vw !important;
-  max-height: 90vh !important;
+:global(.event-detail-modal) {
   border-radius: 16px !important;
   overflow: hidden;
+  max-width: 800px !important;
+  width: 90% !important;
+  margin-top: 8vh !important;
 }
 
 /* Modal header styling */
-:global(.full-screen-modal .el-dialog__header) {
+:global(.event-detail-modal .el-dialog__header) {
   background: #fefbea;
   padding: 20px 24px;
-  border-bottom: 1px solid #d8eadb;
+  border-bottom: none;
 }
 
-:global(.full-screen-modal .el-dialog__title) {
+:global(.event-detail-modal .el-dialog__title) {
   font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
   color: #153226;
 }
 
 /* Modal body styling */
-:global(.full-screen-modal .el-dialog__body) {
-  flex: 1;
-  overflow-y: auto;
+:global(.event-detail-modal .el-dialog__body) {
   padding: 24px;
   background: #fefbea;
   font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
 
 /* Modal footer styling */
-:global(.full-screen-modal .el-dialog__footer) {
+:global(.event-detail-modal .el-dialog__footer) {
   background: #fefbea;
   padding: 16px 24px;
-  border-top: 1px solid #d8eadb;
+  border-top: none;
 }
 
 /* Close button styling */
-:global(.full-screen-modal .el-dialog__headerbtn) {
+:global(.event-detail-modal .el-dialog__headerbtn) {
   top: 20px;
   right: 20px;
-  width: 32px;
-  height: 32px;
+}
+
+:global(.event-detail-modal .el-dialog__close) {
+  color: #6b7c74;
   font-size: 18px;
 }
 
-:global(.full-screen-modal .el-dialog__close) {
+:global(.event-detail-modal .el-dialog__close:hover) {
   color: #1b8f48;
-  font-weight: bold;
-}
-
-:global(.full-screen-modal .el-dialog__close:hover) {
-  color: #167a3d;
 }
 
 /* Button styling */
-:global(.full-screen-modal .el-button--primary) {
+:global(.event-detail-modal .el-button--primary) {
   background-color: #1b8f48 !important;
   border-color: #1b8f48 !important;
-  border-radius: 6px;
+  border-radius: 8px;
   font-weight: 600;
+  padding: 10px 20px;
 }
 
-:global(.full-screen-modal .el-button--primary:hover) {
+:global(.event-detail-modal .el-button--primary:hover) {
   background-color: #167a3d !important;
   border-color: #167a3d !important;
 }
 
-:global(.full-screen-modal .el-button--default) {
-  border-radius: 6px;
-  border-color: #d8eadb;
-  color: #153226;
+:global(.event-detail-modal .el-button--default) {
+  border-radius: 8px;
+  border-color: #dcdfe6;
+  color: #606266;
 }
 
-
-:global(.full-screen-modal .el-button--default:hover) {
-  border-color: #1b8f48;
+:global(.event-detail-modal .el-button--default:hover) {
+  border-color: #c6e2d9;
   color: #1b8f48;
+  background-color: #f0f9eb;
 }
 
 /* See All button styling */

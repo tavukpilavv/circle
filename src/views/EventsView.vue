@@ -55,6 +55,10 @@
             <span><i class="fas fa-location-dot"></i> {{ event.location }}</span>
             <span><i class="fas fa-users"></i> {{ event.capacity }} seats</span>
             <span><i class="fas fa-users-viewfinder"></i> {{ event.club }}</span>
+            <span class="rating-meta" v-if="event.rating && new Date(event.date) < new Date().setHours(0,0,0,0)">
+              <i class="fas fa-star" style="color: #fcc419;"></i> 
+              {{ event.rating }} ({{ event.ratingCount }})
+            </span>
           </div>
         </div>
 

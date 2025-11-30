@@ -40,6 +40,14 @@
     </main>
 
     <AppFooter />
+    
+    <RatingPopup 
+      v-if="ratingEvent"
+      v-model="showRatingPopup"
+      :event="ratingEvent"
+      @close="closeRatingPopup"
+      @submit="handleRatingSubmit"
+    />
   </div>
 </template>
 
@@ -47,10 +55,14 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import AppFooter from '../components/AppFooter.vue'
+import RatingPopup from '../components/RatingPopup.vue'
+import { store } from '../store.js'
 
 const router = useRouter()
 const isLoggedIn = ref(false)
 const userAvatar = ref('')
+const showRatingPopup = ref(false)
+const ratingEvent = ref(null)
 
 const loadAvatar = () => {
   const stored = localStorage.getItem('user_avatar')
@@ -71,6 +83,64 @@ const checkLogin = () => {
   }
 }
 
+const checkRating = () => {
+  if (!isLoggedIn.value) return
+
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
+  // Find a past event that is registered but not rated
+  const candidate = store.events.find(e => {
+    if (!e.registered) return false
+    
+    const eventDate = new Date(e.date)
+    console.log(`Checking event ${e.id}: registered=${e.registered}, date=${e.date}, isPast=${eventDate < today}`)
+    
+    if (eventDate >= today) return false // Future event
+    
+    // Check if already rated
+    const rated = localStorage.getItem(`rated_event_${e.id}`)
+    console.log(`Event ${e.id} rated status: ${rated}`)
+    return !rated
+  })
+
+  console.log('Candidate event:', candidate)
+
+  if (candidate) {
+    ratingEvent.value = candidate
+    showRatingPopup.value = true
+  }
+}
+
+const closeRatingPopup = () => {
+  showRatingPopup.value = false
+  // Mark as skipped/rated so it doesn't show again immediately? 
+  // User asked "show popup once", so maybe we should mark it even if skipped?
+  // For now, if skipped, we might show it again next reload unless we mark it.
+  // Let's mark it as 'skipped' or just 'rated' to prevent annoyance.
+  if (ratingEvent.value) {
+    localStorage.setItem(`rated_event_${ratingEvent.value.id}`, 'skipped')
+  }
+  ratingEvent.value = null
+}
+
+const handleRatingSubmit = (payload) => {
+  if (ratingEvent.value) {
+    const rating = typeof payload === 'object' ? payload.rating : payload
+    const feedback = typeof payload === 'object' ? payload.feedback : ''
+    
+    localStorage.setItem(`rated_event_${ratingEvent.value.id}`, rating)
+    if (feedback) {
+      localStorage.setItem(`feedback_event_${ratingEvent.value.id}`, feedback)
+    }
+    
+    // Here we could also save the rating to a backend or store
+    console.log(`Rated event ${ratingEvent.value.id} with ${rating} stars. Feedback: ${feedback}`)
+  }
+  showRatingPopup.value = false
+  ratingEvent.value = null
+}
+
 onMounted(() => {
   checkLogin()
   loadAvatar()
@@ -78,7 +148,12 @@ onMounted(() => {
   window.addEventListener('auth-changed', () => {
     checkLogin()
     loadAvatar()
+    // Check rating after a short delay to ensure store is ready/loaded
+    setTimeout(checkRating, 500)
   })
+  
+  // Initial check
+  setTimeout(checkRating, 1000)
 })
 
 onUnmounted(() => {

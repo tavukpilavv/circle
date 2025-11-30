@@ -2,12 +2,15 @@
   <section class="announcements-wrapper">
     <div class="custom-container">
       <el-carousel 
+        ref="carouselRef"
         trigger="click" 
         height="500px" 
         indicator-position="outside" 
         :interval="5000" 
         arrow="hover"
         class="custom-carousel"
+        @touchstart="onTouchStart"
+        @touchend="onTouchEnd"
       >
         <el-carousel-item v-for="item in 4" :key="item">
           <div class="banner-item">
@@ -28,6 +31,30 @@ import { ref } from 'vue'
 
 // Helper to resolve image URLs from the project root "images" folder
 const getImage = (fileName) => new URL(`../../images/${fileName}`, import.meta.url).href
+
+const carouselRef = ref(null)
+let touchStartX = 0
+let touchEndX = 0
+
+const onTouchStart = (e) => {
+  touchStartX = e.changedTouches[0].screenX
+}
+
+const onTouchEnd = (e) => {
+  touchEndX = e.changedTouches[0].screenX
+  handleSwipe()
+}
+
+const handleSwipe = () => {
+  if (touchEndX < touchStartX - 50) {
+    // Swipe Left -> Next
+    carouselRef.value.next()
+  }
+  if (touchEndX > touchStartX + 50) {
+    // Swipe Right -> Prev
+    carouselRef.value.prev()
+  }
+}
 </script>
 
 <style scoped>
@@ -102,6 +129,11 @@ const getImage = (fileName) => new URL(`../../images/${fileName}`, import.meta.u
   :deep(.el-carousel__indicator--outside .el-carousel__button) {
     width: 40px;
     height: 6px;
+  }
+
+  /* Hide arrows on mobile */
+  :deep(.el-carousel__arrow) {
+    display: none !important;
   }
 }
 </style>

@@ -62,7 +62,11 @@ export const store = reactive({
       location: "Cleopatra Ayrancı Atelier",
       time: "14:00",
       date: "2025-11-01",
-      registered: false
+      time: "14:00",
+      date: "2025-11-01",
+      registered: false,
+      rating: 4.8,
+      ratingCount: 124
     },
     {
       id: 2,
@@ -74,7 +78,11 @@ export const store = reactive({
       location: "AYBU Campus",
       time: "TBA",
       date: "2025-11-07",
-      registered: false
+      time: "TBA",
+      date: "2025-11-07",
+      registered: false,
+      rating: 4.5,
+      ratingCount: 89
     },
     {
       id: 3,
@@ -86,7 +94,11 @@ export const store = reactive({
       location: "Coffee Up Beşevler",
       time: "12:00",
       date: "2025-11-29",
-      registered: false
+      time: "12:00",
+      date: "2025-11-29",
+      registered: false,
+      rating: 4.9,
+      ratingCount: 56
     },
     {
       id: 4,
@@ -98,7 +110,11 @@ export const store = reactive({
       location: "A-212",
       time: "11:00",
       date: "2025-11-06",
-      registered: false
+      time: "11:00",
+      date: "2025-11-06",
+      registered: false,
+      rating: 4.2,
+      ratingCount: 34
     },
     {
       id: 5,
@@ -110,7 +126,11 @@ export const store = reactive({
       location: "AYBU – Online Video Submission",
       time: "TBA",
       date: "2025-11-02",
-      registered: false
+      time: "TBA",
+      date: "2025-11-02",
+      registered: false,
+      rating: 4.7,
+      ratingCount: 210
     },
     {
       id: 6,
@@ -122,7 +142,11 @@ export const store = reactive({
       location: "Coffee Up, Bahçelievler – Azerbaijan St. No:23",
       time: "14:00",
       date: "2025-10-12",
-      registered: false
+      time: "14:00",
+      date: "2025-10-12",
+      registered: true,
+      rating: 4.6,
+      ratingCount: 45
     },
     {
       id: 7,
@@ -134,7 +158,11 @@ export const store = reactive({
       location: "Etlik Milli İrade Campus",
       time: "10:00-12:00",
       date: "2025-12-05",
-      registered: false
+      time: "10:00-12:00",
+      date: "2025-12-05",
+      registered: false,
+      rating: 4.3,
+      ratingCount: 12
     },
     {
       id: 8,
@@ -146,7 +174,11 @@ export const store = reactive({
       location: "Esenboğa Campus – A Block Conference Hall",
       time: "12:30-13:30",
       date: "2025-11-24",
-      registered: false
+      time: "12:30-13:30",
+      date: "2025-11-24",
+      registered: false,
+      rating: 4.8,
+      ratingCount: 67
     },
     {
       id: 9,
@@ -158,7 +190,11 @@ export const store = reactive({
       location: "Coffee & Tea Shop Cafe",
       time: "14:00-17:00",
       date: "2025-11-29",
-      registered: false
+      time: "14:00-17:00",
+      date: "2025-11-29",
+      registered: false,
+      rating: 4.9,
+      ratingCount: 156
     },
     {
       id: 10,
@@ -170,7 +206,11 @@ export const store = reactive({
       location: "AYBU – Application Link in Bio",
       time: "TBA",
       date: "2025-11-15",
-      registered: false
+      time: "TBA",
+      date: "2025-11-15",
+      registered: false,
+      rating: 4.4,
+      ratingCount: 28
     },
     {
       id: 11,
@@ -182,7 +222,11 @@ export const store = reactive({
       location: "Grand National Assembly of Türkiye",
       time: "16:00",
       date: "2025-11-18",
-      registered: false
+      time: "16:00",
+      date: "2025-11-18",
+      registered: false,
+      rating: 4.7,
+      ratingCount: 92
     },
     {
       id: 12,
@@ -194,7 +238,11 @@ export const store = reactive({
       location: "Milli İrade Campus – Conference Hall",
       time: "14:00",
       date: "2025-12-02",
-      registered: false
+      time: "14:00",
+      date: "2025-12-02",
+      registered: false,
+      rating: 5.0,
+      ratingCount: 312
     }
   ],
   joinCommunity(community) {
