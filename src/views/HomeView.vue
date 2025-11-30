@@ -27,7 +27,7 @@
   >
     <template #header="{ close, titleId, titleClass }">
       <div class="my-header" style="display: flex; justify-content: space-between; align-items: center;">
-        <h4 :id="titleId" :class="titleClass" style="margin: 0; font-size: 20px; font-weight: 700; color: #153226;">{{ selectedEvent?.event_name }}</h4>
+        <h4 :id="titleId" :class="titleClass" style="margin: 0; font-size: 20px; font-weight: 700; color: #153226;">{{ selectedEvent?.name }}</h4>
       </div>
     </template>
     <div class="dialog-content-wrapper">
@@ -106,14 +106,34 @@ const filteredEvents = computed(() => {
   }
 
   // Sort by Date
+  // Sort by Date (Upcoming first, then Past)
   return result.sort((a, b) => {
     const dateA = new Date(a.date);
     const dateB = new Date(b.date);
-    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const isUpcomingA = dateA >= today;
+    const isUpcomingB = dateB >= today;
+
+    // 1. Prioritize Upcoming over Past
+    if (isUpcomingA && !isUpcomingB) return -1;
+    if (!isUpcomingA && isUpcomingB) return 1;
+
+    // 2. Sort within groups
     if (sortOrder.value === 'nearest') {
-      return dateA - dateB; // Ascending
+      if (isUpcomingA) {
+        return dateA - dateB; // Upcoming: Ascending (nearest future first)
+      } else {
+        return dateB - dateA; // Past: Descending (nearest past first)
+      }
     } else {
-      return dateB - dateA; // Descending (Farthest first)
+      // Farthest
+      if (isUpcomingA) {
+        return dateB - dateA; // Upcoming: Descending (farthest future first)
+      } else {
+        return dateA - dateB; // Past: Ascending (oldest past first)
+      }
     }
   });
 })

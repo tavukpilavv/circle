@@ -7,11 +7,7 @@
         <p class="footer-tagline">
           Connecting students, building communities, and creating memories.
         </p>
-        <div class="social-links">
-          <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
-          <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-          <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
-        </div>
+
       </div>
 
       <!-- Quick Links Removed -->
@@ -100,24 +96,7 @@
   color: #1b8f48;
 }
 
-/* Social Icons */
-.social-links {
-  display: flex;
-  gap: 12px;
-  margin-top: 0;
-}
 
-.social-links a {
-  color: #1b8f48;
-  font-size: 14px; /* Smaller icons */
-  opacity: 0.8;
-  transition: all 0.2s;
-}
-
-.social-links a:hover {
-  opacity: 1;
-  transform: translateY(-1px);
-}
 
 .footer-bottom {
   font-size: 10px; /* Tiny copyright */

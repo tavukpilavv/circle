@@ -5,8 +5,8 @@
       </div>
       <div class="card-content">
           <div class="card-info">
-            <p class="community-name">{{event.community_name}}</p>
-            <h4 class="event-name">{{event.event_name}}</h4>
+
+            <h4 class="event-name">{{event.name}}</h4>
             <div class="event-detail location">
                 <i class="fas fa-map-marker-alt"></i>
                 <span>{{event.location}}</span>
@@ -53,8 +53,9 @@ const props = defineProps({
 }
 
 .event-name {
-  font-size: 22px;
+  font-size: 14px;
   font-weight: 700;
+  color: #555;
   margin: 0 0 8px 0; /* Added small bottom margin for spacing between title and details */
 }
 

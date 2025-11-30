@@ -4,7 +4,7 @@
   </button>
   <el-dialog
       v-model="dialogVisible"
-      :title="event?.event_name"
+      :title="event?.name"
       width="90%"
       class="event-detail-modal"
       append-to-body
@@ -13,6 +13,11 @@
         <img v-if="event?.image" :src="event.image" :alt="event.alt" class="event-image" />
         
         <div class="info-column">
+          <div class="detail-row">
+            <i class="fas fa-calendar-check"></i>
+            <strong>Event:</strong> {{ event?.name }}
+          </div>
+          
           <div class="detail-row">
             <i class="fas fa-users"></i>
             <strong>Community:</strong> {{ event?.community_name }}
@@ -33,6 +38,18 @@
             <strong>Time:</strong> {{ event?.time }}
           </div>
 
+          <div class="detail-row" v-if="isPastEvent">
+            <button 
+              class="rate-btn" 
+              :class="{ 'is-rated': isRated }"
+              @click="openRating"
+              :disabled="isRated"
+            >
+              <i class="fas" :class="isRated ? 'fa-check' : 'fa-star'"></i>
+              {{ isRated ? 'Rated' : 'Rate Event' }}
+            </button>
+          </div>
+
           <p class="event-description">
             Join us for this exciting event! Don't miss out on this opportunity to connect with the community and participate in engaging activities.
           </p>
@@ -48,13 +65,20 @@
       </div>
       </template>
   </el-dialog>
+  <RatingPopup 
+    v-if="event"
+    v-model="showRatingPopup"
+    :event="event"
+    @submit="handleRatingSubmit"
+  />
   <ConfettiOverlay v-if="showCelebration" @close="showCelebration = false" />
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import ConfettiOverlay from './ConfettiOverlay.vue'
+import RatingPopup from './RatingPopup.vue'
 
 const router = useRouter()
 
@@ -67,6 +91,8 @@ const props = defineProps({
 
 const dialogVisible = ref(false)
 const showCelebration = ref(false)
+const showRatingPopup = ref(false)
+const isRated = ref(false)
 
 const isPastEvent = computed(() => {
   if (!props.event?.date) return false
@@ -75,6 +101,41 @@ const isPastEvent = computed(() => {
   today.setHours(0, 0, 0, 0)
   return eventDate < today
 })
+
+const checkRatedStatus = () => {
+  if (props.event?.id) {
+    const rated = localStorage.getItem(`rated_event_${props.event.id}`)
+    isRated.value = !!rated
+  }
+}
+
+// Watch for dialog opening to check status
+import { watch } from 'vue'
+watch(dialogVisible, (newVal) => {
+  if (newVal) {
+    checkRatedStatus()
+  }
+})
+
+const openRating = () => {
+  if (isRated.value) return
+  showRatingPopup.value = true
+}
+
+const handleRatingSubmit = (payload) => {
+  const rating = typeof payload === 'object' ? payload.rating : payload
+  const feedback = typeof payload === 'object' ? payload.feedback : ''
+  
+  if (props.event?.id) {
+    localStorage.setItem(`rated_event_${props.event.id}`, rating)
+    if (feedback) {
+      localStorage.setItem(`feedback_event_${props.event.id}`, feedback)
+    }
+    isRated.value = true
+    console.log(`Rated event ${props.event.id} with ${rating} stars`)
+  }
+  showRatingPopup.value = false
+}
 
 const registerForEvent = () => {
   // Check if user is logged in
@@ -251,5 +312,32 @@ const registerForEvent = () => {
   background-color: #167a3d;
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(46, 133, 64, 0.3);
+}
+
+.rate-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid #fcc419;
+  background: #fff9db;
+  color: #f08c00;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.rate-btn:hover:not(:disabled) {
+  background: #fcc419;
+  color: #fff;
+}
+
+.rate-btn.is-rated {
+  border-color: #1b8f48;
+  background: #e6f6e6;
+  color: #1b8f48;
+  cursor: default;
 }
 </style>

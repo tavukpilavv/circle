@@ -224,7 +224,28 @@ const filteredEvents = computed(() => {
     if (activeFilter.value === 'upcoming') return !isPast;
     if (activeFilter.value === 'past') return isPast;
     return true; // all
-  }).sort((a, b) => new Date(a.date) - new Date(b.date));
+  }).sort((a, b) => {
+    const dateA = new Date(a.date);
+    const dateB = new Date(b.date);
+    const isPastA = dateA < today;
+    const isPastB = dateB < today;
+
+    // 1. Upcoming comes before Past
+    if (!isPastA && isPastB) return -1;
+    if (isPastA && !isPastB) return 1;
+
+    // 2. Both Upcoming: Sort Ascending (Soonest -> Furthest)
+    if (!isPastA && !isPastB) {
+      return dateA - dateB;
+    }
+
+    // 3. Both Past: Sort Descending (Most Recent -> Oldest)
+    if (isPastA && isPastB) {
+      return dateB - dateA;
+    }
+    
+    return 0;
+  });
 });
 
 onMounted(() => {
