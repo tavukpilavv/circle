@@ -1,28 +1,32 @@
 from app import db
 from datetime import datetime
 
-# Ara Tablo: Hangi Öğrenci Hangi Topluluğa Üye?
+# --- ARA TABLOLAR ---
 user_community = db.Table('user_community',
     db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
     db.Column('community_id', db.Integer, db.ForeignKey('community.id'))
 )
 
-# Ara Tablo: Hangi Öğrenci Hangi Etkinliğe Gidiyor?
 user_event = db.Table('user_event',
     db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
     db.Column('event_id', db.Integer, db.ForeignKey('event.id'))
 )
 
+# --- ANA MODELLER ---
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(64))
     last_name = db.Column(db.String(64))
     email = db.Column(db.String(120), unique=True, index=True)
     password_hash = db.Column(db.String(128))
-    role = db.Column(db.String(20), default='student') # student, admin, superadmin
-    avatar_url = db.Column(db.String(255)) # Profil Resmi
+    
+    # Yeni Alanlar (Signup Formuna Göre)
+    username = db.Column(db.String(64), unique=True)
+    major = db.Column(db.String(100))
 
-    # İlişkiler
+    role = db.Column(db.String(20), default='student')
+    avatar_url = db.Column(db.String(255))
+
     joined_communities = db.relationship('Community', secondary=user_community, backref=db.backref('members', lazy='dynamic'))
     registered_events = db.relationship('Event', secondary=user_event, backref=db.backref('participants', lazy='dynamic'))
 
@@ -37,19 +41,22 @@ class User(db.Model):
 class Community(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True)
-    university = db.Column(db.String(100))        # Formdaki Üniversite
-    category = db.Column(db.String(50))           # Kategori
-    short_description = db.Column(db.String(255)) # Kısa Açıklama
-    description = db.Column(db.Text)              # Uzun Açıklama
+    
+    university = db.Column(db.String(100))
+    category = db.Column(db.String(50))
+    short_description = db.Column(db.String(255))
+    description = db.Column(db.Text)
     
     contact_email = db.Column(db.String(120))
     contact_person = db.Column(db.String(100))
     instagram_link = db.Column(db.String(255))
+    external_link = db.Column(db.String(255))
     
-    image_url = db.Column(db.String(255))         # Kulüp Logosu
-    proof_document_url = db.Column(db.String(255)) # Kanıt Belgesi
+    image_url = db.Column(db.String(255))
+    proof_document_url = db.Column(db.String(255))
 
-    # YENİ ÖZELLİK: Bu topluluğun başkanı (Admin) kim?
+    is_approved = db.Column(db.Boolean, default=False)
+
     admin_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     admin = db.relationship('User', backref=db.backref('managed_community', uselist=False))
 
@@ -59,10 +66,13 @@ class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100))
     date = db.Column(db.String(20))
-    time = db.Column(db.String(20)) # Saat eklendi (09:00 gibi)
+    time = db.Column(db.String(20))
     location = db.Column(db.String(100))
-    capacity = db.Column(db.Integer) # Kapasite eklendi
+    capacity = db.Column(db.Integer)
     description = db.Column(db.Text)
     image_url = db.Column(db.String(255))
+    
+    rating = db.Column(db.Float, default=0.0)
+    rating_count = db.Column(db.Integer, default=0)
     
     community_id = db.Column(db.Integer, db.ForeignKey('community.id'))

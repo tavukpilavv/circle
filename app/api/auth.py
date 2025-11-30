@@ -6,37 +6,55 @@ bp = Blueprint('auth', __name__)
 
 @bp.route('/register', methods=['POST'])
 def register():
-    data = request.get_json()
-    if User.query.filter_by(email=data.get('email')).first():
-        return jsonify({'error': 'Bu email zaten kullanılıyor.'}), 400
-    
-    user = User(
-        first_name=data.get('firstName'),
-        last_name=data.get('lastName'),
-        email=data.get('email')
-    )
-    user.set_password(data.get('password'))
-    db.session.add(user)
-    db.session.commit()
-    
-    return jsonify({'message': 'Kayıt Başarılı!'}), 201
+    try:
+        data = request.get_json()
+        
+        # Benzersizlik Kontrolleri
+        if User.query.filter_by(email=data.get('email')).first():
+            return jsonify({'error': 'Bu email zaten kullanılıyor.'}), 400
+        
+        if data.get('username') and User.query.filter_by(username=data.get('username')).first():
+            return jsonify({'error': 'Bu kullanıcı adı zaten alınmış.'}), 400
+        
+        # Yeni Kullanıcı
+        user = User(
+            first_name=data.get('firstName'),
+            last_name=data.get('lastName'),
+            email=data.get('email'),
+            username=data.get('username'),
+            major=data.get('major')
+        )
+        user.set_password(data.get('password'))
+        
+        db.session.add(user)
+        db.session.commit()
+        
+        return jsonify({'message': 'Kayıt Başarılı!'}), 201
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @bp.route('/login', methods=['POST'])
 def login():
-    data = request.get_json()
-    user = User.query.filter_by(email=data.get('email')).first()
-    
-    if user and user.check_password(data.get('password')):
-        return jsonify({
-            'message': 'Giriş Başarılı',
-            'user': {
-                'id': user.id,
-                'first_name': user.first_name,
-                'role': user.role,
-                'avatar_url': user.avatar_url,
-                # Eğer adminse yönettiği kulübün ID'sini de gönderelim
-                'managed_community_id': user.managed_community.id if user.managed_community else None
-            }
-        }), 200
+    try:
+        data = request.get_json()
         
-    return jsonify({'error': 'Email veya şifre hatalı'}), 401
+        # Email ile giriş
+        user = User.query.filter_by(email=data.get('email')).first()
+        
+        if user and user.check_password(data.get('password')):
+            return jsonify({
+                'message': 'Giriş Başarılı',
+                'user': {
+                    'id': user.id,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                    'username': user.username,
+                    'role': user.role,
+                    'avatar_url': user.avatar_url,
+                    'managed_community_id': user.managed_community.id if user.managed_community else None
+                }
+            }), 200
+            
+        return jsonify({'error': 'Email veya şifre hatalı'}), 401
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
