@@ -5,7 +5,7 @@
 
     <!-- NAVBAR -->
     <header class="navbar">
-      <div class="nav-inner">
+      <div class="nav-inner standard-layout-container">
         <div class="nav-left">
           <!-- CUTE WALKING CAT -->
           <div class="nav-walker" id="navWalker">
@@ -61,7 +61,7 @@
 
         <div class="nav-right">
           <router-link v-if="isLoggedIn" to="/profile" class="icon-btn-link">
-            <el-avatar :size="40" :src="userAvatar" />
+            <el-avatar :size="48" :src="userAvatar" />
           </router-link>
           <router-link v-else to="/login" class="sign-in-btn">
             Sign in
@@ -285,9 +285,7 @@ body {
 }
 
 .nav-inner {
-  max-width: 1180px;
-  margin: 0 auto;
-  padding: 14px 20px 12px;
+  /* max-width, margin, padding handled by .standard-layout-container */
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
@@ -414,8 +412,8 @@ body {
 }
 
 .icon-btn {
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   border-radius: 999px;
   border: none;
   background: var(--brand-200);

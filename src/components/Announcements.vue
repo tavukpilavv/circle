@@ -1,6 +1,6 @@
 <template>
   <section class="announcements-wrapper">
-    <div class="custom-container">
+    <!-- Banner takes full width of parent container -->
       <el-carousel 
         ref="carouselRef"
         trigger="click" 
@@ -9,6 +9,7 @@
         :interval="5000" 
         arrow="hover"
         class="custom-carousel"
+        style="width: 100% !important; max-width: none !important;"
         @touchstart="onTouchStart"
         @touchend="onTouchEnd"
       >
@@ -22,7 +23,6 @@
           </div>
         </el-carousel-item>
       </el-carousel>
-    </div>
   </section>
 </template>
 
@@ -59,18 +59,15 @@ const handleSwipe = () => {
 
 <style scoped>
 .announcements-wrapper {
-  width: 100%;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
   display: flex;
   justify-content: center;
   padding: 24px 0; /* Increased vertical spacing */
 }
 
-.custom-container {
-  width: 100%;
-  max-width: 1200px;
-  padding: 0 16px;
-  box-sizing: border-box;
-}
+/* .custom-container removed */
 
 .banner-item {
   width: 100%;
@@ -81,7 +78,7 @@ const handleSwipe = () => {
 }
 
 .banner-image {
-  width: 100%;
+  width: 100% !important;
   height: 100%;
   display: block;
 }
@@ -135,5 +132,12 @@ const handleSwipe = () => {
   :deep(.el-carousel__arrow) {
     display: none !important;
   }
+}
+
+/* Fix for smooth rounded corners during slide transition */
+:deep(.el-carousel__container) {
+  border-radius: 24px;
+  overflow: hidden;
+  transform: translateZ(0); /* Force hardware acceleration to fix Safari clipping */
 }
 </style>

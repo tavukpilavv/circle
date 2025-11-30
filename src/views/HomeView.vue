@@ -1,16 +1,18 @@
 <template>
-  <Announcements/>
-  <div class="content-wrapper container">
-      <Filters 
-        :filterChange="onFilterChange" 
-        v-model:activeType="activeType"
-        v-model:sortOrder="sortOrder"
-      />
-      
-      <EventGrid 
-        :events="filteredEvents" 
-        :seeAll="seeAll" 
-      />
+  <div class="standard-layout-container">
+    <Announcements/>
+    <div class="content-wrapper">
+        <Filters 
+          :filterChange="onFilterChange" 
+          v-model:activeType="activeType"
+          v-model:sortOrder="sortOrder"
+        />
+        
+        <EventGrid 
+          :events="filteredEvents" 
+          :seeAll="seeAll" 
+        />
+    </div>
   </div>
   <!-- Global event detail dialog -->
   <el-dialog 
@@ -207,4 +209,7 @@ const onFilterChange = (val) => {
     border-radius: 3px !important;
   }
 }
+
+
+/* .page-container styles removed - using global .standard-layout-container */
 </style>

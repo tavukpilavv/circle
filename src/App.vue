@@ -40,4 +40,14 @@ html, body {
 .el-dialog__body {
   background-color: #fefbea !important;
 }
+
+/* Global Layout Container - Single Source of Truth */
+.standard-layout-container {
+  max-width: 1280px !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+  padding-left: 24px !important;
+  padding-right: 24px !important;
+  box-sizing: border-box !important;
+}
 </style>
