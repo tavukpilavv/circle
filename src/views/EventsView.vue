@@ -66,6 +66,7 @@
           <button 
             class="event-primary-btn" 
             @click="register(event)"
+            v-if="!isPast(event.date)"
           >
             {{ event.registered ? 'Registered' : 'Register' }}
           </button>
@@ -270,6 +271,13 @@ const getDay = (dateStr) => {
 const getMonth = (dateStr) => {
   const date = new Date(dateStr);
   return date.toLocaleString('default', { month: 'short' }).toUpperCase();
+}
+
+const isPast = (dateStr) => {
+  const date = new Date(dateStr);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return date < today;
 }
 
 // Modal Logic

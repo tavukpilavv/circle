@@ -42,7 +42,7 @@
       <template #footer>
       <div class="dialog-footer">
           <el-button @click="dialogVisible = false">Close</el-button>
-          <el-button type="primary" @click="registerForEvent">
+          <el-button type="primary" @click="registerForEvent" v-if="!isPastEvent">
           Register
           </el-button>
       </div>
@@ -52,7 +52,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import ConfettiOverlay from './ConfettiOverlay.vue'
 
@@ -67,6 +67,14 @@ const props = defineProps({
 
 const dialogVisible = ref(false)
 const showCelebration = ref(false)
+
+const isPastEvent = computed(() => {
+  if (!props.event?.date) return false
+  const eventDate = new Date(props.event.date)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  return eventDate < today
+})
 
 const registerForEvent = () => {
   // Check if user is logged in
