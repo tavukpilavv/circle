@@ -46,8 +46,16 @@
         </div>
 
         <div class="nav-center">
-          <form class="global-search" role="search" aria-label="Search for an Event">
-            <input type="search" placeholder="Search for an Event" aria-label="Search for an Event" />
+          <form class="global-search" role="search" aria-label="Search for an Event" @submit.prevent="handleSearch">
+            <input 
+              type="search" 
+              placeholder="Search for an Event" 
+              aria-label="Search for an Event" 
+              v-model="searchQuery"
+            />
+            <button type="submit" class="search-btn" aria-label="Search">
+              <i class="fas fa-search"></i>
+            </button>
           </form>
         </div>
 
@@ -93,6 +101,17 @@ const isLoggedIn = ref(false)
 const userAvatar = ref('')
 const showRatingPopup = ref(false)
 const ratingEvent = ref(null)
+const searchQuery = ref('')
+
+const handleSearch = () => {
+  if (searchQuery.value.trim()) {
+    router.push({ path: '/events', query: { search: searchQuery.value } })
+  } else {
+    // If empty, just go to events page (clears search)
+    router.push({ path: '/events' })
+  }
+  searchQuery.value = ''
+}
 
 const loadAvatar = () => {
   const stored = localStorage.getItem('user_avatar')
@@ -360,6 +379,22 @@ body {
 
 .global-search input::placeholder {
   color: #8ca59a;
+}
+
+.search-btn {
+  background: none;
+  border: none;
+  color: #1f5c3f;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s;
+}
+
+.search-btn:hover {
+  opacity: 0.7;
 }
 
 /* right: avatar / sign in */

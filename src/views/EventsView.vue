@@ -183,6 +183,7 @@ const isAdmin = ref(false);
 
 // Filters
 const activeFilter = ref('upcoming');
+const searchQuery = ref('');
 
 // Filtered events logic
 const filteredEvents = computed(() => {
@@ -190,6 +191,24 @@ const filteredEvents = computed(() => {
   today.setHours(0, 0, 0, 0);
   
   let events = store.events;
+
+  // 0. Filter by search query
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase();
+    events = events.filter(e => {
+      try {
+        const name = (e.name || '').toLowerCase();
+        const desc = (e.description || '').toLowerCase();
+        const loc = (e.location || '').toLowerCase();
+        const club = (e.club || '').toLowerCase();
+        
+        return name.includes(query) || desc.includes(query) || loc.includes(query) || club.includes(query);
+      } catch (err) {
+        console.warn('Error filtering event:', e, err);
+        return false;
+      }
+    });
+  }
 
   // 1. Filter by route query "registered" if present
   if (route.query.filter === 'registered') {
@@ -221,6 +240,12 @@ onMounted(() => {
   } else if (route.query.filter === 'registered') {
     activeFilter.value = 'all'; // Show all registered
   }
+
+  // Apply search query
+  if (route.query.search) {
+    searchQuery.value = route.query.search;
+    activeFilter.value = 'all'; // Switch to all to show matches from past too? Or keep upcoming? Let's default to 'all' if searching.
+  }
 });
 
 watch(() => route.query.filter, (newVal) => {
@@ -229,6 +254,11 @@ watch(() => route.query.filter, (newVal) => {
   } else if (newVal === 'registered') {
     activeFilter.value = 'all';
   }
+});
+
+watch(() => route.query.search, (newVal) => {
+  searchQuery.value = newVal || '';
+  if (newVal) activeFilter.value = 'all';
 });
 
 // Date Helpers
