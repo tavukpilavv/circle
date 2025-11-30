@@ -205,8 +205,7 @@ onMounted(() => {
     setTimeout(checkRating, 500)
   })
   
-  // Initial check
-  setTimeout(checkRating, 1000)
+  // Initial check removed to prevent auto-show on load
 })
 
 onUnmounted(() => {
