@@ -7,7 +7,37 @@
     <header class="navbar">
       <div class="nav-inner">
         <div class="nav-left">
-          <router-link to="/" class="logo">CirCle</router-link>
+          <!-- CUTE WALKING CAT -->
+          <div class="nav-walker" id="navWalker">
+            <div class="cat">
+              <div class="cat-tail"></div>
+              <div class="cat-body"></div>
+              <div class="cat-head">
+                <div class="cat-ear left"></div>
+                <div class="cat-ear right"></div>
+                <div class="cat-eye left"></div>
+                <div class="cat-eye right"></div>
+                <div class="cat-nose"></div>
+                <div class="cat-whisker left-1"></div>
+                <div class="cat-whisker left-2"></div>
+                <div class="cat-whisker right-1"></div>
+                <div class="cat-whisker right-2"></div>
+              </div>
+              <div class="cat-scarf"></div>
+              <div class="cat-scarf-end"></div>
+              <div class="cat-leg left"></div>
+              <div class="cat-leg right"></div>
+            </div>
+          </div>
+
+          <router-link to="/" class="logo">
+            <span class="logo-letter">C</span>
+            <span class="logo-letter">i</span>
+            <span class="logo-letter">r</span>
+            <span class="logo-letter">C</span>
+            <span class="logo-letter">l</span>
+            <span class="logo-letter">e</span>
+          </router-link>
 
           <nav class="tabs" aria-label="Primary navigation">
             <router-link to="/communities" class="tab" active-class="is-active">Communities</router-link>
@@ -85,6 +115,10 @@ const checkLogin = () => {
 
 const checkRating = () => {
   if (!isLoggedIn.value) return
+
+  // Prevent popup for admins
+  const role = localStorage.getItem('user_role')
+  if (role === 'admin' || role === 'super_admin') return
 
   const today = new Date()
   today.setHours(0, 0, 0, 0)
@@ -189,6 +223,10 @@ const toggleAuth = () => {
   --outline: #d8eadb;
 
   --shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+
+  /* Cat Colors */
+  --cat-body: #ffe8d4;
+  --cat-outline: #e1c0a4;
 }
 
 /* ========= RESET ========= */
@@ -223,6 +261,8 @@ body {
 
 .navbar {
   background: var(--page);
+  position: relative;
+  overflow: visible;
 }
 
 .nav-inner {
@@ -232,6 +272,8 @@ body {
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
+  position: relative;
+  z-index: 2;
 }
 
 .nav-bottom-line {
@@ -245,6 +287,7 @@ body {
 .nav-left {
   display: flex;
   align-items: center;
+  position: relative; /* For cat positioning */
 }
 
 .logo {
@@ -255,6 +298,15 @@ body {
   letter-spacing: -1px;
   color: var(--brand);
   text-decoration: none;
+  position: relative;
+  z-index: 5; /* Letters above cat when cat is behind */
+}
+
+/* each letter is separate so cat passes behind them */
+.logo-letter {
+  position: relative;
+  display: inline-block;
+  z-index: 5;
 }
 
 .tabs {
@@ -268,6 +320,8 @@ body {
   text-decoration: none;
   color: #333;
   padding-bottom: 6px;
+  position: relative;
+  z-index: 5;
 }
 
 .tab.is-active {
@@ -291,6 +345,8 @@ body {
   background: var(--brand-200);
   display: flex;
   align-items: center;
+  position: relative;
+  z-index: 5;
 }
 
 .global-search input {
@@ -312,6 +368,8 @@ body {
   display: flex;
   justify-content: flex-end;
   align-items: center; /* Fix vertical alignment */
+  position: relative;
+  z-index: 5;
 }
 
 .icon-btn-link {
@@ -352,6 +410,248 @@ body {
 
 .sign-in-btn:hover {
   opacity: 0.8;
+}
+
+/* ------------ CUTE WALKING CAT ------------ */
+
+.nav-walker {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 52px;
+  height: 52px;
+  pointer-events: none;
+  z-index: 1; /* Default behind */
+  animation: walker-orbit 12s linear infinite;
+  /* Scale down to look small */
+  transform-origin: center bottom;
+}
+
+.cat {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform: scale(0.4); /* Make it smallllll */
+}
+
+/* Tail */
+.cat-tail {
+  position: absolute;
+  right: 6px;
+  bottom: 14px;
+  width: 18px;
+  height: 8px;
+  border-radius: 12px;
+  background: var(--cat-body);
+  box-shadow: 0 0 0 1.5px var(--cat-outline);
+  transform-origin: left center;
+  animation: cat-tail-wag 0.6s ease-in-out infinite alternate;
+}
+
+/* Body */
+.cat-body {
+  position: absolute;
+  left: 10px;
+  bottom: 8px;
+  width: 28px;
+  height: 22px;
+  border-radius: 12px;
+  background: var(--cat-body);
+  box-shadow: 0 0 0 1.5px var(--cat-outline);
+  animation: cat-bob 0.55s ease-in-out infinite;
+}
+
+/* Head */
+.cat-head {
+  position: absolute;
+  left: 10px;
+  bottom: 26px;
+  width: 24px;
+  height: 22px;
+  border-radius: 12px;
+  background: var(--cat-body);
+  box-shadow: 0 0 0 1.5px var(--cat-outline);
+}
+
+/* Ears */
+.cat-ear {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: var(--cat-body);
+  box-shadow: 0 0 0 1.5px var(--cat-outline);
+  transform: rotate(45deg);
+  top: -4px;
+}
+
+.cat-ear.left {
+  left: 2px;
+}
+
+.cat-ear.right {
+  right: 2px;
+}
+
+/* Face */
+.cat-eye {
+  position: absolute;
+  top: 7px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #3c3a34;
+}
+
+.cat-eye.left {
+  left: 6px;
+}
+
+.cat-eye.right {
+  right: 6px;
+}
+
+.cat-nose {
+  position: absolute;
+  top: 11px;
+  left: 50%;
+  width: 4px;
+  height: 3px;
+  border-radius: 2px;
+  background: #f58f8f;
+  transform: translateX(-50%);
+}
+
+.cat-whisker {
+  position: absolute;
+  top: 12px;
+  width: 8px;
+  height: 1.5px;
+  background: #c79f7f;
+}
+
+.cat-whisker.left-1 {
+  left: 1px;
+}
+.cat-whisker.left-2 {
+  left: 1px;
+  top: 14px;
+}
+.cat-whisker.right-1 {
+  right: 1px;
+}
+.cat-whisker.right-2 {
+  right: 1px;
+  top: 14px;
+}
+
+/* Scarf */
+.cat-scarf {
+  position: absolute;
+  left: 8px;
+  bottom: 24px;
+  width: 18px;
+  height: 7px;
+  border-radius: 6px;
+  background: var(--brand);
+}
+
+.cat-scarf-end {
+  position: absolute;
+  left: 16px;
+  bottom: 18px;
+  width: 6px;
+  height: 10px;
+  border-radius: 4px;
+  background: var(--brand);
+}
+
+/* Legs */
+.cat-leg {
+  position: absolute;
+  bottom: 0;
+  width: 7px;
+  height: 14px;
+  border-radius: 4px;
+  background: var(--cat-body);
+  box-shadow: 0 0 0 1.3px var(--cat-outline);
+  transform-origin: top center;
+}
+
+.cat-leg.left {
+  left: 13px;
+  animation: cat-leg-left 0.35s ease-in-out infinite alternate;
+}
+
+.cat-leg.right {
+  left: 22px;
+  animation: cat-leg-right 0.35s ease-in-out infinite alternate;
+}
+
+/* WALKING PATH (ORBIT) */
+@keyframes walker-orbit {
+  0% {
+    left: -20px;
+    transform: translateY(-50%) scaleX(1); /* Face Right */
+    z-index: 1; /* Behind */
+  }
+  45% {
+    left: 120px; /* End of logo */
+    transform: translateY(-50%) scaleX(1);
+    z-index: 1;
+  }
+  50% {
+    left: 120px;
+    transform: translateY(-50%) scaleX(-1); /* Turn Left */
+    z-index: 10; /* In Front */
+  }
+  95% {
+    left: -20px;
+    transform: translateY(-50%) scaleX(-1);
+    z-index: 10;
+  }
+  100% {
+    left: -20px;
+    transform: translateY(-50%) scaleX(1); /* Reset */
+    z-index: 1;
+  }
+}
+
+/* Cute motion */
+@keyframes cat-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes cat-leg-left {
+  0% {
+    transform: rotate(18deg);
+  }
+  100% {
+    transform: rotate(-10deg);
+  }
+}
+
+@keyframes cat-leg-right {
+  0% {
+    transform: rotate(-10deg);
+  }
+  100% {
+    transform: rotate(18deg);
+  }
+}
+
+@keyframes cat-tail-wag {
+  0% {
+    transform: rotate(10deg);
+  }
+  100% {
+    transform: rotate(-12deg);
+  }
 }
 
 /* ========= RESPONSIVE ========= */
@@ -436,6 +736,44 @@ body {
 
   .sign-in-btn::after {
     display: none !important;
+  }
+
+  /* 6. Responsive Cat */
+  .cat {
+    transform: scale(0.25); /* Smaller on mobile */
+  }
+
+  .nav-walker {
+    animation-name: walker-orbit-mobile; /* Use shorter path */
+    left: -10px; /* Adjust start pos */
+  }
+}
+
+@keyframes walker-orbit-mobile {
+  0% {
+    left: -10px;
+    transform: translateY(-50%) scaleX(1);
+    z-index: 1;
+  }
+  45% {
+    left: 60px; /* Shorter distance for smaller logo */
+    transform: translateY(-50%) scaleX(1);
+    z-index: 1;
+  }
+  50% {
+    left: 60px;
+    transform: translateY(-50%) scaleX(-1);
+    z-index: 10;
+  }
+  95% {
+    left: -10px;
+    transform: translateY(-50%) scaleX(-1);
+    z-index: 10;
+  }
+  100% {
+    left: -10px;
+    transform: translateY(-50%) scaleX(1);
+    z-index: 1;
   }
 }
 </style>
