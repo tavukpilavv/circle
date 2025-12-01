@@ -5,16 +5,15 @@ from flask import current_app
 def upload_file(file, folder="uploads"):
     """
     Dosyayı Cloudinary'ye yükler ve güvenli HTTPS linkini döndürür.
-    Eğer Cloudinary ayarlı değilse None döner.
+    Frontend'den gelen FormData objesini işler.
     """
     if not file:
         return None
 
-    # Cloudinary ayarları var mı kontrol et
     cloud_name = current_app.config.get('CLOUDINARY_CLOUD_NAME')
     if not cloud_name:
-        print("UYARI: Cloudinary ayarları eksik!")
-        return None
+        # Localhost'ta test yapılıyorsa Cloudinary'yi atla
+        return None 
 
     # Cloudinary'yi başlat
     cloudinary.config(
@@ -25,13 +24,13 @@ def upload_file(file, folder="uploads"):
 
     try:
         # Yükleme işlemi
-        result = cloudinary.uploader.upload(
+        upload_result = cloudinary.uploader.upload(
             file,
             folder=f"circle_app/{folder}", # Cloudinary'de düzenli klasörleme
-            resource_type="auto" # Resim, PDF, Video otomatik algıla
+            resource_type="auto"
         )
-        return result['secure_url']
+        return upload_result['secure_url']
     
     except Exception as e:
-        print(f"Cloudinary Yükleme Hatası: {e}")
+        current_app.logger.error(f"Cloudinary Yükleme Hatası: {e}")
         return None

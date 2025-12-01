@@ -18,9 +18,9 @@ class User(db.Model):
     first_name = db.Column(db.String(64))
     last_name = db.Column(db.String(64))
     email = db.Column(db.String(120), unique=True, index=True)
-    password_hash = db.Column(db.String(512))
+    password_hash = db.Column(db.String(128))
     
-    # Yeni Alanlar (Signup Formuna Göre)
+    # Signup Formu Alanları
     username = db.Column(db.String(64), unique=True)
     major = db.Column(db.String(100))
 
@@ -55,7 +55,7 @@ class Community(db.Model):
     image_url = db.Column(db.String(255))
     proof_document_url = db.Column(db.String(255))
 
-    is_approved = db.Column(db.Boolean, default=False)
+    is_approved = db.Column(db.Boolean, default=False) # Onay Durumu
 
     admin_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     admin = db.relationship('User', backref=db.backref('managed_community', uselist=False))
@@ -72,7 +72,20 @@ class Event(db.Model):
     description = db.Column(db.Text)
     image_url = db.Column(db.String(255))
     
+    # Puanlama
     rating = db.Column(db.Float, default=0.0)
     rating_count = db.Column(db.Integer, default=0)
+    feedbacks = db.relationship('Rating', backref='rated_event', lazy='dynamic')
     
     community_id = db.Column(db.Integer, db.ForeignKey('community.id'))
+
+class Rating(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    event_id = db.Column(db.Integer, db.ForeignKey('event.id'))
+    
+    score = db.Column(db.Integer)  # 1'den 5'e kadar puan
+    comment = db.Column(db.Text)
+    is_anonymous = db.Column(db.Boolean, default=False)
+
+    __table_args__ = (db.UniqueConstraint('user_id', 'event_id', name='uq_user_event_rating'),)

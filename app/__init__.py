@@ -1,13 +1,11 @@
-import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_cors import CORS
 from app.config import Config
-from sqlalchemy import MetaData # <--- YENİ EKLENDİ
+from sqlalchemy import MetaData # SQLite Hata Çözümü İçin
 
-# --- YENİ: OTOMATİK İSİMLENDİRME KURALI ---
-# Bu kural, SQLite hatalarını sonsuza dek çözer.
+# --- YENİ: OTOMATİK İSİMLENDİRME KURALI (SQLite Fix) ---
 convention = {
     "ix": 'ix_%(column_0_label)s',
     "uq": "uq_%(table_name)s_%(column_0_name)s",
@@ -16,8 +14,8 @@ convention = {
     "pk": "pk_%(table_name)s"
 }
 metadata = MetaData(naming_convention=convention)
-db = SQLAlchemy(metadata=metadata) # Metadata'yı buraya ekledik
-# ------------------------------------------
+db = SQLAlchemy(metadata=metadata) 
+# ----------------------------------------------------------
 
 migrate = Migrate()
 
@@ -26,17 +24,19 @@ def create_app(config_class=Config):
     app.config.from_object(config_class)
 
     db.init_app(app)
-    # render_as_batch=True ayarını buraya da ekleyelim, garanti olsun
     migrate.init_app(app, db, render_as_batch=True)
     
+    # CORS Ayarı (Tüm domainlere izin ver)
     CORS(app, resources={r"/api/*": {"origins": "*"}})
 
+    # Blueprints
     from app.api.auth import bp as auth_bp
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     
     from app.api.general import bp as general_bp
     app.register_blueprint(general_bp, url_prefix='/api/general')
     
+    # Health Check Endpoint
     @app.route('/health')
     def health():
         return {'status': 'healthy'}, 200

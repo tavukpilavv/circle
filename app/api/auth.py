@@ -9,14 +9,13 @@ def register():
     try:
         data = request.get_json()
         
-        # Benzersizlik Kontrolleri
         if User.query.filter_by(email=data.get('email')).first():
             return jsonify({'error': 'Bu email zaten kullanılıyor.'}), 400
         
         if data.get('username') and User.query.filter_by(username=data.get('username')).first():
             return jsonify({'error': 'Bu kullanıcı adı zaten alınmış.'}), 400
         
-        # Yeni Kullanıcı
+        # Yeni Kullanıcı (Username ve Major eklendi)
         user = User(
             first_name=data.get('firstName'),
             last_name=data.get('lastName'),
@@ -37,8 +36,6 @@ def register():
 def login():
     try:
         data = request.get_json()
-        
-        # Email ile giriş
         user = User.query.filter_by(email=data.get('email')).first()
         
         if user and user.check_password(data.get('password')):
@@ -49,6 +46,7 @@ def login():
                     'first_name': user.first_name,
                     'last_name': user.last_name,
                     'username': user.username,
+                    'major': user.major,
                     'role': user.role,
                     'avatar_url': user.avatar_url,
                     'managed_community_id': user.managed_community.id if user.managed_community else None

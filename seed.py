@@ -5,8 +5,6 @@ app = create_app()
 
 with app.app_context():
     print("💣 Veritabanı SIFIRLANIYOR (Temizlik)...")
-    
-    # 1. Eski tabloları uçur ve yenilerini kur
     db.session.remove()
     db.drop_all()
     db.create_all()
@@ -52,7 +50,7 @@ with app.app_context():
         contact_person="Ahmet Demir",
         contact_email="tiyatro@aybu.edu.tr",
         image_url="https://images.unsplash.com/photo-1460723237483-7a6dc9d0b212",
-        admin=club_admin, # Bu kulübün sahibi Admin
+        admin=club_admin, 
         is_approved=True 
     )
 
@@ -64,7 +62,7 @@ with app.app_context():
         description="Coding workshops, hackathonlar ve teknoloji sohbetleri.",
         contact_person="Ayşe Yılmaz",
         contact_email="cs@odtu.edu.tr",
-        image_url="https://images.unsplash.com/photo-1531482615713-2afd69097998",
+        image_url="https://images.unsplash.com/photo-1531482615713-2afd9697998",
         is_approved=True
     )
 
@@ -127,7 +125,6 @@ with app.app_context():
 
     db.session.add_all([e1, e2, e3])
     
-    # Öğrenciyi üye yapalım
     c2.members.append(student)
     e1.participants.append(student)
 
