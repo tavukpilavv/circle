@@ -1,14 +1,24 @@
 from app import create_app, db
 from app.models import User, Community, Event
+from sqlalchemy import text
 
 app = create_app()
 
 with app.app_context():
     print("💣 Veritabanı SIFIRLANIYOR (Temizlik)...")
-    db.session.remove()
-    db.drop_all()
-    db.create_all()
     
+    # Tüm foreign key constraint'leri ve tabloları CASCADE ile temizle
+    try:
+        db.session.execute(text('DROP SCHEMA public CASCADE;'))
+        db.session.execute(text('CREATE SCHEMA public;'))
+        db.session.commit()
+        print("✅ Schema tamamen temizlendi.")
+    except Exception as e:
+        print(f"⚠️ Schema temizleme hatası (devam ediliyor): {e}")
+        db.session.rollback()
+    
+    # Tabloları yeniden oluştur
+    db.create_all()
     print("✅ Tablolar yeniden oluşturuldu.")
 
     # ================= KULLANICILAR =================
@@ -37,9 +47,10 @@ with app.app_context():
 
     db.session.add_all([super_admin, club_admin, student])
     db.session.commit()
+    print("✅ Kullanıcılar eklendi.")
 
     # ================= TOPLULUKLAR =================
-    print("camp Topluluklar (Communities) ekleniyor...")
+    print("🏕️ Topluluklar (Communities) ekleniyor...")
 
     c1 = Community(
         name="AYBU Tiyatro Kulübü",
@@ -80,6 +91,7 @@ with app.app_context():
 
     db.session.add_all([c1, c2, c3])
     db.session.commit()
+    print("✅ Topluluklar eklendi.")
 
     # ================= ETKİNLİKLER =================
     print("📅 Etkinlikler (Events) ekleniyor...")
@@ -138,6 +150,7 @@ with app.app_context():
 
     db.session.add_all([e1, e2, e3, e4])
     
+    # İlişkileri ekle
     c2.members.append(student)
     e1.participants.append(student)
 
