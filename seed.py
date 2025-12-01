@@ -123,7 +123,20 @@ with app.app_context():
         rating_count=30
     )
 
-    db.session.add_all([e1, e2, e3])
+    e4 = Event(
+        title="TEST ETKİNLİĞİ - DEĞİŞİKLİK KONTROLÜ",
+        date="2025-12-31",
+        time="23:59",
+        location="Test Location",
+        capacity=999,
+        description="Bu etkinlik seed.py'nin çalıştığını doğrulamak için eklendi.",
+        image_url="https://via.placeholder.com/150",
+        community_id=c1.id,
+        rating=5.0,
+        rating_count=1
+    )
+
+    db.session.add_all([e1, e2, e3, e4])
     
     c2.members.append(student)
     e1.participants.append(student)

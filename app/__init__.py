@@ -26,8 +26,8 @@ def create_app(config_class=Config):
     db.init_app(app)
     migrate.init_app(app, db, render_as_batch=True)
     
-    # CORS Ayarı (Tüm domainlere izin ver)
-    CORS(app, resources={r"/api/*": {"origins": "*"}})
+    # CORS Ayarı (Frontend URL'ine izin ver ve credentials destekle)
+    CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}}, supports_credentials=True)
 
     # Blueprints
     from app.api.auth import bp as auth_bp

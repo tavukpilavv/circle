@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CirCle • Rating (Vue & Element Plus)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body style="opacity: 0; transition: opacity 0.3s;">
+  <div id="app">
+    <div class="top-bar"></div>
+    <header class="navbar" role="banner">
+      <div class="nav-inner">
+        <div class="nav-left">
+          <a class="logo" href="/">CirCle</a>
+          <nav class="tabs" aria-label="Primary">
+            <a href="#" class="tab">Communities</a>
+            <a href="#" class="tab is-active" aria-current="page">Events</a>
+          </nav>
+        </div>
+        <div class="nav-center">
+          <form class="global-search" role="search" aria-label="Search events">
+            <i class="fas fa-search" aria-hidden="true"></i>
+            <input type="search" placeholder="Search for an Event" aria-label="Search for an Event"/>
+          </form>
+        </div>
+        <div class="nav-right">
+          <button class="icon-btn" aria-label="Account"><i class="fas fa-user"></i></button>
+        </div>
+      </div>
+    </header>
+
+    <main style="padding: 20px;">
+      <!-- Main content area -->
+    </main>
+
+    <!-- Feedback Dialog - Pop-up -->
+    <el-dialog
+      v-model="dialogVisible"
+      title="Give Feedback!"
+      width="500px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      :show-close="true"
+      append-to-body
+      lock-scroll
+      modal
+    >
+      <div class="feedback-content">
+        <div class="rating-section">
+          <h3 class="rating-title">
+            Your rating
+            <i class="fas fa-question-circle rating-icon"></i>
+          </h3>
+          <el-rate v-model="rating" size="large" :colors="['#fcc419', '#fcc419', '#fcc419']" />
+        </div>
+        
+        <div class="thoughts-section">
+          <p class="thoughts-question">Do you have any thoughts you'd like to share?</p>
+          <textarea
+            v-model="textarea"
+            placeholder=""
+            class="feedback-textarea"
+            rows="5"
+          ></textarea>
+        </div>
+      </div>
+      
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="cancelFeedback">Cancel</el-button>
+          <el-button type="primary" @click="submitFeedback">
+            Submit
+          </el-button>
+        </span>
+      </template>
+    </el-dialog>
+
+  </div> 
+  
+  <script src="https://unpkg.com/vue@3"></script>
+  <script src="https://unpkg.com/element-plus"></script>
+  <script src="app.js"></script>
+
+</body>
+</html>
