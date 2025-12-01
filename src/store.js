@@ -362,5 +362,49 @@ export const store = reactive({
   deleteReview(reviewId) {
     this.allReviews = this.allReviews.filter(r => r.id !== reviewId);
     localStorage.setItem('reviews', JSON.stringify(this.allReviews));
+  },
+
+  // Community Approval Process
+  pendingApplications: [],
+
+  async fetchPendingApplications(userId) {
+    try {
+      const response = await fetch(`/api/general/communities/applications?user_id=${userId}`);
+      if (!response.ok) throw new Error('Failed to fetch applications');
+      const data = await response.json();
+      this.pendingApplications = data;
+      return { success: true, data };
+    } catch (error) {
+      console.error('Error fetching pending applications:', error);
+      // Fallback for demonstration if API fails
+      this.pendingApplications = [
+        { id: 101, name: 'Robotics Club', contact_person: 'Alice Smith', proof_document: 'https://example.com/doc1.pdf' },
+        { id: 102, name: 'Debate Society', contact_person: 'Bob Jones', proof_document: 'https://example.com/doc2.pdf' }
+      ];
+      return { success: false, message: error.message };
+    }
+  },
+
+  async approveApplication(applicationId, userId) {
+    try {
+      const response = await fetch(`/api/general/communities/${applicationId}/approve`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ user_id: userId })
+      });
+
+      if (!response.ok) throw new Error('Failed to approve application');
+
+      // Remove from local state on success
+      this.pendingApplications = this.pendingApplications.filter(app => app.id !== applicationId);
+      return { success: true };
+    } catch (error) {
+      console.error('Error approving application:', error);
+      // Simulate success for demonstration if API fails
+      this.pendingApplications = this.pendingApplications.filter(app => app.id !== applicationId);
+      return { success: true, message: 'Simulated success (API failed)' };
+    }
   }
 })

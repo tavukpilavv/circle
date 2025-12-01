@@ -62,6 +62,11 @@ const routes = [
         path: '/apply',
         name: 'Apply',
         component: () => import('../views/ApplyView.vue')
+    },
+    {
+        path: '/community-applications',
+        name: 'CommunityApplications',
+        component: () => import('../views/CommunityApplications.vue')
     }
 ]
 

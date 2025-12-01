@@ -51,7 +51,7 @@
     </section>
 
     <!-- TABS UNDER PROFILE -->
-    <section class="dual-tabs">
+    <section class="dual-tabs" :style="{ gridTemplateColumns: isSuperAdmin ? '1fr 1fr 1fr' : '1fr 1fr' }">
       <button 
         class="tabbtn" 
         :class="activePanel === 'events' ? 'solid' : 'outline'" 
@@ -64,6 +64,17 @@
         @click="activePanel = 'communities'"
         :aria-pressed="activePanel === 'communities'"
       >My Communities</button>
+      <button 
+        v-if="isSuperAdmin"
+        class="tabbtn" 
+        :class="activePanel === 'applications' ? 'solid' : 'outline'" 
+        @click="activePanel = 'applications'"
+        :aria-pressed="activePanel === 'applications'"
+        style="position: relative;"
+      >
+        Pending Apps
+        <span v-if="pendingApplications.length > 0" class="notification-badge">{{ pendingApplications.length }}</span>
+      </button>
     </section>
 
     <div v-show="activePanel === 'events'" class="panel is-active">
@@ -226,6 +237,37 @@
       </section>
     </div>
 
+    <!-- PENDING APPLICATIONS PANEL -->
+    <div v-show="activePanel === 'applications'" class="panel is-active">
+      <section class="section-head">
+        <h3>Pending Club Applications</h3>
+        <span class="community-count">{{ pendingApplications.length }} pending</span>
+      </section>
+
+      <div v-if="pendingApplications.length === 0" class="empty-state">
+        <el-empty description="No pending applications" />
+      </div>
+
+      <section class="slider-shell" aria-label="Pending Applications" v-else>
+        <div class="slider-track" style="display: flex; flex-direction: column; gap: 15px; overflow-x: visible;">
+          <article class="card application-card" v-for="app in pendingApplications" :key="app.id" style="width: 100%; flex-direction: row; align-items: center; justify-content: space-between; padding: 15px;">
+            <div class="app-info">
+              <h4 style="margin: 0; color: var(--ink);">{{ app.name }}</h4>
+              <p style="margin: 5px 0 0; font-size: 13px; color: var(--muted);">Applicant: {{ app.contact_person }}</p>
+            </div>
+            <div class="app-actions" style="display: flex; align-items: center; gap: 15px;">
+              <a :href="app.proof_document" target="_blank" style="font-size: 13px; color: var(--brand); font-weight: 600; text-decoration: none;">
+                View Proof
+              </a>
+              <el-button type="success" size="small" @click="approveApp(app.id)" :loading="approvingId === app.id">
+                Approve & Promote
+              </el-button>
+            </div>
+          </article>
+        </div>
+      </section>
+    </div>
+
     <!-- SEE ALL OVERLAYS -->
     <div class="seeall-overlay" :class="{ 'is-open': seeAllTarget === 'events' }" @click.self="closeSeeAll">
       <div class="seeall-inner">
@@ -342,6 +384,7 @@ import { ref, reactive, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { store } from '../store.js'
 import { CircleCheckFilled } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
 import RatingPopup from '../components/RatingPopup.vue'
 
 const router = useRouter()
@@ -383,6 +426,22 @@ const user = reactive({
 })
 
 const isAdmin = computed(() => user.role === 'admin' || user.role === 'super_admin')
+const isSuperAdmin = computed(() => user.role === 'super_admin')
+
+const pendingApplications = computed(() => store.pendingApplications)
+const approvingId = ref(null)
+
+const approveApp = async (id) => {
+  approvingId.value = id
+  const result = await store.approveApplication(id, user.id || 1) // Fallback ID if not set
+  
+  if (result.success) {
+    ElMessage.success('Application approved and club promoted!')
+  } else {
+    ElMessage.error('Failed to approve: ' + (result.message || 'Unknown error'))
+  }
+  approvingId.value = null
+}
 
 const loadUserData = () => {
   const token = localStorage.getItem('user_token')
@@ -475,6 +534,10 @@ onMounted(() => {
   loadAvatar()
   // loadRatedEvents() // No longer needed with store
   window.addEventListener('avatar-changed', loadAvatar)
+
+  if (isSuperAdmin.value) {
+    store.fetchPendingApplications(user.id || 1)
+  }
 })
 
 onUnmounted(() => {
@@ -793,7 +856,6 @@ const handleRatingSubmit = (payload) => {
   align-items: center;
   justify-content: center;
 }
-
 /* section headers */
 .section-head {
   margin-top: 4px;
@@ -943,28 +1005,6 @@ const handleRatingSubmit = (payload) => {
 
 .rate-btn:hover {
   background: #d67a00;
-}
-
-.rate-pill {
-  position: absolute;
-  right: 16px;
-  bottom: 16px;
-  border: none;
-  border-radius: 999px;
-  background: #f08c00;
-  color: white;
-  padding: 0 18px;
-  height: 30px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-}
-
-.rate-pill:hover {
   background: #d67a00;
 }
 
@@ -1354,5 +1394,23 @@ const handleRatingSubmit = (payload) => {
 
 :global(.event-detail-modal .el-dialog__headerbtn:hover .el-dialog__close) {
   color: #dc2626;
+}
+
+.notification-badge {
+  position: absolute;
+  top: -5px;
+  right: -10px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #f56c6c;
+  color: white;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 700;
+  border: 2px solid #fff;
 }
 </style>
