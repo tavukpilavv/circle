@@ -40,23 +40,83 @@ const props = defineProps({
 /* Scoped styles can be used here if needed, but we are relying on global style.css for consistency */
 /* However, for component-specific structure, we can add some here */
 
-.card-content {
-  padding-left: 20px;
+.event-card {
   display: flex;
   flex-direction: column;
+  height: auto; /* Allow card to grow with content */
+  min-height: 100%; /* Ensure it fills the grid cell */
+  border-radius: 12px;
+  overflow: hidden;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: transform 0.2s;
+}
+
+.event-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+
+.card-image-wrapper {
+  height: 200px; /* Fixed height as requested */
+  width: 100%;
+  overflow: hidden;
+}
+
+.card-image-wrapper img {
+  width: 100%;
   height: 100%;
+  object-fit: cover;
+  object-position: center top; /* Focus on faces/top */
+}
+
+.card-content {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
   flex: 1;
+  gap: 12px; /* Flexbox gap for spacing */
+}
+
+.card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.event-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #153226; /* Darker color */
+  margin: 0;
+  line-height: 1.4;
+  
+  /* Line Clamp for 2 lines */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.event-detail {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px; /* Smaller size */
+  color: #6b7c74;
+}
+
+.event-detail i {
+  width: 16px;
+  text-align: center;
+  color: #1b8f48;
 }
 
 .card-actions {
   margin-top: auto;
-}
-
-.event-name {
-  font-size: 14px;
-  font-weight: 700;
-  color: #555;
-  margin: 0 0 8px 0; /* Added small bottom margin for spacing between title and details */
+  padding-top: 8px;
 }
 
 .community-name {
