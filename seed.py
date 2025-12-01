@@ -1,20 +1,39 @@
 from app import create_app, db
 from app.models import User, Community, Event
-from sqlalchemy import text
+from sqlalchemy import text, inspect
 
 app = create_app()
 
 with app.app_context():
     print("💣 Veritabanı SIFIRLANIYOR (Temizlik)...")
     
-    # Tüm foreign key constraint'leri ve tabloları CASCADE ile temizle
+    # Önce mevcut tüm constraint'leri bul ve drop et
     try:
-        db.session.execute(text('DROP SCHEMA public CASCADE;'))
-        db.session.execute(text('CREATE SCHEMA public;'))
+        inspector = inspect(db.engine)
+        
+        # Tüm tabloları listele
+        for table_name in inspector.get_table_names():
+            # Her tablodaki constraint'leri drop et
+            constraints = inspector.get_unique_constraints(table_name)
+            for constraint in constraints:
+                try:
+                    constraint_name = constraint['name']
+                    db.session.execute(text(f'ALTER TABLE {table_name} DROP CONSTRAINT IF EXISTS {constraint_name} CASCADE;'))
+                    print(f"  ✓ Dropped constraint: {constraint_name}")
+                except Exception as e:
+                    print(f"  ⚠️ Constraint drop hatası (devam ediliyor): {e}")
+        
         db.session.commit()
-        print("✅ Schema tamamen temizlendi.")
     except Exception as e:
-        print(f"⚠️ Schema temizleme hatası (devam ediliyor): {e}")
+        print(f"⚠️ Constraint temizleme hatası (devam ediliyor): {e}")
+        db.session.rollback()
+    
+    # Şimdi tabloları drop et
+    try:
+        db.drop_all()
+        print("✅ Tüm tablolar silindi.")
+    except Exception as e:
+        print(f"⚠️ Table drop hatası (devam ediliyor): {e}")
         db.session.rollback()
     
     # Tabloları yeniden oluştur
