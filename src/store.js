@@ -328,5 +328,39 @@ export const store = reactive({
     if (index !== -1) {
       this.events.splice(index, 1);
     }
+  },
+
+  // Centralized Reviews Management
+  allReviews: JSON.parse(localStorage.getItem('reviews') || '[]'),
+
+  addReview(review) {
+    // Ensure review has an ID and date
+    const newReview = {
+      id: Date.now(),
+      date: new Date().toLocaleDateString(), // Simple date format
+      ...review
+    };
+
+    this.allReviews.unshift(newReview);
+    localStorage.setItem('reviews', JSON.stringify(this.allReviews));
+
+    // Also update the event object for immediate UI feedback if needed (optional but good for reactivity)
+    const event = this.events.find(e => e.id === review.eventId);
+    if (event) {
+      event.userRating = review.rating;
+      event.userFeedback = review.comment; // or review.feedback
+      event.isAnonymous = review.isAnonymous;
+    }
+
+    return newReview;
+  },
+
+  getReviewsByEventId(eventId) {
+    return this.allReviews.filter(r => r.eventId === eventId);
+  },
+
+  deleteReview(reviewId) {
+    this.allReviews = this.allReviews.filter(r => r.id !== reviewId);
+    localStorage.setItem('reviews', JSON.stringify(this.allReviews));
   }
 })

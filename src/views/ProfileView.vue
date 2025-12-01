@@ -414,12 +414,16 @@ const loadRatedEvents = () => {
 }
 
 const isRated = (eventId) => {
-  return ratedEvents.value.has(eventId)
+  const reviews = store.getReviewsByEventId(eventId)
+  // Assuming current user is the one creating reviews in this local-only app
+  // In a real app, we'd check review.userId === currentUser.id
+  return reviews.some(r => r.isCurrentUser)
 }
 
 const getEventRating = (eventId) => {
-  const rating = localStorage.getItem(`rated_event_${eventId}`)
-  return rating ? parseInt(rating) : 0
+  const reviews = store.getReviewsByEventId(eventId)
+  const userReview = reviews.find(r => r.isCurrentUser)
+  return userReview ? userReview.rating : 0
 }
 
 const joinedCommunities = computed(() => {
@@ -469,7 +473,7 @@ const loadAvatar = () => {
 onMounted(() => {
   loadUserData()
   loadAvatar()
-  loadRatedEvents()
+  // loadRatedEvents() // No longer needed with store
   window.addEventListener('avatar-changed', loadAvatar)
 })
 
@@ -520,15 +524,19 @@ const currentAnonymous = ref(false)
 const openRating = (event) => {
   ratingEvent.value = event
   
-  // Fetch existing rating if any
-  const storedRating = localStorage.getItem(`rated_event_${event.id}`)
-  currentRating.value = storedRating ? parseInt(storedRating) : 0
+  // Fetch existing rating if any from store
+  const reviews = store.getReviewsByEventId(event.id)
+  const userReview = reviews.find(r => r.isCurrentUser)
   
-  const storedFeedback = localStorage.getItem(`feedback_event_${event.id}`)
-  currentFeedback.value = storedFeedback || ''
-
-  const storedAnonymous = localStorage.getItem(`anonymous_event_${event.id}`)
-  currentAnonymous.value = storedAnonymous === 'true'
+  if (userReview) {
+    currentRating.value = userReview.rating
+    currentFeedback.value = userReview.comment
+    currentAnonymous.value = userReview.isAnonymous
+  } else {
+    currentRating.value = 0
+    currentFeedback.value = ''
+    currentAnonymous.value = false
+  }
   
   showRatingPopup.value = true
 }
@@ -547,14 +555,16 @@ const handleRatingSubmit = (payload) => {
     const feedback = typeof payload === 'object' ? payload.feedback : ''
     const isAnonymous = typeof payload === 'object' ? payload.isAnonymous : false
     
-    const result = store.rateEvent(ratingEvent.value.id, rating, feedback, isAnonymous)
+    store.addReview({
+      eventId: ratingEvent.value.id,
+      user: isAnonymous ? 'Incognito User' : 'You', // Should match EventDetailsView logic
+      rating: rating,
+      comment: feedback,
+      isCurrentUser: true,
+      isAnonymous: isAnonymous
+    })
     
-    if (result.success) {
-      ratedEvents.value.add(ratingEvent.value.id)
-      console.log(`Rated event ${ratingEvent.value.id} with ${rating} stars. Feedback: ${feedback}. Anonymous: ${isAnonymous}`)
-    } else {
-      alert(result.message) // Show error if security check fails
-    }
+    console.log(`Rated event ${ratingEvent.value.id} with ${rating} stars.`)
   }
   showRatingPopup.value = false
   ratingEvent.value = null

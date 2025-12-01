@@ -2,7 +2,7 @@
   <el-dialog
     v-model="visible"
     title="Give Feedback!"
-    width="500px"
+    width="800px"
     class="rating-dialog"
     :close-on-click-modal="false"
     :close-on-press-escape="false"
@@ -12,33 +12,56 @@
     modal
     @close="handleClose"
   >
-    <div class="feedback-content">
-      <div class="rating-section">
-        <h3 class="rating-title">
-          Your rating
-          <i class="fas fa-question-circle rating-icon" title="Rate your experience"></i>
-        </h3>
-        <el-rate 
-          v-model="rating" 
-          size="large" 
-          :colors="['#fcc419', '#fcc419', '#fcc419']" 
-        />
-      </div>
-      
-      <div class="thoughts-section">
-        <p class="thoughts-question">Do you have any thoughts you'd like to share?</p>
-        <textarea
-          v-model="feedbackText"
-          placeholder=""
-          class="feedback-textarea"
-          rows="5"
-        ></textarea>
+    <div class="feedback-container">
+      <!-- Left Column: Input -->
+      <div class="input-column">
+        <div class="rating-section">
+          <h3 class="rating-title">
+            Your rating
+            <i class="fas fa-question-circle rating-icon" title="Rate your experience"></i>
+          </h3>
+          <el-rate 
+            v-model="rating" 
+            size="large" 
+            :colors="['#fcc419', '#fcc419', '#fcc419']" 
+          />
+        </div>
         
-        <div class="anonymous-option">
-          <label class="checkbox-label">
-            <input type="checkbox" v-model="isAnonymous" />
-            <span class="checkbox-text">Hide my name (Post Anonymously)</span>
-          </label>
+        <div class="thoughts-section">
+          <p class="thoughts-question">Do you have any thoughts you'd like to share?</p>
+          <textarea
+            v-model="feedbackText"
+            placeholder="Tell us about your experience..."
+            class="feedback-textarea"
+            rows="5"
+          ></textarea>
+          
+          <div class="anonymous-option">
+            <label class="checkbox-label">
+              <input type="checkbox" v-model="isAnonymous" />
+              <span class="checkbox-text">Hide my name (Post Anonymously)</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Live Preview -->
+      <div class="preview-column">
+        <h3 class="preview-title">Live Preview</h3>
+        <div class="review-card preview-card">
+          <div class="review-header">
+            <div class="reviewer-info">
+              <div class="avatar">{{ previewAvatar }}</div>
+              <div>
+                <span class="name">{{ previewName }}</span>
+                <span class="date">Just now</span>
+              </div>
+            </div>
+            <div class="review-stars">
+              <i v-for="n in 5" :key="n" class="fas fa-star" :class="{ filled: n <= rating }"></i>
+            </div>
+          </div>
+          <p class="review-text">{{ feedbackText || 'Your review text will appear here...' }}</p>
         </div>
       </div>
     </div>
@@ -55,7 +78,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 
 const props = defineProps({
   event: {
@@ -87,6 +110,15 @@ const rating = ref(props.initialRating)
 const feedbackText = ref(props.initialFeedback)
 const isAnonymous = ref(props.initialAnonymous)
 
+// Computed properties for Live Preview
+const previewName = computed(() => {
+  return isAnonymous.value ? 'Incognito User' : 'You' // Or fetch real user name if available
+})
+
+const previewAvatar = computed(() => {
+  return isAnonymous.value ? '?' : 'Y' // Or real user initial
+})
+
 watch(() => props.modelValue, (val) => {
   visible.value = val
 })
@@ -116,9 +148,9 @@ const submitFeedback = () => {
   border-radius: 12px !important;
   overflow: hidden !important;
   margin: 0 auto !important;
-  margin-top: 15vh !important;
-  width: 500px !important;
-  max-width: 90vw !important;
+  margin-top: 10vh !important;
+  width: 800px !important; /* Increased width for split layout */
+  max-width: 95vw !important;
   border: 2px dashed #1b8f48 !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
   background-color: #FDFDEE !important;
@@ -153,7 +185,7 @@ const submitFeedback = () => {
 
 .rating-dialog .el-dialog__body {
   background-color: #FDFDEE !important;
-  padding: 20px !important; 
+  padding: 24px !important; 
   overflow: visible !important;
   min-height: 300px !important;
   height: auto !important;
@@ -201,13 +233,35 @@ const submitFeedback = () => {
 </style>
 
 <style scoped>
-.feedback-content {
-  padding: 10px 0;
-  width: 100%;
+.feedback-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+}
+
+.input-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.preview-column {
+  background: #f8fcf9;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px dashed #d8eadb;
+}
+
+.preview-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #6b7c74;
+  margin: 0 0 16px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .rating-section {
-  margin-bottom: 30px;
+  margin-bottom: 24px;
 }
 
 .rating-title {
@@ -216,7 +270,7 @@ const submitFeedback = () => {
   gap: 8px;
   color: #153226;
   margin-top: 0;
-  margin-bottom: 15px;
+  margin-bottom: 12px;
   font-size: 16px;
   font-weight: 500;
 }
@@ -254,7 +308,7 @@ const submitFeedback = () => {
 }
 
 .thoughts-section {
-  margin-top: 25px;
+  margin-top: 0;
 }
 
 .thoughts-question {
@@ -286,7 +340,7 @@ const submitFeedback = () => {
 }
 
 .anonymous-option {
-  margin-top: 12px;
+  margin-top: 16px;
 }
 
 .checkbox-label {
@@ -307,5 +361,72 @@ input[type="checkbox"] {
   width: 16px;
   height: 16px;
   cursor: pointer;
+}
+
+/* Review Card Styles (Reused) */
+.review-card {
+  background: white;
+  border: 1px solid #eef2f0;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.reviewer-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  background: #e6f3e9;
+  color: #1b8f48;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.reviewer-info .name {
+  display: block;
+  font-weight: 600;
+  color: #153226;
+}
+
+.reviewer-info .date {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.review-stars {
+  color: #e5e7eb;
+  font-size: 14px;
+}
+
+.review-stars .filled {
+  color: #fbbf24;
+}
+
+.review-text {
+  color: #4a5e53;
+  line-height: 1.6;
+  margin: 0;
+  word-break: break-word;
+}
+
+@media (max-width: 768px) {
+  .feedback-container {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

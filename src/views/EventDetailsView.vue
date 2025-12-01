@@ -99,8 +99,14 @@
               </div>
               <span class="count">Based on 128 reviews</span>
             </div>
-            <div class="trustpilot-badge">
-              <i class="fas fa-star" style="color: #00b67a;"></i> Trustpilot
+            
+            <div class="summary-actions">
+              <div class="trustpilot-badge">
+                <i class="fas fa-star" style="color: #00b67a;"></i> Trustpilot
+              </div>
+              <button class="write-review-btn" @click="showRatingPopup = true">
+                Write a Review
+              </button>
             </div>
           </div>
 
@@ -114,8 +120,18 @@
                     <span class="date">{{ review.date }}</span>
                   </div>
                 </div>
-                <div class="review-stars">
-                  <i v-for="n in 5" :key="n" class="fas fa-star" :class="{ filled: n <= review.rating }"></i>
+                <div class="review-meta">
+                  <div v-if="review.isCurrentUser" class="review-actions">
+                    <button class="action-btn edit-btn" title="Edit Review">
+                      <i class="fas fa-pen"></i>
+                    </button>
+                    <button class="action-btn delete-btn" title="Delete Review" @click="deleteReview(review.id)">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                  <div class="review-stars">
+                    <i v-for="n in 5" :key="n" class="fas fa-star" :class="{ filled: n <= review.rating }"></i>
+                  </div>
                 </div>
               </div>
               <p class="review-text">{{ review.comment }}</p>
@@ -130,6 +146,12 @@
       <button @click="$router.push('/events')">Go to Events</button>
     </div>
     <ConfettiOverlay v-if="showCelebration" @close="showCelebration = false" />
+    <RatingPopup 
+      v-if="event"
+      v-model="showRatingPopup" 
+      :event="event"
+      @submit="handleRatingSubmit"
+    />
   </div>
 </template>
 
@@ -138,10 +160,12 @@ import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { store } from '../store.js'
 import ConfettiOverlay from '../components/ConfettiOverlay.vue'
+import RatingPopup from '../components/RatingPopup.vue'
 
 const route = useRoute()
 const router = useRouter()
 const showCelebration = ref(false)
+const showRatingPopup = ref(false)
 const activeTab = ref('details')
 
 const event = computed(() => {
@@ -157,12 +181,11 @@ const isPastEvent = computed(() => {
   return eventDate < today
 })
 
-// Mock Reviews Data
-const reviews = ref([
-  { id: 1, user: 'Sarah J.', date: '2 days ago', rating: 5, comment: 'Absolutely amazing event! The organization was top-notch and I learned so much.' },
-  { id: 2, user: 'Michael C.', date: '1 week ago', rating: 4, comment: 'Great speakers and networking opportunities. Would definitely recommend.' },
-  { id: 3, user: 'Emily R.', date: '2 weeks ago', rating: 5, comment: 'One of the best community events I have attended this year. Can\'t wait for the next one!' }
-])
+// Fetch reviews from store
+const reviews = computed(() => {
+  if (!event.value) return []
+  return store.getReviewsByEventId(event.value.id)
+})
 
 const toggleRegistration = () => {
   if (!event.value) return
@@ -177,6 +200,27 @@ const toggleRegistration = () => {
   
   if (event.value.registered) {
     showCelebration.value = true
+  }
+}
+
+const handleRatingSubmit = (data) => {
+  if (!event.value) return
+
+  store.addReview({
+    eventId: event.value.id,
+    user: data.isAnonymous ? 'Incognito User' : 'You', // In real app, get from user store
+    rating: data.rating,
+    comment: data.feedback,
+    isCurrentUser: true, // Mark as current user's review
+    isAnonymous: data.isAnonymous
+  })
+  
+  showRatingPopup.value = false
+}
+
+const deleteReview = (id) => {
+  if (confirm('Are you sure you want to delete your review?')) {
+    store.deleteReview(id)
   }
 }
 </script>
@@ -417,12 +461,34 @@ const toggleRegistration = () => {
   color: #6b7c74;
 }
 
+.summary-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+
 .trustpilot-badge {
   font-weight: 600;
   color: #153226;
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.write-review-btn {
+  background: #1b8f48;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.write-review-btn:hover {
+  background: #167a3d;
 }
 
 .reviews-list {
@@ -479,6 +545,35 @@ const toggleRegistration = () => {
 .reviewer-info .date {
   font-size: 12px;
   color: #9ca3af;
+}
+
+.review-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.review-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  font-size: 14px;
+  color: #9ca3af;
+  transition: color 0.2s;
+}
+
+.action-btn:hover {
+  color: #153226;
+}
+
+.delete-btn:hover {
+  color: #ef4444; /* Red color for delete */
 }
 
 .review-stars {
