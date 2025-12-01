@@ -386,9 +386,12 @@ import { store } from '../store.js'
 import { CircleCheckFilled } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import RatingPopup from '../components/RatingPopup.vue'
+import { useToast } from "vue-toastification";
 
 const router = useRouter()
 const activePanel = ref('events')
+const toast = useToast();
+
 const seeAllTarget = ref(null)
 const upcomingTrack = ref(null)
 const activitiesTrack = ref(null)
@@ -436,9 +439,9 @@ const approveApp = async (id) => {
   const result = await store.approveApplication(id, user.id || 1) // Fallback ID if not set
   
   if (result.success) {
-    ElMessage.success('Application approved and club promoted!')
+    toast.success('Application approved and club promoted!')
   } else {
-    ElMessage.error('Failed to approve: ' + (result.message || 'Unknown error'))
+    toast.error('Failed to approve: ' + (result.message || 'Unknown error'))
   }
   approvingId.value = null
 }
@@ -627,7 +630,7 @@ const handleRatingSubmit = (payload) => {
       isAnonymous: isAnonymous
     })
     
-    console.log(`Rated event ${ratingEvent.value.id} with ${rating} stars.`)
+    toast.success(`Rated event with ${rating} stars.`)
   }
   showRatingPopup.value = false
   ratingEvent.value = null

@@ -167,9 +167,11 @@ import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { store } from '../store.js'
 import ConfettiOverlay from '../components/ConfettiOverlay.vue'
+import { useToast } from "vue-toastification";
 
 const route = useRoute()
 const router = useRouter()
+const toast = useToast()
 const showCelebration = ref(false)
 
 const CLUBS = [
@@ -378,7 +380,7 @@ const deleteEvent = (event) => {
 const register = (event) => {
   // Check if user is logged in
   if (!localStorage.getItem('user_token')) {
-    alert('Please sign in to register.')
+    toast.warning('Please sign in to register.')
     router.push('/login')
     return
   }
@@ -389,7 +391,10 @@ const register = (event) => {
   // If registration was successful (it toggles, so check if it's now true)
   // Note: store.registerEvent modifies the object in place.
   if (event.registered) {
+    toast.success("Successfully registered for the event! 🎉")
     showCelebration.value = true;
+  } else {
+    toast.info("Unregistered from event.")
   }
 }
 </script>

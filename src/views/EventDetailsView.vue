@@ -70,10 +70,16 @@
           <template v-if="!isPastEvent">
             <button 
               class="register-btn" 
-              :class="{ 'registered': event.registered }"
+              :class="{ 'registered': event.registered, 'is-loading': isRegistering }"
               @click="toggleRegistration"
+              :disabled="isRegistering"
             >
-              {{ event.registered ? 'Registered' : 'Register Now' }}
+              <span v-if="isRegistering">
+                <i class="fas fa-spinner fa-spin"></i> Processing...
+              </span>
+              <span v-else>
+                {{ event.registered ? 'Registered' : 'Register Now' }}
+              </span>
             </button>
           </template>
           <button 
@@ -161,12 +167,16 @@ import { useRoute, useRouter } from 'vue-router'
 import { store } from '../store.js'
 import ConfettiOverlay from '../components/ConfettiOverlay.vue'
 import RatingPopup from '../components/RatingPopup.vue'
+import { useToast } from "vue-toastification";
 
 const route = useRoute()
 const router = useRouter()
+const toast = useToast()
+
 const showCelebration = ref(false)
 const showRatingPopup = ref(false)
 const activeTab = ref('details')
+const isRegistering = ref(false)
 
 const event = computed(() => {
   const id = parseInt(route.params.id)
@@ -187,19 +197,34 @@ const reviews = computed(() => {
   return store.getReviewsByEventId(event.value.id)
 })
 
-const toggleRegistration = () => {
+const toggleRegistration = async () => {
   if (!event.value) return
   
   if (!localStorage.getItem('user_token')) {
-    alert('Please sign in to register.')
+    toast.warning('Please sign in to register.')
     router.push('/login')
     return
   }
 
-  store.registerEvent(event.value)
-  
-  if (event.value.registered) {
-    showCelebration.value = true
+  isRegistering.value = true
+
+  try {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 1000))
+
+    store.registerEvent(event.value)
+    
+    if (event.value.registered) {
+      toast.success("Successfully registered for the event! 🎉")
+      showCelebration.value = true
+    } else {
+      toast.info("Unregistered from event.")
+    }
+  } catch (error) {
+    toast.error("Failed to join. Please try again.")
+    console.error(error)
+  } finally {
+    isRegistering.value = false
   }
 }
 
