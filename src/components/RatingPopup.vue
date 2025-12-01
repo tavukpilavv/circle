@@ -33,6 +33,13 @@
           class="feedback-textarea"
           rows="5"
         ></textarea>
+        
+        <div class="anonymous-option">
+          <label class="checkbox-label">
+            <input type="checkbox" v-model="isAnonymous" />
+            <span class="checkbox-text">Hide my name (Post Anonymously)</span>
+          </label>
+        </div>
       </div>
     </div>
     
@@ -58,14 +65,27 @@ const props = defineProps({
   modelValue: {
     type: Boolean,
     default: false
+  },
+  initialRating: {
+    type: Number,
+    default: 0
+  },
+  initialFeedback: {
+    type: String,
+    default: ''
+  },
+  initialAnonymous: {
+    type: Boolean,
+    default: false
   }
 })
 
 const emit = defineEmits(['update:modelValue', 'close', 'submit'])
 
 const visible = ref(props.modelValue)
-const rating = ref(0)
-const feedbackText = ref('')
+const rating = ref(props.initialRating)
+const feedbackText = ref(props.initialFeedback)
+const isAnonymous = ref(props.initialAnonymous)
 
 watch(() => props.modelValue, (val) => {
   visible.value = val
@@ -81,7 +101,11 @@ const handleClose = () => {
 
 const submitFeedback = () => {
   if (rating.value > 0) {
-    emit('submit', { rating: rating.value, feedback: feedbackText.value })
+    emit('submit', { 
+      rating: rating.value, 
+      feedback: feedbackText.value,
+      isAnonymous: isAnonymous.value
+    })
   }
 }
 </script>
@@ -259,5 +283,29 @@ const submitFeedback = () => {
   outline: none;
   border-color: #1b8f48;
   box-shadow: 0 0 0 2px rgba(27, 143, 72, 0.1);
+}
+
+.anonymous-option {
+  margin-top: 12px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkbox-text {
+  font-size: 14px;
+  color: #153226;
+}
+
+input[type="checkbox"] {
+  accent-color: #1b8f48;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
 }
 </style>

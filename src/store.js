@@ -262,6 +262,32 @@ export const store = reactive({
       target.registered = !target.registered;
     }
   },
+  rateEvent(eventId, rating, feedback, isAnonymous = false) {
+    const event = this.events.find(e => e.id === eventId);
+    if (!event) return { success: false, message: 'Event not found' };
+
+    // Security check: User must be registered
+    if (!event.registered) {
+      console.warn('Security Check Failed: User not registered for event', eventId);
+      return { success: false, message: 'User did not participate in this event' };
+    }
+
+    // Update or Create logic (simulated)
+    event.userRating = rating;
+    event.userFeedback = feedback;
+    event.isAnonymous = isAnonymous;
+
+    // Persist to localStorage (mocking DB persistence)
+    localStorage.setItem(`rated_event_${eventId}`, rating);
+    localStorage.setItem(`anonymous_event_${eventId}`, isAnonymous);
+    if (feedback) {
+      localStorage.setItem(`feedback_event_${eventId}`, feedback);
+    } else {
+      localStorage.removeItem(`feedback_event_${eventId}`);
+    }
+
+    return { success: true };
+  },
   createClub(clubData) {
     const newId = this.communities.length > 0
       ? Math.max(...this.communities.map(c => c.id)) + 1

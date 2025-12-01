@@ -167,10 +167,17 @@
               class="rate-pill" 
               :class="{ 'is-rated': isRated(event.id) }"
               @click="openRating(event)"
-              :disabled="isRated(event.id)"
             >
-              <i class="fas" :class="isRated(event.id) ? 'fa-check' : 'fa-star'"></i> 
-              {{ isRated(event.id) ? 'Rated' : 'Rate' }}
+              <template v-if="isRated(event.id)">
+                <span style="display: flex; align-items: center; gap: 6px;">
+                  <i class="fas fa-star" style="color: #fcc419;"></i>
+                  {{ getEventRating(event.id) }}/5
+                  <i class="fas fa-pen" style="font-size: 10px; margin-left: 4px; opacity: 0.7;"></i>
+                </span>
+              </template>
+              <template v-else>
+                <i class="fas fa-star"></i> Rate
+              </template>
             </button>
           </article>
         </div>
@@ -275,10 +282,17 @@
               class="rate-pill" 
               :class="{ 'is-rated': isRated(event.id) }"
               @click="openRating(event)"
-              :disabled="isRated(event.id)"
             >
-              <i class="fas" :class="isRated(event.id) ? 'fa-check' : 'fa-star'"></i> 
-              {{ isRated(event.id) ? 'Rated' : 'Rate' }}
+              <template v-if="isRated(event.id)">
+                <span style="display: flex; align-items: center; gap: 6px;">
+                  <i class="fas fa-star" style="color: #fcc419;"></i>
+                  {{ getEventRating(event.id) }}/5
+                  <i class="fas fa-pen" style="font-size: 10px; margin-left: 4px; opacity: 0.7;"></i>
+                </span>
+              </template>
+              <template v-else>
+                <i class="fas fa-star"></i> Rate
+              </template>
             </button>
           </article>
         </div>
@@ -289,6 +303,9 @@
       v-if="ratingEvent"
       v-model="showRatingPopup"
       :event="ratingEvent"
+      :initial-rating="currentRating"
+      :initial-feedback="currentFeedback"
+      :initial-anonymous="currentAnonymous"
       @close="closeRatingPopup"
       @submit="handleRatingSubmit"
     />
@@ -400,6 +417,11 @@ const isRated = (eventId) => {
   return ratedEvents.value.has(eventId)
 }
 
+const getEventRating = (eventId) => {
+  const rating = localStorage.getItem(`rated_event_${eventId}`)
+  return rating ? parseInt(rating) : 0
+}
+
 const joinedCommunities = computed(() => {
   return store.communities.filter(c => c.joined)
 })
@@ -491,31 +513,54 @@ const slide = (trackName, direction) => {
   })
 }
 
+const currentRating = ref(0)
+const currentFeedback = ref('')
+const currentAnonymous = ref(false)
+
 const openRating = (event) => {
-  if (isRated(event.id)) return
   ratingEvent.value = event
+  
+  // Fetch existing rating if any
+  const storedRating = localStorage.getItem(`rated_event_${event.id}`)
+  currentRating.value = storedRating ? parseInt(storedRating) : 0
+  
+  const storedFeedback = localStorage.getItem(`feedback_event_${event.id}`)
+  currentFeedback.value = storedFeedback || ''
+
+  const storedAnonymous = localStorage.getItem(`anonymous_event_${event.id}`)
+  currentAnonymous.value = storedAnonymous === 'true'
+  
   showRatingPopup.value = true
 }
 
 const closeRatingPopup = () => {
   showRatingPopup.value = false
   ratingEvent.value = null
+  currentRating.value = 0
+  currentFeedback.value = ''
+  currentAnonymous.value = false
 }
 
 const handleRatingSubmit = (payload) => {
   if (ratingEvent.value) {
     const rating = typeof payload === 'object' ? payload.rating : payload
     const feedback = typeof payload === 'object' ? payload.feedback : ''
+    const isAnonymous = typeof payload === 'object' ? payload.isAnonymous : false
     
-    localStorage.setItem(`rated_event_${ratingEvent.value.id}`, rating)
-    if (feedback) {
-      localStorage.setItem(`feedback_event_${ratingEvent.value.id}`, feedback)
+    const result = store.rateEvent(ratingEvent.value.id, rating, feedback, isAnonymous)
+    
+    if (result.success) {
+      ratedEvents.value.add(ratingEvent.value.id)
+      console.log(`Rated event ${ratingEvent.value.id} with ${rating} stars. Feedback: ${feedback}. Anonymous: ${isAnonymous}`)
+    } else {
+      alert(result.message) // Show error if security check fails
     }
-    ratedEvents.value.add(ratingEvent.value.id)
-    console.log(`Rated event ${ratingEvent.value.id} with ${rating} stars. Feedback: ${feedback}`)
   }
   showRatingPopup.value = false
   ratingEvent.value = null
+  currentRating.value = 0
+  currentFeedback.value = ''
+  currentAnonymous.value = false
 }
 </script>
 
@@ -914,13 +959,16 @@ const handleRatingSubmit = (payload) => {
 }
 
 .rate-pill.is-rated {
-  background: #e2e8f0;
-  color: #64748b;
-  cursor: default;
+  background: transparent;
+  border: 2px solid var(--brand);
+  color: var(--brand);
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
 .rate-pill.is-rated:hover {
-  background: #e2e8f0;
+  background: var(--brand);
+  color: #ffffff;
 }
 
 .no-data-msg {
