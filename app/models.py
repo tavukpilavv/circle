@@ -18,7 +18,7 @@ class User(db.Model):
     first_name = db.Column(db.String(64))
     last_name = db.Column(db.String(64))
     email = db.Column(db.String(120), unique=True, index=True)
-    password_hash = db.Column(db.String(128))
+    password_hash = db.Column(db.String(256))
     
     # Signup Formu Alanları
     username = db.Column(db.String(64), unique=True)
