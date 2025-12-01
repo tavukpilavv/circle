@@ -61,12 +61,26 @@
           Join us for this exciting event! Don't miss out on this opportunity to connect with the community and participate in engaging activities.
         </p>
 
-        <button 
-          @click="dialogVisible = false"
-          style="background: #1b8f48; color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: 600; margin-top: 10px; width: 100%;"
-        >
-          Close
-        </button>
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+          <button 
+            @click="toggleRegistration"
+            :style="{
+              background: selectedEvent.registered ? '#e0e0e0' : '#1b8f48',
+              color: selectedEvent.registered ? '#333' : 'white',
+              flex: 1
+            }"
+            style="border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: 600;"
+          >
+            {{ selectedEvent.registered ? 'Unregister' : 'Register' }}
+          </button>
+
+          <button 
+            @click="dialogVisible = false"
+            style="background: transparent; border: 2px solid #ddd; color: #666; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: 600;"
+          >
+            Close
+          </button>
+        </div>
       </div>
 
     </div>
@@ -142,6 +156,12 @@ const seeAll = (event) => {
   // Open the global dialog with the clicked event's details
   selectedEvent.value = event
   dialogVisible.value = true
+}
+
+const toggleRegistration = () => {
+  if (selectedEvent.value) {
+    store.registerEvent(selectedEvent.value)
+  }
 }
 
 const onFilterChange = (val) => {
