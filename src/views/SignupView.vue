@@ -60,6 +60,7 @@
 import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { registerUser } from '../services/auth'
 
 const router = useRouter()
 const formRef = ref(null)
@@ -120,20 +121,27 @@ watch(
 
 const submit = () => {
     if (!formRef.value) return
-    formRef.value.validate((valid) => {
+    formRef.value.validate(async (valid) => {
         if (valid) {
             isSubmitting.value = true
             
-            // Save user info to localStorage
-            // Save user info to localStorage
-            localStorage.setItem('user_username', form.value.username)
-            localStorage.setItem('user_major', form.value.major)
-            
-            ElMessage.success('Sign up form submitted!')
-            setTimeout(() => {
-                isSubmitting.value = false
-                router.push('/login')
-            }, 1200)
+            try {
+                await registerUser(form.value);
+                
+                // Save user info to localStorage (optional, but keeping existing logic pattern)
+                localStorage.setItem('user_username', form.value.username)
+                localStorage.setItem('user_major', form.value.major)
+                
+                ElMessage.success('Sign up successful! Please log in.')
+                setTimeout(() => {
+                    isSubmitting.value = false
+                    router.push('/login')
+                }, 1200)
+            } catch (error) {
+                isSubmitting.value = false;
+                console.error('Signup error:', error);
+                ElMessage.error('Signup failed: ' + (error.response?.data?.message || 'An error occurred'));
+            }
         }
     })
 }

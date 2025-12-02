@@ -54,40 +54,36 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { loginUser } from '../services/auth'
 
 const router = useRouter()
 const showPassword = ref(false)
 const username = ref('')
 const password = ref('')
 
-const handleLogin = () => {
-  const user = username.value.toLowerCase();
+const handleLogin = async () => {
+  const user = username.value; // Removed toLowerCase to allow case-sensitive usernames if needed, or keep it? Backend usually handles it.
   const pass = password.value;
 
-  // Mock Credential Check
-  if (user === 'superadmin') {
-    if (pass !== 'superadmin') {
-      alert('Invalid password for Super Admin');
-      return;
-    }
-    localStorage.setItem('user_role', 'super_admin');
-  } else if (user === 'admin') {
-    if (pass !== 'admin') {
-      alert('Invalid password for Admin');
-      return;
-    }
-    localStorage.setItem('user_role', 'admin');
-  } else {
-    // Regular user - allow any password for demo
-    localStorage.setItem('user_role', 'user');
-  }
+  try {
+    const response = await loginUser({ username: user, password: pass });
+    
+    // Keep existing local state updates for compatibility if needed, 
+    // but 'authToken' is now the source of truth for API calls.
+    localStorage.setItem('user_token', 'logged_in'); 
+    localStorage.setItem('user_name', username.value);
+    
+    // If backend returns role, use it. Otherwise default to user.
+    // For now, we'll assume 'user' unless we parse the JWT or backend sends it.
+    const role = response.role || 'user'; 
+    localStorage.setItem('user_role', role);
 
-  localStorage.setItem('user_token', 'logged_in')
-  localStorage.setItem('user_name', username.value) 
-  
-  window.dispatchEvent(new Event('auth-changed'))
-  // Force reload to ensure all components pick up the new role/token
-  window.location.href = '/'
+    window.dispatchEvent(new Event('auth-changed'));
+    window.location.href = '/';
+  } catch (error) {
+    console.error('Login error:', error);
+    alert('Login failed: ' + (error.response?.data?.message || 'Invalid credentials'));
+  }
 }
 </script>
 

@@ -164,6 +164,7 @@ const applyFilters = () => {
 }
 
 onMounted(() => {
+  store.fetchCommunities()
   applyFilters()
   
   // Check for Super Admin role

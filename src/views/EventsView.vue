@@ -251,6 +251,7 @@ const filteredEvents = computed(() => {
 });
 
 onMounted(() => {
+  store.fetchEvents();
   if (localStorage.getItem('user_token')) {
     const role = localStorage.getItem('user_role');
     isAdmin.value = role === 'admin' || role === 'super_admin';
