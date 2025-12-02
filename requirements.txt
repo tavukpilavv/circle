@@ -8,3 +8,4 @@ cloudinary
 python-dotenv
 email_validator
 Werkzeug
+Flask-JWT-Extended

@@ -1,44 +1,29 @@
 from app import create_app, db
 from app.models import User, Community, Event
-from sqlalchemy import text, inspect
+from sqlalchemy import MetaData
 
 app = create_app()
 
 with app.app_context():
     print("💣 Veritabanı SIFIRLANIYOR (Temizlik)...")
     
-    # Önce mevcut tüm constraint'leri bul ve drop et
     try:
-        inspector = inspect(db.engine)
-        
-        # Tüm tabloları listele
-        for table_name in inspector.get_table_names():
-            # Her tablodaki constraint'leri drop et
-            constraints = inspector.get_unique_constraints(table_name)
-            for constraint in constraints:
-                try:
-                    constraint_name = constraint['name']
-                    db.session.execute(text(f'ALTER TABLE {table_name} DROP CONSTRAINT IF EXISTS {constraint_name} CASCADE;'))
-                    print(f"  ✓ Dropped constraint: {constraint_name}")
-                except Exception as e:
-                    print(f"  ⚠️ Constraint drop hatası (devam ediliyor): {e}")
-        
-        db.session.commit()
-    except Exception as e:
-        print(f"⚠️ Constraint temizleme hatası (devam ediliyor): {e}")
-        db.session.rollback()
-    
-    # Şimdi tabloları drop et
-    try:
-        db.drop_all()
+        # SQLAlchemy MetaData kullanarak tüm tabloları yansıt (reflect) ve sil
+        meta = MetaData()
+        meta.reflect(bind=db.engine)
+        meta.drop_all(bind=db.engine)
         print("✅ Tüm tablolar silindi.")
     except Exception as e:
-        print(f"⚠️ Table drop hatası (devam ediliyor): {e}")
-        db.session.rollback()
+        print(f"⚠️ Tablo silme hatası: {e}")
+        # Hata olsa bile devam etmeyi dene, create_all hata verebilir ama transaction block sorunu olmaz
     
     # Tabloları yeniden oluştur
-    db.create_all()
-    print("✅ Tablolar yeniden oluşturuldu.")
+    try:
+        db.create_all()
+        print("✅ Tablolar yeniden oluşturuldu.")
+    except Exception as e:
+        print(f"❌ Tablo oluşturma hatası: {e}")
+        raise e
 
     # ================= KULLANICILAR =================
     print("👤 Kullanıcılar ekleniyor...")

@@ -5,6 +5,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 class Config:
     # Güvenlik Anahtarı
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'cok-gizli-anahtar-123'
+    JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY') or SECRET_KEY
     
     # --- VERİTABANI AYARLARI ---
     # Render'da DATABASE_URL ortam değişkeni kullanılır, localde SQLite

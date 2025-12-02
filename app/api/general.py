@@ -3,6 +3,7 @@ from flask import Blueprint, jsonify, request, current_app
 from app.models import Community, Event, User, Rating
 from app import db
 from app.utils import upload_file
+from flask_jwt_extended import jwt_required, get_jwt_identity, verify_jwt_in_request
 
 bp = Blueprint('general', __name__)
 
@@ -11,6 +12,11 @@ bp = Blueprint('general', __name__)
 @bp.route('/events', methods=['GET'])
 def get_events():
     try:
+        # Opsiyonel JWT kontrolü (Giriş yapmışsa registered bilgisini doğru verelim)
+        verify_jwt_in_request(optional=True)
+        current_user_id = get_jwt_identity()
+        current_user = User.query.get(current_user_id) if current_user_id else None
+
         q = request.args.get('q')
         query = Event.query
         if q: query = query.filter(Event.title.contains(q))
@@ -26,6 +32,10 @@ def get_events():
                 community_name = e.host_community.name
                 organizer_name = e.host_community.university
 
+            is_registered = False
+            if current_user and e in current_user.registered_events:
+                is_registered = True
+
             output.append({
                 'id': e.id,
                 'name': e.title,
@@ -39,7 +49,7 @@ def get_events():
                 'organizer': organizer_name,
                 'capacity': e.capacity,
                 'description': e.description,
-                'registered': False,
+                'registered': is_registered,
                 'rating': e.rating or 0,
                 'ratingCount': e.rating_count or 0,
                 'participant_count': e.participants.count()
@@ -50,10 +60,11 @@ def get_events():
         return jsonify({'error': 'Etkinlikler getirilemedi.'}), 500
 
 @bp.route('/events/create', methods=['POST'])
+@jwt_required()
 def create_event():
     """Etkinlik Oluşturma (Admin Kontrollü)"""
     try:
-        user_id = request.form.get('user_id')
+        user_id = get_jwt_identity()
         user = User.query.get(user_id)
         if not user: return jsonify({'error': 'Kullanıcı bulunamadı'}), 404
 
@@ -92,10 +103,11 @@ def create_event():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/events/<int:id>/register', methods=['POST'])
+@jwt_required()
 def register_event(id):
     try:
-        data = request.get_json()
-        user = User.query.get(data.get('user_id'))
+        user_id = get_jwt_identity()
+        user = User.query.get(user_id)
         event = Event.query.get(id)
         
         if not user or not event: return jsonify({'error': 'Hata'}), 404
@@ -109,12 +121,13 @@ def register_event(id):
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/events/<int:id>/rate', methods=['POST'])
+@jwt_required()
 def rate_event(id):
     """Puan Verme (Çift oy kontrolü ve yorum kaydı)"""
     try:
+        user_id = get_jwt_identity()
         data = request.get_json()
         rating_val = data.get('rating')
-        user_id = data.get('user_id')
         feedback_text = data.get('feedback')
         is_anonymous = data.get('is_anonymous', False)
         
@@ -147,10 +160,11 @@ def rate_event(id):
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/events/<int:id>/participants', methods=['GET'])
+@jwt_required()
 def get_event_participants(id):
     """Katılımcı Listesi (Admin)"""
     try:
-        requester_id = request.args.get('user_id')
+        requester_id = get_jwt_identity()
         requester = User.query.get(requester_id)
         event = Event.query.get(id)
         
@@ -177,7 +191,9 @@ def get_event_participants(id):
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/events/<int:id>', methods=['DELETE'])
+@jwt_required()
 def delete_event(id):
+    # Basit bir yetki kontrolü eklenebilir
     event = Event.query.get(id)
     if event:
         db.session.delete(event)
@@ -190,9 +206,17 @@ def delete_event(id):
 @bp.route('/communities', methods=['GET'])
 def get_communities():
     try:
+        verify_jwt_in_request(optional=True)
+        current_user_id = get_jwt_identity()
+        current_user = User.query.get(current_user_id) if current_user_id else None
+
         comms = Community.query.filter_by(is_approved=True).all()
         output = []
         for c in comms:
+            is_joined = False
+            if current_user and c in current_user.joined_communities:
+                is_joined = True
+
             output.append({
                 'id': c.id,
                 'name': c.name,
@@ -200,7 +224,7 @@ def get_communities():
                 'description': c.description,
                 'short_description': c.short_description,
                 'image': c.image_url, 
-                'joined': False,
+                'joined': is_joined,
                 'member_count': c.members.count()
             })
         return jsonify(output), 200
@@ -208,10 +232,11 @@ def get_communities():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/communities/create', methods=['POST'])
+@jwt_required()
 def create_community():
     """Topluluk Oluşturma (Auto-Approve + Admin Atama)"""
     try:
-        user_id = request.form.get('user_id')
+        user_id = get_jwt_identity()
         user = User.query.get(user_id)
         if not user: return jsonify({'error': 'Giriş yapmalısınız'}), 401
         
@@ -245,10 +270,11 @@ def create_community():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/communities/<int:id>/join', methods=['POST'])
+@jwt_required()
 def join_community(id):
     try:
-        data = request.get_json()
-        user = User.query.get(data.get('user_id'))
+        user_id = get_jwt_identity()
+        user = User.query.get(user_id)
         comm = Community.query.get(id)
         if comm in user.joined_communities: return jsonify({'message': 'Zaten üyesiniz'}), 400
         user.joined_communities.append(comm)
@@ -258,9 +284,10 @@ def join_community(id):
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/communities/applications', methods=['GET'])
+@jwt_required()
 def get_applications():
     try:
-        user_id = request.args.get('user_id')
+        user_id = get_jwt_identity()
         user = User.query.get(user_id)
         if not user or user.role != 'superadmin': return jsonify({'error': 'Yetkiniz yok'}), 403
         
@@ -271,9 +298,10 @@ def get_applications():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/communities/<int:id>/approve', methods=['POST'])
+@jwt_required()
 def approve_community(id):
     try:
-        user_id = request.args.get('user_id') or request.json.get('user_id')
+        user_id = get_jwt_identity()
         user = User.query.get(user_id)
         if not user or user.role != 'superadmin': return jsonify({'error': 'Yetkiniz yok'}), 403
         

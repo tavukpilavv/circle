@@ -2,6 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_cors import CORS
+from flask_jwt_extended import JWTManager
 from app.config import Config
 from sqlalchemy import MetaData # SQLite Hata Çözümü İçin
 
@@ -18,6 +19,7 @@ db = SQLAlchemy(metadata=metadata)
 # ----------------------------------------------------------
 
 migrate = Migrate()
+jwt = JWTManager()
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -25,9 +27,19 @@ def create_app(config_class=Config):
 
     db.init_app(app)
     migrate.init_app(app, db, render_as_batch=True)
+    jwt.init_app(app)
     
     # CORS Ayarı (Frontend URL'ine izin ver ve credentials destekle)
-    CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}}, supports_credentials=True)
+    CORS(
+        app,
+        resources={r"/api/*": {
+            "origins": [
+                "http://localhost:5173",                # Local development
+                "https://www.circleevent.app"           # Production frontend
+            ]
+        }},
+        supports_credentials=True
+    )
 
     # Blueprints
     from app.api.auth import bp as auth_bp
