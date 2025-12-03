@@ -33,8 +33,20 @@ def get_events():
                 organizer_name = e.host_community.university
 
             is_registered = False
-            if current_user and e in current_user.registered_events:
-                is_registered = True
+            is_rated = False
+            user_rating = 0
+            user_comment = ""
+
+            if current_user:
+                if e in current_user.registered_events:
+                    is_registered = True
+                
+                # Kullanıcının bu etkinliğe verdiği puanı bul
+                user_rating_obj = Rating.query.filter_by(user_id=current_user.id, event_id=e.id).first()
+                if user_rating_obj:
+                    is_rated = True
+                    user_rating = user_rating_obj.score
+                    user_comment = user_rating_obj.comment
 
             output.append({
                 'id': e.id,
@@ -52,7 +64,10 @@ def get_events():
                 'registered': is_registered,
                 'rating': e.rating or 0,
                 'ratingCount': e.rating_count or 0,
-                'participant_count': e.participants.count()
+                'participant_count': e.participants.count(),
+                'is_rated': is_rated,
+                'user_rating': user_rating,
+                'user_comment': user_comment
             })
         return jsonify(output), 200
     except Exception as e:
@@ -123,7 +138,7 @@ def register_event(id):
 @bp.route('/events/<int:id>/rate', methods=['POST'])
 @jwt_required()
 def rate_event(id):
-    """Puan Verme (Çift oy kontrolü ve yorum kaydı)"""
+    """Puan Verme (Ekleme veya Güncelleme)"""
     try:
         user_id = get_jwt_identity()
         data = request.get_json()
@@ -137,24 +152,38 @@ def rate_event(id):
         if not event or not user: return jsonify({'error': 'Hata'}), 404
 
         existing = Rating.query.filter_by(user_id=user.id, event_id=event.id).first()
-        if existing: return jsonify({'error': 'Bu etkinliğe zaten oy verdiniz.'}), 400
-
-        # Yeni Rating Kaydı
-        new_rating_instance = Rating(
-            user_id=user.id, event_id=event.id, score=rating_val,
-            comment=feedback_text, is_anonymous=is_anonymous
-        )
-        db.session.add(new_rating_instance)
         
-        # Ortalama Puanı Güncelle
-        new_count = (event.rating_count or 0) + 1
-        new_rating = (((event.rating or 0) * (event.rating_count or 0)) + rating_val) / new_count
-        
-        event.rating = round(new_rating, 1)
-        event.rating_count = new_count
-        
-        db.session.commit()
-        return jsonify({'message': 'Geri bildiriminiz kaydedildi.', 'new_rating': event.rating}), 200
+        if existing:
+            # Güncelleme Mantığı
+            old_score = existing.score
+            existing.score = rating_val
+            existing.comment = feedback_text
+            existing.is_anonymous = is_anonymous
+            
+            # Ortalamayı yeniden hesapla
+            current_total_score = (event.rating or 0) * (event.rating_count or 0)
+            new_total_score = current_total_score - old_score + rating_val
+            event.rating = round(new_total_score / event.rating_count, 1)
+            
+            db.session.commit()
+            return jsonify({'message': 'Puanınız güncellendi.', 'new_rating': event.rating}), 200
+        else:
+            # Yeni Rating Kaydı
+            new_rating_instance = Rating(
+                user_id=user.id, event_id=event.id, score=rating_val,
+                comment=feedback_text, is_anonymous=is_anonymous
+            )
+            db.session.add(new_rating_instance)
+            
+            # Ortalama Puanı Güncelle
+            new_count = (event.rating_count or 0) + 1
+            new_rating = (((event.rating or 0) * (event.rating_count or 0)) + rating_val) / new_count
+            
+            event.rating = round(new_rating, 1)
+            event.rating_count = new_count
+            
+            db.session.commit()
+            return jsonify({'message': 'Geri bildiriminiz kaydedildi.', 'new_rating': event.rating}), 200
     except Exception as e:
         current_app.logger.error(f"Rating Error: {str(e)}")
         return jsonify({'error': str(e)}), 500
