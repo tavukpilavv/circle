@@ -176,6 +176,7 @@
             <button 
               v-else
               class="rate-pill" 
+              style="position: absolute; right: 16px; bottom: 16px; background-color: #1b8f48; color: white; border: none; border-radius: 20px; padding: 4px 12px; font-weight: bold; font-size: 12px;"
               :class="{ 'is-rated': isRated(event.id) }"
               @click="openRating(event)"
             >
@@ -322,6 +323,7 @@
             <button 
               v-else
               class="rate-pill" 
+              style="position: absolute; right: 16px; bottom: 16px; background-color: #1b8f48; color: white; border: none; border-radius: 20px; padding: 4px 12px; font-weight: bold; font-size: 12px;"
               :class="{ 'is-rated': isRated(event.id) }"
               @click="openRating(event)"
             >
