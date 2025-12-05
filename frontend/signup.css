@@ -1,0 +1,92 @@
+/* --- Sign Up Form Overrides --- */
+.signup-form {
+    width: 100%;
+    max-width: 637px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.signup-form .form-row {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.signup-form .form-row .el-form-item {
+    flex: 1;
+    min-width: 280px;
+}
+
+.signup-form .el-form-item {
+    margin-bottom: 0;
+}
+
+.signup-form .el-form-item__label {
+    color: #000;
+    font-size: 20px;
+    font-weight: 500;
+    padding: 0;
+    line-height: 1.2;
+    margin-bottom: 8px;
+}
+
+.signup-form .el-form-item__content {
+    line-height: 1;
+}
+
+.signup-form .el-input__wrapper {
+    border-radius: 8px;
+    padding: 0 20px;
+    box-shadow: none;
+    border: 1px solid #FFFFFF;
+    background-color: #ffffff;
+    min-height: 69px;
+}
+
+.signup-form .el-input__wrapper.is-focus {
+    border-color: #1A916D;
+    box-shadow: 0 0 0 2px rgba(26, 145, 109, 0.15);
+}
+
+.signup-form .el-input__inner {
+    font-size: 15px;
+    height: 100%;
+}
+
+.signup-form .el-form-item.is-error .el-input__wrapper {
+    border-color: #FF654A;
+}
+
+.signup-form .el-form-item:last-child {
+    margin-bottom: 0;
+}
+
+.el-button.signin-button {
+    width: 100%;
+    height: 76px;
+    border-radius: 16px;
+    background-color: #1A916D;
+    border-color: #1A916D;
+    font-size: 24px;
+    font-weight: 800;
+    font-family: 'Roboto', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    color: #ffffff;
+}
+
+.el-button.signin-button:hover,
+.el-button.signin-button:focus {
+    background-color: #157a5c;
+    border-color: #157a5c;
+    color: #ffffff;
+}
+
+.el-button.signin-button:focus-visible {
+    outline: 2px solid #157a5c;
+    outline-offset: 2px;
+}

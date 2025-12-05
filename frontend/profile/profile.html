@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CirCle • Dashboard</title>
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@800;900&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Vue + Element Plus + App JS -->
+  <script src="https://unpkg.com/vue@3"></script>
+  <script src="https://unpkg.com/element-plus"></script>
+  <script src="app.js" defer></script>
+</head>
+
+<body>
+  <!-- TOP GREEN STRIP -->
+  <div class="top-bar"></div>
+
+  <!-- NAVBAR -->
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <div class="nav-inner">
+      <div class="nav-left">
+        <a href="../index.html#/" class="logo">CirCle</a>
+
+        <nav class="tabs" aria-label="Primary navigation">
+          <a href="../index.html#/communities" class="tab">Communities</a>
+          <a href="../index.html#/events" class="tab">Events</a>
+        </nav>
+      </div>
+
+      <div class="nav-center">
+        <form class="global-search" role="search" aria-label="Search for an Event">
+          <input type="search" placeholder="Search for an Event" aria-label="Search for an Event" />
+        </form>
+      </div>
+
+      <div class="nav-right">
+        <button class="icon-btn" aria-label="Account">
+          <i class="fas fa-user"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="nav-bottom-line"></div>
+
+  <!-- MAIN PAGE -->
+  <div id="app">
+    <main class="page-wrap">
+
+      <!-- PROFILE BANNER -->
+      <section class="profile-banner">
+        <div class="profile-left">
+          <!-- Super Admin Badge -->
+          <span class="admin-badge">Super Admin</span>
+
+          <!-- empty alt so no "avatar" word -->
+          <img class="avatar"
+            src="https://images.unsplash.com/photo-1628157588553-5eeea00c5caa?q=80&w=160&auto=format&fit=crop" alt=""
+            role="presentation" />
+
+          <div class="identity">
+            <div class="name">Alara Özürk</div>
+            <div class="sub">Computer Science • Class of 2025</div>
+          </div>
+        </div>
+
+        <div class="profile-right">
+          <a href="../settings/setting.html" style="text-decoration: none;">
+            <button class="ghost-gear" aria-label="Settings">
+              <i class="fas fa-gear"></i>
+            </button>
+          </a>
+          <button class="logout" aria-label="Log Out" @click="logout">
+            Log Out
+            <i class="fas fa-arrow-right-from-bracket"></i>
+          </button>
+        </div>
+      </section>
+
+      <!-- TABS UNDER PROFILE -->
+      <section class="dual-tabs">
+        <button class="tabbtn solid" data-target="events" aria-pressed="true">My Events</button>
+        <button class="tabbtn outline" data-target="communities" aria-pressed="false">My Communities</button>
+      </section>
+
+      <div class="panel is-active" data-panel="events">
+        <!-- UPCOMING EVENTS -->
+        <section class="section-head">
+          <h3>Upcoming Events</h3>
+          <!-- See All button triggers overlay for events -->
+          <a href="#" class="see-all" data-seeall-target="events">
+            See All <i class="fas fa-caret-right"></i>
+          </a>
+        </section>
+
+        <section class="slider-shell" aria-label="Upcoming Events">
+          <button class="slide-btn left" type="button">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+
+          <div class="slider-track">
+            <!-- 6 cards (4 visible at once) -->
+            <article class="card event-card"><button class="view-pill">View</button></article>
+            <article class="card event-card"><button class="view-pill">View</button></article>
+            <article class="card event-card"><button class="view-pill">View</button></article>
+            <article class="card event-card"><button class="view-pill">View</button></article>
+            <article class="card event-card"><button class="view-pill">View</button></article>
+            <article class="card event-card"><button class="view-pill">View</button></article>
+          </div>
+
+          <button class="slide-btn right" type="button">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </section>
+
+        <!-- NEAREST ACTIVITIES -->
+        <section class="section-head">
+          <h3>Nearest Activities</h3>
+          <!-- See All button triggers overlay for activities -->
+          <a href="#" class="see-all" data-seeall-target="activities">
+            See All <i class="fas fa-caret-right"></i>
+          </a>
+        </section>
+
+        <section class="slider-shell" aria-label="Nearest Activities">
+          <button class="slide-btn left" type="button">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+
+          <div class="slider-track">
+            <!-- 6 green blocks -->
+            <article class="card activity-card"></article>
+            <article class="card activity-card"></article>
+            <article class="card activity-card"></article>
+            <article class="card activity-card"></article>
+            <article class="card activity-card"></article>
+            <article class="card activity-card"></article>
+          </div>
+
+          <button class="slide-btn right" type="button">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </section>
+      </div>
+
+      <div class="panel" data-panel="communities">
+        <section class="section-head">
+          <h3>Joined Communities</h3>
+          <span class="community-count">4 communities</span>
+        </section>
+
+        <section class="community-grid" aria-label="Joined communities">
+          <article class="community-card">
+            <img class="community-cover"
+              src="https://images.unsplash.com/photo-1518791841217-8f162f1e1131?auto=format&fit=crop&w=900&q=80"
+              alt="Community cover image">
+            <div class="community-body">
+              <h4>STEM Society</h4>
+              <p>Weekly workshops on robotics, AI and emerging tech.</p>
+              <div class="community-meta">
+                <span class="community-chip">Lead Mentor</span>
+                <span>Joined May 2023</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="community-card">
+            <img class="community-cover"
+              src="https://images.unsplash.com/photo-1518791841217-8f162f1e1131?auto=format&fit=crop&w=900&q=80"
+              alt="Community cover image">
+            <div class="community-body">
+              <h4>Environmental Club</h4>
+              <p>Campus sustainability projects and weekend clean-ups.</p>
+              <div class="community-meta">
+                <span class="community-chip">Volunteer</span>
+                <span>Joined Feb 2024</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="community-card">
+            <img class="community-cover"
+              src="https://images.unsplash.com/photo-1518791841217-8f162f1e1131?auto=format&fit=crop&w=900&q=80"
+              alt="Community cover image">
+            <div class="community-body">
+              <h4>Women in Tech</h4>
+              <p>Networking and mentorship for women pursuing STEM careers.</p>
+              <div class="community-meta">
+                <span class="community-chip">Core Team</span>
+                <span>Joined Sep 2022</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="community-card">
+            <img class="community-cover"
+              src="https://images.unsplash.com/photo-1518791841217-8f162f1e1131?auto=format&fit=crop&w=900&q=80"
+              alt="Community cover image">
+            <div class="community-body">
+              <h4>Literature Circle</h4>
+              <p>Monthly book clubs and creative writing sessions.</p>
+              <div class="community-meta">
+                <span class="community-chip">Member</span>
+                <span>Joined Jan 2024</span>
+              </div>
+            </div>
+          </article>
+        </section>
+      </div>
+
+    </main>
+
+    <!-- SEE ALL OVERLAYS -->
+
+    <!-- ALL UPCOMING EVENTS -->
+    <section class="seeall-overlay" id="seeall-events" aria-hidden="true">
+      <div class="seeall-inner">
+        <div class="seeall-header">
+          <h2>All Upcoming Events</h2>
+          <button class="seeall-close" type="button" aria-label="Close">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="seeall-grid">
+          <!-- you can add real info inside later -->
+          <article class="card event-card"><button class="view-pill">View</button></article>
+          <article class="card event-card"><button class="view-pill">View</button></article>
+          <article class="card event-card"><button class="view-pill">View</button></article>
+          <article class="card event-card"><button class="view-pill">View</button></article>
+          <article class="card event-card"><button class="view-pill">View</button></article>
+          <article class="card event-card"><button class="view-pill">View</button></article>
+          <article class="card event-card"><button class="view-pill">View</button></article>
+          <article class="card event-card"><button class="view-pill">View</button></article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ALL NEAREST ACTIVITIES -->
+    <section class="seeall-overlay" id="seeall-activities" aria-hidden="true">
+      <div class="seeall-inner">
+        <div class="seeall-header">
+          <h2>All Nearest Activities</h2>
+          <button class="seeall-close" type="button" aria-label="Close">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="seeall-grid">
+          <article class="card activity-card"></article>
+          <article class="card activity-card"></article>
+          <article class="card activity-card"></article>
+          <article class="card activity-card"></article>
+          <article class="card activity-card"></article>
+          <article class="card activity-card"></article>
+          <article class="card activity-card"></article>
+          <article class="card activity-card"></article>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const tabButtons = document.querySelectorAll('.dual-tabs .tabbtn');
+      const panels = document.querySelectorAll('.panel[data-panel]');
+
+      const activatePanel = (target) => {
+        panels.forEach((panel) => {
+          panel.classList.toggle('is-active', panel.dataset.panel === target);
+        });
+
+        tabButtons.forEach((button) => {
+          const isActive = button.dataset.target === target;
+          button.classList.toggle('solid', isActive);
+          button.classList.toggle('outline', !isActive);
+          button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+        });
+      };
+
+      tabButtons.forEach((button) => {
+        button.addEventListener('click', () => activatePanel(button.dataset.target));
+      });
+    });
+  </script>
+</body>
+
+</html>
