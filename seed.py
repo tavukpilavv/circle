@@ -1,5 +1,5 @@
 from app import create_app, db
-from app.models import User, Community, Event
+from app.models import User, Community, Event, Rating
 from sqlalchemy import MetaData
 
 app = create_app()
@@ -157,6 +157,31 @@ with app.app_context():
     # İlişkileri ekle
     c2.members.append(student)
     e1.participants.append(student)
+
+    # ================= YORUMLAR (REVIEWS) =================
+    print("⭐ Yorumlar ekleniyor...")
+    
+    from app.models import Rating
+    
+    r1 = Rating(
+        user_id=student.id,
+        event_id=e1.id,
+        score=5,
+        comment="Harika bir etkinlikti, çok eğlendim!",
+        is_anonymous=False
+    )
+    
+    r2 = Rating(
+        user_id=club_admin.id,
+        event_id=e1.id,
+        score=4,
+        comment="Güzeldi ama biraz kalabalıktı.",
+        is_anonymous=True
+    )
+    
+    db.session.add_all([r1, r2])
+    db.session.commit()
+    print("✅ Yorumlar eklendi.")
 
     db.session.commit()
     print("🎉 İŞLEM TAMAM! Veritabanı etkinliklerle doldu.")

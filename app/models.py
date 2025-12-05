@@ -87,5 +87,6 @@ class Rating(db.Model):
     score = db.Column(db.Integer)  # 1'den 5'e kadar puan
     comment = db.Column(db.Text)
     is_anonymous = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     __table_args__ = (db.UniqueConstraint('user_id', 'event_id', name='uq_user_event_rating'),)

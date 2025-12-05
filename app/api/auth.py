@@ -48,9 +48,10 @@ def login():
                     'id': user.id,
                     'first_name': user.first_name,
                     'last_name': user.last_name,
+                    'email': user.email,
                     'username': user.username,
                     'major': user.major,
-                    'role': user.role,
+                    'role': 'super_admin' if user.role == 'superadmin' else user.role,
                     'avatar_url': user.avatar_url,
                     'managed_community_id': user.managed_community.id if user.managed_community else None
                 }

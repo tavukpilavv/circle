@@ -219,6 +219,82 @@ def get_event_participants(id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@bp.route('/events/<int:id>/reviews', methods=['GET'])
+def get_event_reviews(id):
+    try:
+        # Opsiyonel JWT kontrolü (current user'ı belirlemek için)
+        verify_jwt_in_request(optional=True)
+        current_user_id = get_jwt_identity()
+        
+        event = Event.query.get(id)
+        if not event: return jsonify({'error': 'Etkinlik bulunamadı'}), 404
+        
+        reviews = []
+        for r in event.feedbacks:
+            user_name = "Incognito User"
+            if not r.is_anonymous:
+                user = User.query.get(r.user_id)
+                if user:
+                    user_name = f"{user.first_name} {user.last_name}" if user.first_name else user.username
+            
+            is_current_user = False
+            if current_user_id and r.user_id == current_user_id:
+                is_current_user = True
+                
+            reviews.append({
+                'id': r.id,
+                'user': user_name,
+                'rating': r.score,
+                'comment': r.comment,
+                'isAnonymous': r.is_anonymous,
+                'isCurrentUser': is_current_user,
+                'created_at': r.created_at.isoformat() if r.created_at else None
+            })
+            
+        # Sort by date (newest first)
+        reviews.sort(key=lambda x: x['created_at'] or '', reverse=True)
+        
+        return jsonify(reviews), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@bp.route('/reviews/<int:id>', methods=['DELETE'])
+@jwt_required()
+def delete_review(id):
+    try:
+        user_id = get_jwt_identity()
+        user = User.query.get(user_id)
+        review = Rating.query.get(id)
+        
+        if not review: return jsonify({'error': 'Yorum bulunamadı'}), 404
+        
+        # Yetki Kontrolü: Sadece yorum sahibi veya admin silebilir
+        if review.user_id != user_id and user.role not in ['admin', 'superadmin']:
+            return jsonify({'error': 'Yetkiniz yok'}), 403
+            
+        # Event rating güncellemesi gerekiyor mu? 
+        # Evet, ortalamayı yeniden hesaplamalıyız.
+        event = Event.query.get(review.event_id)
+        
+        db.session.delete(review)
+        db.session.commit()
+        
+        # Ortalamayı güncelle
+        if event:
+            ratings = Rating.query.filter_by(event_id=event.id).all()
+            count = len(ratings)
+            if count > 0:
+                total = sum(r.score for r in ratings)
+                event.rating = round(total / count, 1)
+            else:
+                event.rating = 0
+            event.rating_count = count
+            db.session.commit()
+            
+        return jsonify({'message': 'Review deleted'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @bp.route('/events/<int:id>', methods=['DELETE'])
 @jwt_required()
 def delete_event(id):
@@ -321,7 +397,12 @@ def get_applications():
         if not user or user.role != 'superadmin': return jsonify({'error': 'Yetkiniz yok'}), 403
         
         pending = Community.query.filter_by(is_approved=False).all()
-        output = [{'id': c.id, 'name': c.name, 'proof': c.proof_document_url} for c in pending]
+        output = [{
+            'id': c.id, 
+            'name': c.name, 
+            'proof_document': c.proof_document_url,
+            'contact_person': c.contact_person
+        } for c in pending]
         return jsonify(output), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
