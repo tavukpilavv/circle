@@ -60,34 +60,58 @@ const showPassword = ref(false)
 const username = ref('')
 const password = ref('')
 
-const handleLogin = () => {
-  const user = username.value.toLowerCase();
+const handleLogin = async () => {
+  const user = username.value;
   const pass = password.value;
 
-  // Mock Credential Check
-  if (user === 'superadmin') {
-    if (pass !== 'superadmin') {
-      alert('Invalid password for Super Admin');
-      return;
-    }
-    localStorage.setItem('user_role', 'super_admin');
-  } else if (user === 'admin') {
-    if (pass !== 'admin') {
-      alert('Invalid password for Admin');
-      return;
-    }
-    localStorage.setItem('user_role', 'admin');
-  } else {
-    // Regular user - allow any password for demo
-    localStorage.setItem('user_role', 'user');
+  // Client-side Validations for Admin/Superadmin
+  if (user === 'admin' && pass !== 'admin') {
+    alert('Invalid password for Admin');
+    return;
+  }
+  if (user === 'superadmin' && pass !== 'superadmin') {
+    alert('Invalid password for Super Admin');
+    return;
   }
 
-  localStorage.setItem('user_token', 'logged_in')
-  localStorage.setItem('user_name', username.value) 
-  
-  window.dispatchEvent(new Event('auth-changed'))
-  // Force reload to ensure all components pick up the new role/token
-  window.location.href = '/'
+  try {
+    const response = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        username: user,
+        password: pass
+      })
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      
+      // Store auth data
+      localStorage.setItem('user_token', data.token || 'logged_in');
+      localStorage.setItem('user_name', user);
+      
+      // Set roles (keeping existing logic pattern for roles if backend doesn't send them)
+      if (data.role) {
+         localStorage.setItem('user_role', data.role);
+      } else {
+        if (user === 'admin') localStorage.setItem('user_role', 'admin');
+        else if (user === 'superadmin') localStorage.setItem('user_role', 'super_admin');
+        else localStorage.setItem('user_role', 'user');
+      }
+
+      window.dispatchEvent(new Event('auth-changed'));
+      window.location.href = '/';
+    } else {
+      // Handle 401/403 etc
+      alert('Invalid username or password');
+    }
+  } catch (error) {
+    console.error('Login error:', error);
+    alert('Unable to connect to login server');
+  }
 }
 </script>
 
