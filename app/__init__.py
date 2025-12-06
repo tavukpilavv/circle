@@ -34,8 +34,10 @@ def create_app(config_class=Config):
         app,
         resources={r"/api/*": {
             "origins": [
-                "http://localhost:5173",                # Local development
-                "https://www.circleevent.app"           # Production frontend
+                "http://localhost:5173",
+                "https://new2-dusky.vercel.app",
+                "https://circleevent.app",
+                "https://www.circleevent.app"
             ]
         }},
         supports_credentials=True
