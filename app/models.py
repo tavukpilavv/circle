@@ -36,6 +36,8 @@ class User(db.Model):
     
     def check_password(self, password):
         from werkzeug.security import check_password_hash
+        if not self.password_hash:
+            return False
         return check_password_hash(self.password_hash, password)
 
 class Community(db.Model):

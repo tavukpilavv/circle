@@ -37,9 +37,21 @@ def register():
 def login():
     try:
         data = request.get_json()
-        user = User.query.filter_by(email=data.get('email')).first()
         
-        if user and user.check_password(data.get('password')):
+        email = data.get('email')
+        username = data.get('username')
+        password = data.get('password')
+
+        if not password:
+            return jsonify({'error': 'Email/Kullanıcı adı ve şifre gereklidir'}), 400
+
+        user = None
+        if email:
+            user = User.query.filter_by(email=email).first()
+        elif username:
+            user = User.query.filter_by(username=username).first()
+        
+        if user and user.check_password(password):
             access_token = create_access_token(identity=user.id)
             return jsonify({
                 'message': 'Giriş Başarılı',
