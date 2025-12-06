@@ -26,7 +26,8 @@ def create_app(config_class=Config):
     app = Flask(
         __name__,
         static_folder="static",
-        template_folder="templates"
+        template_folder="templates",
+        static_url_path=""
     )
 
     app.config.from_object(config_class)
