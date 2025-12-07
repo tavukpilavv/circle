@@ -120,20 +120,51 @@ watch(
 
 const submit = () => {
     if (!formRef.value) return
-    formRef.value.validate((valid) => {
+    
+    formRef.value.validate(async (valid) => { // async ekledik
         if (valid) {
             isSubmitting.value = true
             
-            // Save user info to localStorage
-            // Save user info to localStorage
-            localStorage.setItem('user_username', form.value.username)
-            localStorage.setItem('user_major', form.value.major)
-            
-            ElMessage.success('Sign up form submitted!')
-            setTimeout(() => {
-                isSubmitting.value = false
-                router.push('/login')
-            }, 1200)
+            try {
+                // --- BACKEND BAĞLANTISI (YENİ EKLENEN KISIM) ---
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    // Backend auth.py tam olarak bu isimleri bekliyor:
+                    body: JSON.stringify({
+                        firstName: form.value.firstName,
+                        lastName: form.value.lastName,
+                        username: form.value.username,
+                        email: form.value.email,
+                        major: form.value.major,
+                        password: form.value.password
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Kayıt Başarılı
+                    ElMessage.success('Registration successful! Redirecting to login...');
+                    
+                    // İsteğe bağlı: Kullanıcı adını login sayfasında otomatik doldurmak için saklayabilirsin
+                    localStorage.setItem('registered_username', form.value.username);
+
+                    setTimeout(() => {
+                        router.push('/login');
+                    }, 1500);
+                } else {
+                    // Backend hata döndürdü (Örn: "Email zaten var")
+                    ElMessage.error(data.error || 'Registration failed. Please try again.');
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                ElMessage.error('Unable to connect to the server.');
+            } finally {
+                isSubmitting.value = false;
+            }
         }
     })
 }

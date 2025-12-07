@@ -64,16 +64,7 @@ const handleLogin = async () => {
   const user = username.value;
   const pass = password.value;
 
-  // Client-side Validations for Admin/Superadmin
-  if (user === 'admin' && pass !== 'admin') {
-    alert('Invalid password for Admin');
-    return;
-  }
-  if (user === 'superadmin' && pass !== 'superadmin') {
-    alert('Invalid password for Super Admin');
-    return;
-  }
-
+ 
   try {
     const response = await fetch('/api/auth/login', {
       method: 'POST',
@@ -88,22 +79,20 @@ const handleLogin = async () => {
 
     if (response.ok) {
       const data = await response.json();
-      
-      // Store auth data
-      localStorage.setItem('user_token', data.token || 'logged_in');
-      localStorage.setItem('user_name', user);
-      
-      // Set roles (keeping existing logic pattern for roles if backend doesn't send them)
-      if (data.role) {
-         localStorage.setItem('user_role', data.role);
-      } else {
-        if (user === 'admin') localStorage.setItem('user_role', 'admin');
-        else if (user === 'superadmin') localStorage.setItem('user_role', 'super_admin');
-        else localStorage.setItem('user_role', 'user');
-      }
 
-      window.dispatchEvent(new Event('auth-changed'));
-      window.location.href = '/';
+      if (data.access_token) {
+        // Store auth data
+        localStorage.setItem('user_token', data.access_token);
+        localStorage.setItem('user_name', user);
+
+        // Set roles
+        localStorage.setItem('user_role', data.role || 'user');
+
+        window.dispatchEvent(new Event('auth-changed'));
+        router.push('/');
+      } else {
+        alert('Login failed: Token missing from response');
+      }
     } else {
       // Handle 401/403 etc
       alert('Invalid username or password');
