@@ -70,31 +70,37 @@ def create_app(config_class=Config):
         return {"status": "healthy"}, 200
 
     # --- SÜPER ADMIN KONTROLÜ (DOĞRU YER: return'den önce!) ---
+    # --- GÜNCELLENMİŞ SÜPER ADMIN TOHUMLAMA ---
     with app.app_context():
-        db.create_all()  # Tabloları oluştur
+        db.create_all()
         
-        # User modelini burada import ediyoruz ki döngüsel hata olmasın
+        # User modelini import et
         from app.models import User 
         
-        # Admin var mı diye bak
-        if not User.query.filter_by(username='superadmin').first():
+        # 1. Önce superadmin var mı diye bakalım
+        admin = User.query.filter_by(username='superadmin').first()
+        
+        # 2. Yoksa sıfırdan oluşturalım
+        if not admin:
             print("--- Creating Super Admin... ---")
-            
+
             admin = User(
                 username='superadmin',
                 email='admin@circle.app',
                 first_name='Super',
                 last_name='Admin',
-                major='Management',
-                role='super_admin'  # Frontend ile uyumlu
+                major='Management'
             )
             
-            admin.set_password('123456') # Şifre
-            
             db.session.add(admin)
-            db.session.commit()
-            
-            print("--- Super Admin Created: superadmin / 123456 ---")
+        
+        # 3. VARSA DA YOKSA DA ŞUNLARI GÜNCELLE (ZORLA YAP)
+        # Bu satırlar sayesinde eski hatalı rolü düzeltiyoruz!
+        admin.role = 'super_admin' 
+        admin.set_password('123456') # Şifreyi de garantiye alalım
+        
+        db.session.commit()
+        print(f"--- Super Admin Role Updated to: {admin.role} ---")
     # -----------------------------------------------------------
 
     return app  # TEK VE SON return BU OLMALI
