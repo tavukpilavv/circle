@@ -193,7 +193,7 @@ def create_app(config_class=Config):
         
         # 3. VARSA DA YOKSA DA ŞUNLARI GÜNCELLE (ZORLA YAP)
         # Bu satırlar sayesinde eski hatalı rolü düzeltiyoruz!
-        admin.role = 'super_admin' 
+        admin.role = 'superadmin' 
         admin.set_password('123456') # Şifreyi de garantiye alalım
         
         db.session.commit()

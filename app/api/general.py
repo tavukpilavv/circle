@@ -440,12 +440,18 @@ def approve_community():
         user = User.query.get(user_id)
         data = request.get_json()
         id = data.get('id') 
-        if not user or user.role != 'super_admin': return jsonify({'error': 'Yetkiniz yok'}), 403
+        if not user or user.role != 'superadmin': return jsonify({'error': 'Yetkiniz yok'}), 403
         
         comm = Community.query.get(id)
         if comm:
             comm.is_approved = True
-            User.query.get(comm.admin_id).role = 'admin'
+            
+            admin_user = User.query.get(comm.admin_id)
+            if admin_user:
+                if admin_user.role == 'student':
+                    admin_user.role = 'admin'
+                # if admin_user is already 'admin' or 'superadmin', do nothing
+
             db.session.commit()
             return jsonify({'success': True, 'message': 'Onaylandı'}), 200
         return jsonify({'error': 'Bulunamadı'}), 404
