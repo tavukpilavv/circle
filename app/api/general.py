@@ -357,6 +357,23 @@ def get_pending_communities():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@bp.route('/communities/debug-all', methods=['GET'])
+def debug_all_communities():
+    try:
+        comms = Community.query.all()
+        output = []
+        for c in comms:
+            output.append({
+                "id": c.id,
+                "name": c.name,
+                "is_approved": c.is_approved,
+                "admin_id": c.admin_id
+            })
+        return jsonify(output), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @bp.route('/communities/create', methods=['POST'])
 @jwt_required()
 def create_community():
