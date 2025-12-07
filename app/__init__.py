@@ -4,9 +4,9 @@ from flask_migrate import Migrate
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from app.config import Config
-from sqlalchemy import MetaData  # SQLite Hata Çözümü İçin
+from sqlalchemy import MetaData
 
-# --- YENİ: OTOMATİK İSİMLENDİRME KURALI (SQLite Fix) ---
+# --- OTOMATİK İSİMLENDİRME KURALI (SQLite Fix) ---
 convention = {
     "ix": 'ix_%(column_0_label)s',
     "uq": "uq_%(table_name)s_%(column_0_name)s",
@@ -20,7 +20,6 @@ db = SQLAlchemy(metadata=metadata)
 
 migrate = Migrate()
 jwt = JWTManager()
-
 
 def create_app(config_class=Config):
     app = Flask(
@@ -36,7 +35,7 @@ def create_app(config_class=Config):
     migrate.init_app(app, db, render_as_batch=True)
     jwt.init_app(app)
 
-    # CORS – şu anda zorunlu değil ama dursun
+    # CORS
     CORS(
         app,
         resources={r"/api/*": {
@@ -57,22 +56,47 @@ def create_app(config_class=Config):
     from app.api.general import bp as general_bp
     app.register_blueprint(general_bp, url_prefix="/api/general")
 
-    # 🔵 SPA ana sayfa route'u
+    # SPA Route
     @app.route("/", defaults={"path": ""})
     @app.route("/<path:path>")
     def spa(path):
-        # /api/* isteklerini SPA'ya yönlendirme
         if path.startswith("api/"):
             abort(404)
         return render_template("index.html")
 
-    # Health Check Endpoint
+    # Health Check
     @app.route("/health")
     def health():
         return {"status": "healthy"}, 200
 
-    return app
+    # --- SÜPER ADMIN KONTROLÜ (DOĞRU YER: return'den önce!) ---
+    with app.app_context():
+        db.create_all()  # Tabloları oluştur
+        
+        # User modelini burada import ediyoruz ki döngüsel hata olmasın
+        from app.models import User 
+        
+        # Admin var mı diye bak
+        if not User.query.filter_by(username='superadmin').first():
+            print("--- Creating Super Admin... ---")
+            
+            admin = User(
+                username='superadmin',
+                email='admin@circle.app',
+                first_name='Super',
+                last_name='Admin',
+                major='Management',
+                role='super_admin'  # Frontend ile uyumlu
+            )
+            
+            admin.set_password('123456') # Şifre
+            
+            db.session.add(admin)
+            db.session.commit()
+            
+            print("--- Super Admin Created: superadmin / 123456 ---")
+    # -----------------------------------------------------------
 
+    return app  # TEK VE SON return BU OLMALI
 
 from app import models
-
