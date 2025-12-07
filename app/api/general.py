@@ -4,6 +4,7 @@ from app.models import Community, Event, User, Rating
 from app import db
 from app.utils import upload_file
 from flask_jwt_extended import jwt_required, get_jwt_identity, verify_jwt_in_request
+from flask_jwt_extended import decode_token
 
 bp = Blueprint('general', __name__)
 
@@ -310,6 +311,7 @@ def delete_event(id):
 
 @bp.route('/communities', methods=['GET'])
 def get_communities():
+    print("test communities")
     try:
         verify_jwt_in_request(optional=True)
         current_user_id = get_jwt_identity()
@@ -335,44 +337,67 @@ def get_communities():
         return jsonify(output), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+@bp.route('/communities/pending', methods=['GET'])
+def get_pending_communities():
+    try:
+        comms = Community.query.filter_by(is_approved=False).all()
+        output = []
+        for c in comms:
+            output.append({
+                'id': c.id,
+                'name': c.name,
+                'university': c.university,
+                'description': c.description,
+                'short_description': c.short_description,
+                'image': c.image_url, 
+                'joined': False,
+                'member_count': c.members.count()
+            })
+        return jsonify(output), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @bp.route('/communities/create', methods=['POST'])
 @jwt_required()
 def create_community():
-    """Topluluk Oluşturma (Auto-Approve + Admin Atama)"""
     try:
         user_id = get_jwt_identity()
-        user = User.query.get(user_id)
+        user = User.query.get(int(user_id))
         if not user: return jsonify({'error': 'Giriş yapmalısınız'}), 401
         
         if user.managed_community:
              return jsonify({'error': 'Zaten bir kulübünüz var!'}), 400
 
         file_url = upload_file(request.files.get('file'), folder="communities")
+        data = request.get_json()
         
         new_c = Community(
-            name=request.form.get('name'),
-            university=request.form.get('university'),
-            category=request.form.get('category'),
-            short_description=request.form.get('shortDescription'),
-            description=request.form.get('description'),
-            contact_person=request.form.get('contactPerson'),
-            contact_email=request.form.get('contactEmail'),
+            name=data.get('clubName'),
+            university=data.get('university'),
+            category=data.get('category'),
+            short_description=data.get('shortDescription'),
+            description=data.get('description'),
+            contact_person=data.get('contactName'),
+            contact_email=data.get('email'),
             image_url=file_url,
             proof_document_url=file_url,
-            is_approved=True, # Otomatik Onay
+            is_approved=False, # Otomatik Onay
             admin_id=user.id
         )
-        
-        if user.role == 'student':
-            user.role = 'admin'
+# clubType events instagram otherLink studentNumber için db de kolon açılmamış
+# shortDescription için formda giriş yok
+
+        # if user.role == 'student':
+        #     user.role = 'admin'
         user.joined_communities.append(new_c)
 
         db.session.add(new_c)
         db.session.commit()
-        return jsonify({'message': 'Kulübünüz kuruldu! Yönetim paneli açıldı.'}), 201
+        return jsonify({'message': 'Onaylandığında klubünüz açılacaktır.'}), 201
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+
 
 @bp.route('/communities/<int:id>/join', methods=['POST'])
 @jwt_required()
@@ -407,19 +432,23 @@ def get_applications():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@bp.route('/communities/<int:id>/approve', methods=['POST'])
+@bp.route('/communities/approve', methods=['POST'])
 @jwt_required()
-def approve_community(id):
+def approve_community():
     try:
         user_id = get_jwt_identity()
         user = User.query.get(user_id)
-        if not user or user.role != 'superadmin': return jsonify({'error': 'Yetkiniz yok'}), 403
+        data = request.get_json()
+        id = data.get('id') 
+        if not user or user.role != 'super_admin': return jsonify({'error': 'Yetkiniz yok'}), 403
         
         comm = Community.query.get(id)
         if comm:
             comm.is_approved = True
+            User.query.get(comm.admin_id).role = 'admin'
             db.session.commit()
-            return jsonify({'message': 'Onaylandı'}), 200
+            return jsonify({'success': True, 'message': 'Onaylandı'}), 200
         return jsonify({'error': 'Bulunamadı'}), 404
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
