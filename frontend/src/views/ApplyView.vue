@@ -33,7 +33,7 @@
 
         <!-- RIGHT SIDE: FORM -->
         <div class="club-form-card">
-          <form @submit.prevent="handleSubmit" novalidate>
+          <el-form :model="form"  @submit.prevent="handleSubmit" novalidate>
             <div class="section-label">Club information</div>
             <div class="section-divider"></div>
 
@@ -42,7 +42,7 @@
                 <label class="form-label" for="clubName">
                   Club / community name <span>*</span>
                 </label>
-                <input
+                <el-input
                   id="clubName"
                   v-model="form.clubName"
                   class="form-input"
@@ -55,11 +55,11 @@
 
               <div class="form-group">
                 <label class="form-label" for="university">University <span>*</span></label>
-                <select id="university" v-model="form.university" class="form-select" required>
-                  <option value="">Select university</option>
-                  <option value="Ankara Yıldırım Beyazıt University">Ankara Yıldırım Beyazıt University</option>
-                  <option value="Other">Other</option>
-                </select>
+                <el-select id="university" v-model="form.university" class="form-select" required>
+                  <el-option value="">Select university</el-option>
+                  <el-option value="Ankara Yıldırım Beyazıt University">Ankara Yıldırım Beyazıt University</el-option>
+                  <el-option value="Other">Other</el-option>
+                </el-select>
                 <div v-if="errors.university" class="form-error-inline">
                   {{ errors.university }}
                 </div>
@@ -71,11 +71,11 @@
                 <label class="form-label" for="clubType">
                   Club type <span>*</span>
                 </label>
-                <select id="clubType" v-model="form.clubType" class="form-select" required>
-                  <option value="">Select type</option>
-                  <option value="official">Official university club</option>
-                  <option value="community">Student community / interest group</option>
-                </select>
+                <el-select id="clubType" v-model="form.clubType" class="form-select" required>
+                  <el-option value="">Select type</el-option>
+                  <el-option value="official">Official university club</el-option>
+                  <el-option value="community">Student community / interest group</el-option>
+                </el-select>
                 <div v-if="errors.clubType" class="form-error-inline">
                   {{ errors.clubType }}
                 </div>
@@ -85,15 +85,15 @@
                 <label class="form-label" for="category">
                   Category <span>*</span>
                 </label>
-                <select id="category" v-model="form.category" class="form-select" required>
-                  <option value="">Select category</option>
-                  <option value="Academic">Academic</option>
-                  <option value="Technology">Technology</option>
-                  <option value="Culture & Arts">Culture &amp; Arts</option>
-                  <option value="Sports">Sports</option>
-                  <option value="Social">Social</option>
-                  <option value="Others">Others</option>
-                </select>
+                <el-select id="category" v-model="form.category" class="form-select" required>
+                  <el-option value="">Select category</el-option>
+                  <el-option value="Academic">Academic</el-option>
+                  <el-option value="Technology">Technology</el-option>
+                  <el-option value="Culture & Arts">Culture &amp; Arts</el-option>
+                  <el-option value="Sports">Sports</el-option>
+                  <el-option value="Social">Social</el-option>
+                  <el-option value="Others">Others</el-option>
+                </el-select>
                 <div v-if="errors.category" class="form-error-inline">
                   {{ errors.category }}
                 </div>
@@ -104,13 +104,14 @@
               <label class="form-label" for="description">
                 Short description <span>*</span>
               </label>
-              <textarea
+              <el-input
+                type="textarea"
                 id="description"
                 v-model="form.description"
                 class="form-textarea"
                 placeholder="Tell us briefly what your club is about and who it is for."
                 required
-              ></textarea>
+              ></el-input>
               <div v-if="errors.description" class="form-error-inline">
                 {{ errors.description }}
               </div>
@@ -120,12 +121,13 @@
               <label class="form-label" for="events">
                 What kind of events do you organize?
               </label>
-              <textarea
+              <el-input
+                type="textarea" 
                 id="events"
                 v-model="form.events"
                 class="form-textarea"
                 placeholder="Example: weekly meetups, workshops, competitions, trips, online sessions..."
-              ></textarea>
+              ></el-input>
             </div>
 
             <div class="section-label" style="margin-top: 8px;">Contact</div>
@@ -136,7 +138,7 @@
                 <label class="form-label" for="contactName">
                   Contact person name <span>*</span>
                 </label>
-                <input
+                <el-input
                   id="contactName"
                   v-model="form.contactName"
                   class="form-input"
@@ -151,7 +153,7 @@
                 <label class="form-label" for="studentNumber">
                   Student number (optional)
                 </label>
-                <input
+                <el-input
                   id="studentNumber"
                   v-model="form.studentNumber"
                   class="form-input"
@@ -165,7 +167,7 @@
                 <label class="form-label" for="email">
                   Contact email <span>*</span>
                 </label>
-                <input
+                <el-input
                   id="email"
                   v-model="form.email"
                   type="email"
@@ -181,7 +183,7 @@
                 <label class="form-label" for="instagram">
                   Instagram (optional)
                 </label>
-                <input
+                <el-input
                   id="instagram"
                   v-model="form.instagram"
                   class="form-input"
@@ -194,7 +196,7 @@
               <label class="form-label" for="otherLink">
                 Other link (optional)
               </label>
-              <input
+              <el-input
                 id="otherLink"
                 v-model="form.otherLink"
                 class="form-input"
@@ -205,11 +207,11 @@
             <div class="section-label" style="margin-top: 8px;">Verification</div>
             <div class="section-divider"></div>
 
-            <div class="form-group">
+            <!-- <div class="form-group">
               <label class="form-label" for="proof">
                 Proof of club (optional for now)
               </label>
-              <input
+              <el-input
                 id="proof"
                 type="file"
                 class="form-file"
@@ -219,11 +221,11 @@
               <p class="form-small">
                 For official clubs, you can upload a document or screenshot that shows the club is recognized by the university.
               </p>
-            </div>
+            </div> -->
 
             <div class="form-footer-row">
               <label class="checkbox-row">
-                <input type="checkbox" v-model="form.confirm" required />
+                <el-checkbox type="checkbox" v-model="form.confirm" required />
                 <span>
                   I confirm that I am an official representative of this club /
                   community and the information is correct.
@@ -240,7 +242,7 @@
               <i class="far fa-check-circle"></i>
               Your application was sent. We’ll review it as soon as possible 💚
             </div>
-          </form>
+          </el-form>
         </div>
       </section>
     </div>
@@ -250,6 +252,7 @@
 import { ref, reactive, computed } from 'vue'
 
 const form = reactive({
+  subject: "Yeni Kulüp Başvurusu",
   clubName: '',
   university: '',
   clubType: '',
@@ -261,7 +264,7 @@ const form = reactive({
   email: '',
   instagram: '',
   otherLink: '',
-  proof: null,
+  //proof: null,
   confirm: false
 })
 
@@ -321,28 +324,55 @@ const validate = () => {
   return isValid
 }
 
-const handleSubmit = () => {
+const handleSubmit = async () => {
   if (!validate()) return
 
   // Simulate API call
   console.log("Submitting application:", form)
   
-  // Reset form
-  Object.keys(form).forEach(key => {
-    if (key === 'confirm') form[key] = false
-    else if (key === 'proof') form[key] = null
-    else form[key] = ''
-  })
+
   
   // Reset file input manually if needed
   const fileInput = document.getElementById('proof')
   if (fileInput) fileInput.value = ''
 
-  alert('Application sent to help@circleevent.app')
-  showSuccess.value = true
-  setTimeout(() => {
-    showSuccess.value = false
-  }, 4000)
+  let token = localStorage.getItem('user_token');
+  let payload = JSON.stringify(form);
+  debugger;
+  let response = await fetch('/api/general/communities/create', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: payload
+  })
+    if (response.status === 422) {
+      response.json().then(error => {
+        console.log('Validation hatası:', error);
+        debugger;
+      })
+    }    
+    let data = await response.json();
+    if (data.error) {
+      alert(data.error);
+      return;
+    }
+    if (data.message) {
+      alert(data.message);
+    }
+    console.log('Response from server:', data);
+    // Reset form
+    /*Object.keys(form).forEach(key => {
+      if (key === 'confirm') form[key] = false
+      else if (key === 'proof') form[key] = null
+      else form[key] = ''
+    })*/
+    showSuccess.value = true
+    setTimeout(() => {
+      showSuccess.value = false
+    }, 4000)
+
 }
 </script>
 

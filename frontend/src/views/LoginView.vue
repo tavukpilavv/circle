@@ -64,8 +64,8 @@ const handleLogin = async () => {
   const user = username.value;
   const pass = password.value;
 
- 
   try {
+    // 1. Send request to Backend
     const response = await fetch('/api/auth/login', {
       method: 'POST',
       headers: {
@@ -77,29 +77,49 @@ const handleLogin = async () => {
       })
     });
 
+    // 2. Check if response is OK
+    const data = await response.json();
     if (response.ok) {
-      const data = await response.json();
-
       if (data.access_token) {
         // Store auth data
         localStorage.setItem('user_token', data.access_token);
         localStorage.setItem('user_name', user);
 
-        // Set roles
-        localStorage.setItem('user_role', data.role || 'user');
+        // --- FIXED LOGIC (ENGLISH) ---
+        // We strictly use the role from the backend response.
+        // If the backend doesn't send a role, we default to 'user'.
+        // We DO NOT rely on the username being "admin".
+        let userRole = 'user';
+        
+        if (data.user && data.user.role) {
+            userRole = data.user.role;
+        } else if (data.role) {
+            // Fallback if backend sends role at the top level
+            userRole = data.role;
+        }
+
+        localStorage.setItem('user_role', userRole);
+        // -----------------------------
 
         window.dispatchEvent(new Event('auth-changed'));
-        router.push('/');
+        
+        // Redirect logic
+        if (userRole === 'admin' || userRole === 'super_admin' || userRole === 'superadmin') {
+             router.push('/'); 
+        } else {
+             router.push('/');
+        }
+        
       } else {
-        alert('Login failed: Token missing from response');
+        alert('Login failed: Token missing from response.');
       }
     } else {
-      // Handle 401/403 etc
-      alert('Invalid username or password');
+      // 401 Unauthorized or other errors
+      alert('Invalid username or password!');
     }
   } catch (error) {
     console.error('Login error:', error);
-    alert('Unable to connect to login server');
+    alert('Unable to connect to the server.');
   }
 }
 </script>

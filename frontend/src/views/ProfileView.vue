@@ -254,7 +254,7 @@
           <article class="card application-card" v-for="app in pendingApplications" :key="app.id" style="width: 100%; flex-direction: row; align-items: center; justify-content: space-between; padding: 15px;">
             <div class="app-info">
               <h4 style="margin: 0; color: var(--ink);">{{ app.name }}</h4>
-              <p style="margin: 5px 0 0; font-size: 13px; color: var(--muted);">Applicant: {{ app.contact_person }}</p>
+              <p style="margin: 5px 0 0; font-size: 13px; color: var(--muted);">Description: {{ app.description }}</p>
             </div>
             <div class="app-actions" style="display: flex; align-items: center; gap: 15px;">
               <a :href="app.proof_document" target="_blank" style="font-size: 13px; color: var(--brand); font-weight: 600; text-decoration: none;">
@@ -432,12 +432,12 @@ const user = reactive({
 
 const isAdmin = computed(() => user.role === 'admin' || user.role === 'super_admin')
 const isSuperAdmin = computed(() => user.role === 'super_admin')
-
-const pendingApplications = computed(() => store.pendingApplications)
+const pendingApplications = ref([])
+//const pendingApplications = computed(() => store.pendingApplications)
 const approvingId = ref(null)
 
 const approveApp = async (id) => {
-  approvingId.value = id
+  /*approvingId.value = id
   const result = await store.approveApplication(id, user.id || 1) // Fallback ID if not set
   
   if (result.success) {
@@ -445,7 +445,23 @@ const approveApp = async (id) => {
   } else {
     toast.error('Failed to approve: ' + (result.message || 'Unknown error'))
   }
-  approvingId.value = null
+  approvingId.value = null*/
+  const response = await fetch(`/api/general/communities/approve`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('user_token')}`
+    },
+    body: JSON.stringify({ id })
+  })
+  const data = await response.json()
+  if (data.success) {
+    toast.success('Application approved and club promoted!')
+    // Remove approved application from local list
+    pendingApplications.value = pendingApplications.value.filter(app => app.id !== id)
+  } else {
+    toast.error('Failed to approve: ' + (data.message || 'Unknown error'))
+  }
 }
 
 const loadUserData = () => {
@@ -534,9 +550,19 @@ const loadAvatar = () => {
   storedAvatar.value = localStorage.getItem('user_avatar') || ''
 }
 
+const loadPenginds = () => {
+  fetch("/api/general/communities/pending")
+    .then(response => response.json())
+    .then(data => {
+      debugger;
+      pendingApplications.value = data || []
+    })
+} 
+
 onMounted(() => {
   loadUserData()
   loadAvatar()
+  loadPenginds()
   // loadRatedEvents() // No longer needed with store
   window.addEventListener('avatar-changed', loadAvatar)
 
