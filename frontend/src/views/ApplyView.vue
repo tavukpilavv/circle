@@ -207,21 +207,21 @@
             <div class="section-label" style="margin-top: 8px;">Verification</div>
             <div class="section-divider"></div>
 
-            <!-- <div class="form-group">
-              <label class="form-label" for="proof">
-                Proof of club (optional for now)
+            <div class="form-group">
+              <label class="form-label" for="clubImage">
+                Club Image (optional)
               </label>
-              <el-input
-                id="proof"
+              <input
+                id="clubImage"
                 type="file"
                 class="form-file"
-                accept=".png,.jpg,.jpeg,.pdf"
+                accept=".png,.jpg,.jpeg"
                 @change="handleFileChange"
               />
               <p class="form-small">
-                For official clubs, you can upload a document or screenshot that shows the club is recognized by the university.
+                Upload a logo or representative image for your club.
               </p>
-            </div> -->
+            </div>
 
             <div class="form-footer-row">
               <label class="checkbox-row">
@@ -249,7 +249,10 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const form = reactive({
   subject: "Yeni Kulüp Başvurusu",
@@ -264,7 +267,7 @@ const form = reactive({
   email: '',
   instagram: '',
   otherLink: '',
-  //proof: null,
+  clubImage: null,
   confirm: false
 })
 
@@ -281,8 +284,18 @@ const studentNumberPlaceholder = computed(() => {
 })
 
 const handleFileChange = (event) => {
-  form.proof = event.target.files[0]
+  const file = event.target.files[0]
+  if (file) {
+    form.clubImage = file
+  }
 }
+
+onMounted(() => {
+  const token = localStorage.getItem('user_token')
+  if (!token) {
+    router.push('/login')
+  }
+})
 
 const validate = () => {
   Object.keys(errors).forEach(key => delete errors[key])
