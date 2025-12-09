@@ -357,20 +357,29 @@ def get_pending_communities():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
 @bp.route('/communities/create', methods=['POST'])
 @jwt_required()
 def create_community():
     try:
         user_id = get_jwt_identity()
         user = User.query.get(int(user_id))
-        if not user: return jsonify({'error': 'Giriş yapmalısınız'}), 401
-        
-        if user.managed_community:
-             return jsonify({'error': 'Zaten bir kulübünüz var!'}), 400
+        if not user:
+            return jsonify({'error': 'Giriş yapmalısınız'}), 401
 
-        file_url = upload_file(request.files.get('file'), folder="communities")
+        if user.managed_community:
+            print("User managed community:", user.managed_community)
+            return jsonify({'error': 'Zaten bir kulübünüz var!'}), 400
+
         data = request.get_json()
-        
+
+        # Handle optional file upload
+        file = request.files.get('file')
+        if file:
+            file_url = upload_file(file, folder="communities")
+        else:
+            file_url = data.get("clubImage") or None
+
         new_c = Community(
             name=data.get('clubName'),
             university=data.get('university'),
@@ -379,24 +388,26 @@ def create_community():
             description=data.get('description'),
             contact_person=data.get('contactName'),
             contact_email=data.get('email'),
+            instagram_link=data.get("instagram"),
+            external_link=data.get("otherLink"),
             image_url=file_url,
             proof_document_url=file_url,
-            is_approved=False, # Otomatik Onay
+            is_approved=False,
             admin_id=user.id
         )
-# clubType events instagram otherLink studentNumber için db de kolon açılmamış
-# shortDescription için formda giriş yok
 
-        # if user.role == 'student':
-        #     user.role = 'admin'
-        user.joined_communities.append(new_c)
-
+        # STEP 1: Save community first
         db.session.add(new_c)
         db.session.commit()
-        return jsonify({'message': 'Onaylandığında klubünüz açılacaktır.'}), 201
+
+        # STEP 2: Add admin as first member
+        user.joined_communities.append(new_c)
+        db.session.commit()
+
+        return jsonify({'message': 'Onaylandığında kulübünüz açılacaktır.'}), 201
+
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
 
 
 @bp.route('/communities/<int:id>/join', methods=['POST'])
@@ -450,5 +461,13 @@ def approve_community():
             return jsonify({'success': True, 'message': 'Onaylandı'}), 200
         return jsonify({'error': 'Bulunamadı'}), 404
     except Exception as e:
+        print("\n🔥 COMMUNITY CREATE ERROR ↓↓↓↓↓")
+        print(str(e))
+        import traceback
+        traceback.print_exc()
+        print("🔥 END ERROR ↑↑↑↑↑\n")
         return jsonify({'error': str(e)}), 500
+
+
+
 
