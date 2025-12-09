@@ -60,6 +60,7 @@
 import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { apiFetch } from '../api'
 
 const router = useRouter()
 const formRef = ref(null)
@@ -127,7 +128,7 @@ const submit = () => {
             
             try {
                 // --- BACKEND BAĞLANTISI (YENİ EKLENEN KISIM) ---
-                const response = await fetch('/api/auth/register', {
+                const response = await apiFetch('/api/auth/register', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

@@ -137,6 +137,7 @@
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { store } from '../store.js'
+import { apiFetch } from '../api'
 
 import ConfettiOverlay from '../components/ConfettiOverlay.vue'
 
@@ -163,10 +164,29 @@ const applyFilters = () => {
   }
 }
 
+const loadCommunities = async () => {
+  try {
+    const res = await apiFetch("/api/general/communities")
+    const data = await res.json()
+
+    store.communities = data.map(c => ({
+      id: c.id,
+      name: c.name,
+      description: c.description || "",
+      members: c.members || 0,
+      joined: c.joined || false,
+      image: c.image_url || "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=800&q=80"
+    }))
+  } catch (err) {
+    console.error("Failed to load communities:", err)
+  }
+}
+
+
 onMounted(() => {
   applyFilters()
-  
-  // Check for Super Admin role
+  loadCommunities()
+
   const role = localStorage.getItem('user_role')
   isSuperAdmin.value = role === 'super_admin'
 })

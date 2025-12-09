@@ -17,7 +17,7 @@ async function fetchCurrentUser() {
   if (currentUserCache) return currentUserCache;
 
   try {
-    const response = await fetch("/api/users/me", {
+    const response = await apiFetch("/api/users/me", {
       method: "GET",
       credentials: "include", // in case you use cookies/session
       headers: {

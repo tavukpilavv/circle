@@ -2,56 +2,7 @@ import { reactive } from 'vue'
 
 export const store = reactive({
   notifications: [],
-  communities: [
-    {
-      id: 1,
-      name: 'BİLTEK – AYBU Science and Technology Community',
-      description: 'Focused on innovation, coding workshops, and technology projects.',
-      members: 450,
-      joined: false,
-      image: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=800&q=80'
-    },
-    {
-      id: 2,
-      name: 'ASEC AYBU',
-      description: 'Cybersecurity, software development, and game development community.',
-      members: 320,
-      joined: false,
-      image: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80'
-    },
-    {
-      id: 3,
-      name: 'Psychology Community',
-      description: 'Mental health awareness, psychology seminars, and student gatherings.',
-      members: 285,
-      joined: false,
-      image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=800&q=80'
-    },
-    {
-      id: 4,
-      name: 'AYBU Aviation and Space Club (AYBUHUK)',
-      description: 'Designing rockets, drones, and exploring aerospace engineering.',
-      members: 410,
-      joined: false,
-      image: 'https://images.unsplash.com/photo-1517976487492-5750f3195933?auto=format&fit=crop&w=800&q=80'
-    },
-    {
-      id: 5,
-      name: 'AYBU Music Community',
-      description: 'Live concerts, instrument workshops, and bringing rhythm to campus.',
-      members: 560,
-      joined: false,
-      image: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=800&q=80'
-    },
-    {
-      id: 6,
-      name: 'AYBU Theater Club',
-      description: 'Performing arts, acting classes, and stage plays.',
-      members: 230,
-      joined: false,
-      image: 'https://images.unsplash.com/photo-1460723237483-7a6dc9d0b212?auto=format&fit=crop&w=800&q=80'
-    }
-  ],
+  communities: [],
   events: [
     {
       id: 1,
@@ -370,7 +321,7 @@ export const store = reactive({
 
   async fetchPendingApplications(userId) {
     try {
-      const response = await fetch(`/api/general/communities/applications?user_id=${userId}`);
+      const response = await apiFetch(`/api/general/communities/applications?user_id=${userId}`);
       if (!response.ok) throw new Error('Failed to fetch applications');
       const data = await response.json();
       this.pendingApplications = data;
@@ -388,7 +339,7 @@ export const store = reactive({
 
   async approveApplication(applicationId, userId) {
     try {
-      const response = await fetch(`/api/general/communities/${applicationId}/approve`, {
+      const response = await apiFetch(`/api/general/communities/${applicationId}/approve`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

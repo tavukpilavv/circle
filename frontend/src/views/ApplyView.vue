@@ -251,6 +251,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { apiFetch } from '../api'
 
 const router = useRouter()
 
@@ -351,8 +352,7 @@ const handleSubmit = async () => {
 
   let token = localStorage.getItem('user_token');
   let payload = JSON.stringify(form);
-  debugger;
-  let response = await fetch('/api/general/communities/create', {
+  let response = await apiFetch('/api/general/communities/create', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

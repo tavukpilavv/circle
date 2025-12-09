@@ -54,6 +54,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { apiFetch } from '../api'
 
 const router = useRouter()
 const showPassword = ref(false)
@@ -66,7 +67,7 @@ const handleLogin = async () => {
 
   try {
     // 1. Send request to Backend
-    const response = await fetch('/api/auth/login', {
+    const response = await apiFetch('/api/auth/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

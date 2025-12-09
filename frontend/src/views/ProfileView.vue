@@ -551,7 +551,7 @@ const loadAvatar = () => {
 }
 
 const loadPenginds = () => {
-  fetch("/api/general/communities/pending")
+  apiFetch("/api/general/communities/pending")
     .then(response => response.json())
     .then(data => {
       debugger;
