@@ -140,17 +140,10 @@ def create_app(config_class=Config):
 
 
     # CORS
+    # CORS (FIXED)
     CORS(
         app,
-        resources={r"/api/*": {
-            "origins": [
-                "http://localhost:5173",
-                "http://localhost:5000",
-                "https://new2-dusky.vercel.app",
-                "https://circleevent.app",
-                "https://www.circleevent.app"
-            ]
-        }},
+        resources={r"/api/*": {"origins": "*"}},
         supports_credentials=True
     )
 
