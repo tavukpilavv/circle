@@ -354,16 +354,12 @@ const closeModal = () => {
 const submitForm = async () => {
   if (modalMode.value === 'create') {
     const fd = new FormData();
-
     fd.append("name", formData.name);
     fd.append("date", formData.date);
     fd.append("location", formData.location);
     fd.append("capacity", formData.capacity);
     fd.append("description", formData.description);
     fd.append("club", formData.club);
-
-    // optional image support later
-    // fd.append("image", selectedFile);
 
     await store.createEvent(fd);
   } else {
@@ -377,9 +373,10 @@ const submitForm = async () => {
       description: formData.description
     });
   }
-
   closeModal();
-}
+};
+
+
 
 
 const deleteEvent = (event) => {

@@ -67,7 +67,7 @@ async createEvent(formData) {
   const res = await apiFetch("/api/general/events/create", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${localStorage.getItem("user_token")}`
+      "Authorization": `Bearer ${localStorage.getItem("user_token")}`
     },
     body: formData
   });
