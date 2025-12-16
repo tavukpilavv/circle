@@ -90,7 +90,7 @@ def create_event():
         if user.role == 'admin':
             if user.managed_community: target_community_id = user.managed_community.id
             else: return jsonify({'error': 'Yönettiğiniz bir kulüp yok!'}), 403
-        elif user.role == 'superadmin':
+        elif user.role == 'super_admin':
             if club_name:
                 found = Community.query.filter_by(name=club_name).first()
                 if found: target_community_id = found.id
