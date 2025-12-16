@@ -44,7 +44,15 @@ def create_app(config_class=Config):
         static_url_path=""
     )
 
+    # Load base config (includes default SQLite)
     app.config.from_object(config_class)
+
+    # 🔹 IMPORTANT: override DB from env (Render / prod)
+    import os
+    db_url = os.getenv("DATABASE_URL")
+    if db_url:
+        app.config["SQLALCHEMY_DATABASE_URI"] = db_url
+
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = False
     app.config['JWT_COOKIE_CSRF_PROTECT'] = False
     app.config['JWT_CSRF_CHECK_FORM'] = False
