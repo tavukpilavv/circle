@@ -351,22 +351,22 @@ const closeModal = () => {
   document.body.style.overflow = '';
 }
 
-const submitForm = () => {
+const submitForm = async () => {
   if (modalMode.value === 'create') {
-      const fd = new FormData();
+    const fd = new FormData();
 
-      fd.append("name", formData.name);
-      fd.append("date", formData.date);
-      fd.append("location", formData.location);
-      fd.append("capacity", formData.capacity);
-      fd.append("description", formData.description);
-      fd.append("club", formData.club);
+    fd.append("name", formData.name);
+    fd.append("date", formData.date);
+    fd.append("location", formData.location);
+    fd.append("capacity", formData.capacity);
+    fd.append("description", formData.description);
+    fd.append("club", formData.club);
 
-      // optional image support later
-      // fd.append("image", selectedFile);
+    // optional image support later
+    // fd.append("image", selectedFile);
 
-      await store.createEvent(fd);
-    } else {
+    await store.createEvent(fd);
+  } else {
     store.updateEvent({
       id: formData.id,
       name: formData.name,
@@ -377,8 +377,10 @@ const submitForm = () => {
       description: formData.description
     });
   }
+
   closeModal();
 }
+
 
 const deleteEvent = (event) => {
   if (confirm('Are you sure you want to delete this event?')) {
