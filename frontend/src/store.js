@@ -1,5 +1,5 @@
 import { reactive } from 'vue'
-import { apiFetch } from '../api'
+import { apiFetch } from './api'
 
 export const store = reactive({
   notifications: [],
