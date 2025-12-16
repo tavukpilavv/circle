@@ -1,4 +1,4 @@
-Flask
+Flask>=2.3,<3.0
 Flask-CORS
 Flask-SQLAlchemy
 Flask-Migrate
@@ -7,4 +7,4 @@ gunicorn
 psycopg2-binary
 cloudinary
 python-dotenv
-Werkzeug
+Werkzeug>=2.3,<3.0
