@@ -351,8 +351,21 @@ const handleSubmit = async () => {
   if (fileInput) fileInput.value = ''
 
   let token = localStorage.getItem('user_token');
-  let payload = JSON.stringify(form);
-  let response = await apiFetch('/api/general/communities/create', {
+  // let payload = JSON.stringify(form);
+  const payload = JSON.stringify({
+    clubName: form.clubName,
+    university: form.university,
+    category: form.category,
+    shortDescription: form.description, // ✅ FIX
+    description: form.description,
+    contactName: form.contactName,
+    email: form.email,
+    instagram: form.instagram,
+    otherLink: form.otherLink,
+    clubImage: null
+  })
+
+  let response = await apiFetch('/api/general/communities/apply', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

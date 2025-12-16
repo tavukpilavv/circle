@@ -211,16 +211,22 @@ const filteredCommunities = computed(() => {
   })
 })
 
-const toggleJoin = (community) => {
-  // Check if user is logged in
+const toggleJoin = async (community) => {
   if (!localStorage.getItem('user_token')) {
     router.push('/login')
     return
   }
-  
-  // User is authenticated, proceed with toggle
-  store.joinCommunity(community)
+
+  await apiFetch(`/api/general/communities/${community.id}/join`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("user_token")}`
+    }
+  })
+
+  await loadCommunities()
 }
+
 
 // Modal Methods
 const openModal = () => {
