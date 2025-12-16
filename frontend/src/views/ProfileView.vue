@@ -254,7 +254,7 @@
           <article class="card application-card" v-for="app in pendingApplications" :key="app.id" style="width: 100%; flex-direction: row; align-items: center; justify-content: space-between; padding: 15px;">
             <div class="app-info">
               <h4 style="margin: 0; color: var(--ink);">{{ app.name }}</h4>
-              <p style="margin: 5px 0 0; font-size: 13px; color: var(--muted);">Description: {{ app.description }}</p>
+              <p style="margin: 5px 0 0; font-size: 13px; color: var(--muted);">Description: {{ app.short_description }}</p>
             </div>
             <div class="app-actions" style="display: flex; align-items: center; gap: 15px;">
               <a :href="app.proof_document" target="_blank" style="font-size: 13px; color: var(--brand); font-weight: 600; text-decoration: none;">
@@ -389,6 +389,7 @@ import { CircleCheckFilled } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import RatingPopup from '../components/RatingPopup.vue'
 import { useToast } from "vue-toastification";
+import { apiFetch } from '../api'
 
 const router = useRouter()
 const activePanel = ref('events')
@@ -551,24 +552,27 @@ const loadAvatar = () => {
 }
 
 const loadPenginds = () => {
-  apiFetch("/api/general/communities/pending")
+  apiFetch("/api/general/communities/pending", {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('user_token')}`
+    }
+  })
     .then(response => response.json())
     .then(data => {
-      debugger;
-      pendingApplications.value = data || []
+      pendingApplications.value = Array.isArray(data) ? data : []
     })
-} 
+}
+
 
 onMounted(() => {
   loadUserData()
   loadAvatar()
+  if (isSuperAdmin.value) {
   loadPenginds()
+}
+
   // loadRatedEvents() // No longer needed with store
   window.addEventListener('avatar-changed', loadAvatar)
-
-  if (isSuperAdmin.value) {
-    store.fetchPendingApplications(user.id || 1)
-  }
 })
 
 onUnmounted(() => {

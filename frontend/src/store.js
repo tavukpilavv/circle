@@ -197,17 +197,17 @@ export const store = reactive({
       ratingCount: 312
     }
   ],
-  joinCommunity(community) {
-    const target = this.communities.find(c => c.name === community.name);
-    if (target) {
-      target.joined = !target.joined;
-      // Add default role/date if joining
-      if (target.joined && !target.role) {
-        target.role = 'Member';
-        target.joinedDate = 'Just now';
-      }
-    }
-  },
+  // joinCommunity(community) {
+  //   const target = this.communities.find(c => c.name === community.name);
+  //   if (target) {
+  //     target.joined = !target.joined;
+  //     // Add default role/date if joining
+  //     if (target.joined && !target.role) {
+  //       target.role = 'Member';
+  //       target.joinedDate = 'Just now';
+  //     }
+  //   }
+  // },
   registerEvent(event) {
     const target = this.events.find(e => e.id === event.id);
     if (target) {
