@@ -363,22 +363,18 @@ def get_pending_communities():
 def create_community():
     try:
         user_id = get_jwt_identity()
-        user = User.query.get(int(user_id))
-        if not user:
-            return jsonify({'error': 'Giriş yapmalısınız'}), 401
+        user = User.query.get(user_id)
 
-        if user.managed_community:
-            print("User managed community:", user.managed_community)
-            return jsonify({'error': 'Zaten bir kulübünüz var!'}), 400
+        if not user:
+            return jsonify({'error': 'Unauthorized'}), 401
+
+        # 🔒 ADMIN-ONLY
+        if user.role not in ['admin', 'super_admin']:
+            return jsonify({'error': 'Only admins can create communities'}), 403
 
         data = request.get_json()
 
-        # Handle optional file upload
-        file = request.files.get('file')
-        if file:
-            file_url = upload_file(file, folder="communities")
-        else:
-            file_url = data.get("clubImage") or None
+        file_url = data.get("clubImage")
 
         new_c = Community(
             name=data.get('clubName'),
@@ -392,19 +388,18 @@ def create_community():
             external_link=data.get("otherLink"),
             image_url=file_url,
             proof_document_url=file_url,
-            is_approved=True,
+            is_approved=True,     # admins create approved communities
             admin_id=user.id
         )
 
-        # STEP 1: Save community first
         db.session.add(new_c)
         db.session.commit()
 
-        # STEP 2: Add admin as first member
+        # Admin automatically joins
         user.joined_communities.append(new_c)
         db.session.commit()
 
-        return jsonify({'message': 'Onaylandığında kulübünüz açılacaktır.'}), 201
+        return jsonify({'message': 'Community created'}), 201
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -468,6 +463,41 @@ def approve_community():
         print("🔥 END ERROR ↑↑↑↑↑\n")
         return jsonify({'error': str(e)}), 500
 
+@bp.route('/communities/apply', methods=['POST'])
+@jwt_required()
+def apply_community():
+    user_id = get_jwt_identity()
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    data = request.get_json()
+
+    # Prevent duplicate names
+    existing = Community.query.filter_by(name=data.get('clubName')).first()
+    if existing:
+        return jsonify({'error': 'Community name already exists'}), 409
+
+    new_c = Community(
+        name=data.get('clubName'),
+        university=data.get('university'),
+        category=data.get('category'),
+        short_description=data.get('shortDescription'),
+        description=data.get('description'),
+        contact_person=data.get('contactName'),
+        contact_email=data.get('email'),
+        instagram_link=data.get("instagram"),
+        external_link=data.get("otherLink"),
+        image_url=data.get("clubImage"),
+        proof_document_url=data.get("clubImage"),
+        is_approved=False,              # 🔑 IMPORTANT
+        admin_id=user.id                # applicant
+    )
+
+    db.session.add(new_c)
+    db.session.commit()
+
+    return jsonify({'message': 'Application submitted'}), 201
 
 
 
