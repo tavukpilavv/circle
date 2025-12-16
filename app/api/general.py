@@ -392,7 +392,7 @@ def create_community():
             external_link=data.get("otherLink"),
             image_url=file_url,
             proof_document_url=file_url,
-            is_approved=False,
+            is_approved=True,
             admin_id=user.id
         )
 
