@@ -446,7 +446,7 @@ const approveApp = async (id) => {
     toast.error('Failed to approve: ' + (result.message || 'Unknown error'))
   }
   approvingId.value = null*/
-  const response = await fetch(`/api/general/communities/approve`, {
+  const response = await apiFetch(`/api/general/communities/approve`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
