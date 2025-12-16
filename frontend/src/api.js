@@ -8,10 +8,14 @@ export function apiFetch(path, options = {}) {
     ...options,
   };
 
-  // Only add JSON header when body exists
-  if (finalOptions.body) {
+  // ✅ FIX: only set JSON header if body is NOT FormData
+  if (finalOptions.body && !(finalOptions.body instanceof FormData)) {
     finalOptions.headers = {
       "Content-Type": "application/json",
+      ...(options.headers || {}),
+    };
+  } else {
+    finalOptions.headers = {
       ...(options.headers || {}),
     };
   }
