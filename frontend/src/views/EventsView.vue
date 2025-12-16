@@ -54,7 +54,7 @@
           <div class="event-meta">
             <span><i class="fas fa-location-dot"></i> {{ event.location }}</span>
             <span><i class="fas fa-users"></i> {{ event.capacity }} seats</span>
-            <span><i class="fas fa-users-viewfinder"></i> {{ event.club }}</span>
+            <span><i class="fas fa-users-viewfinder"></i> {{ event.community_name }}</span>
             <span class="rating-meta" v-if="event.rating && new Date(event.date) < new Date().setHours(0,0,0,0)">
               <i class="fas fa-star" style="color: #fcc419;"></i> 
               {{ event.rating }} ({{ event.ratingCount }})
@@ -168,6 +168,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { store } from '../store.js'
 import ConfettiOverlay from '../components/ConfettiOverlay.vue'
 import { useToast } from "vue-toastification";
+import { apiFetch } from '../api'
 
 const route = useRoute()
 const router = useRouter()
@@ -203,8 +204,7 @@ const filteredEvents = computed(() => {
         const name = (e.name || '').toLowerCase();
         const desc = (e.description || '').toLowerCase();
         const loc = (e.location || '').toLowerCase();
-        const club = (e.club || '').toLowerCase();
-        
+        const club = (e.community_name || '').toLowerCase();
         return name.includes(query) || desc.includes(query) || loc.includes(query) || club.includes(query);
       } catch (err) {
         console.warn('Error filtering event:', e, err);
@@ -250,27 +250,33 @@ const filteredEvents = computed(() => {
   });
 });
 
-onMounted(() => {
+onMounted(async () => {
+  // 🔑 1. FETCH EVENTS FROM BACKEND (REQUIRED)
+  const res = await apiFetch("/api/general/events");
+  const data = await res.json();
+  store.events = data;
+
+  // 🔑 2. ADMIN CHECK (UNCHANGED)
   if (localStorage.getItem('user_token')) {
     const role = localStorage.getItem('user_role');
     isAdmin.value = role === 'admin' || role === 'super_admin';
   } else {
     isAdmin.value = false;
   }
-  
-  // Apply initial filter from route
+
+  // 🔑 3. ROUTE FILTERS (UNCHANGED)
   if (route.query.filter === 'upcoming') {
     activeFilter.value = 'upcoming';
   } else if (route.query.filter === 'registered') {
-    activeFilter.value = 'all'; // Show all registered
+    activeFilter.value = 'all';
   }
 
-  // Apply search query
   if (route.query.search) {
     searchQuery.value = route.query.search;
-    activeFilter.value = 'all'; // Switch to all to show matches from past too? Or keep upcoming? Let's default to 'all' if searching.
+    activeFilter.value = 'all';
   }
 });
+
 
 watch(() => route.query.filter, (newVal) => {
    if (newVal === 'upcoming') {
@@ -347,23 +353,26 @@ const closeModal = () => {
 
 const submitForm = () => {
   if (modalMode.value === 'create') {
-    store.createEvent({
-      name: formData.name,
-      date: formData.date,
-      location: formData.location,
-      club: formData.club,
-      capacity: formData.capacity,
-      description: formData.description,
-      // Default image for now
-      image: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=800&q=80'
-    });
-  } else {
+      const fd = new FormData();
+
+      fd.append("name", formData.name);
+      fd.append("date", formData.date);
+      fd.append("location", formData.location);
+      fd.append("capacity", formData.capacity);
+      fd.append("description", formData.description);
+      fd.append("club", formData.club);
+
+      // optional image support later
+      // fd.append("image", selectedFile);
+
+      await store.createEvent(fd);
+    } else {
     store.updateEvent({
       id: formData.id,
       name: formData.name,
       date: formData.date,
       location: formData.location,
-      club: formData.club,
+      community_name: formData.club,
       capacity: formData.capacity,
       description: formData.description
     });

@@ -3,200 +3,7 @@ import { reactive } from 'vue'
 export const store = reactive({
   notifications: [],
   communities: [],
-  events: [
-    {
-      id: 1,
-      image: new URL('../images/image1.jpg', import.meta.url).href,
-      alt: "Ceramic Painting Workshop Poster",
-      name: "Ceramic Painting Workshop",
-      community_name: "BİLTEK – AYBU Science and Technology Community",
-      organizer: "AYBU",
-      location: "Cleopatra Ayrancı Atelier",
-      time: "14:00",
-      date: "2025-11-01",
-      time: "14:00",
-      date: "2025-11-01",
-      registered: false,
-      rating: 4.8,
-      ratingCount: 124
-    },
-    {
-      id: 2,
-      image: new URL('../images/image2.jpg', import.meta.url).href,
-      alt: "Game Jam 2025 Poster",
-      name: "Game Jam 2025",
-      community_name: "ASEC AYBU",
-      organizer: "AYBU",
-      location: "AYBU Campus",
-      time: "TBA",
-      date: "2025-11-07",
-      time: "TBA",
-      date: "2025-11-07",
-      registered: false,
-      rating: 4.5,
-      ratingCount: 89
-    },
-    {
-      id: 3,
-      image: new URL('../images/image3.jpg', import.meta.url).href,
-      alt: "Psychological First Aid Poster",
-      name: "Psychological First Aid",
-      community_name: "Psychology Community",
-      organizer: "Hacettepe",
-      location: "Coffee Up Beşevler",
-      time: "12:00",
-      date: "2025-11-29",
-      time: "12:00",
-      date: "2025-11-29",
-      registered: false,
-      rating: 4.9,
-      ratingCount: 56
-    },
-    {
-      id: 4,
-      image: new URL('../images/image5.jpg', import.meta.url).href,
-      alt: "MAN Türkiye R&D and Career Panel Poster",
-      name: "MAN Türkiye R&D & Career Panel",
-      community_name: "AYBU Aviation and Space Club (AYBUHUK)",
-      organizer: "AYBU",
-      location: "A-212",
-      time: "11:00",
-      date: "2025-11-06",
-      time: "11:00",
-      date: "2025-11-06",
-      registered: false,
-      rating: 4.2,
-      ratingCount: 34
-    },
-    {
-      id: 5,
-      image: new URL('../images/image6.jpg', import.meta.url).href,
-      alt: "Stage is Yours Poster",
-      name: "Stage is Yours!",
-      community_name: "AYBU Music Community",
-      organizer: "Bilkent",
-      location: "AYBU – Online Video Submission",
-      time: "TBA",
-      date: "2025-11-02",
-      time: "TBA",
-      date: "2025-11-02",
-      registered: false,
-      rating: 4.7,
-      ratingCount: 210
-    },
-    {
-      id: 6,
-      image: new URL('../images/image4.jpg', import.meta.url).href,
-      alt: "Theatre Club Coffee Meetup Poster",
-      name: "Coffee Meetup",
-      community_name: "AYBU Theater Club",
-      organizer: "ODTÜ",
-      location: "Coffee Up, Bahçelievler – Azerbaijan St. No:23",
-      time: "14:00",
-      date: "2025-10-12",
-      time: "14:00",
-      date: "2025-10-12",
-      registered: true,
-      rating: 4.6,
-      ratingCount: 45
-    },
-    {
-      id: 7,
-      image: new URL('../images/image7.jpg', import.meta.url).href,
-      alt: "MS Office Computer Course Poster",
-      name: "MS Office Course",
-      community_name: "Strategic Management Club",
-      organizer: "Gazi Üni",
-      location: "Etlik Milli İrade Campus",
-      time: "10:00-12:00",
-      date: "2025-12-05",
-      time: "10:00-12:00",
-      date: "2025-12-05",
-      registered: false,
-      rating: 4.3,
-      ratingCount: 12
-    },
-    {
-      id: 8,
-      image: new URL('../images/image8.jpg', import.meta.url).href,
-      alt: "Bariatric Surgery Dietetics Seminar Poster",
-      name: "Bariatric Surgery Dietetics",
-      community_name: "AYBU SAYBEK",
-      organizer: "AYBU",
-      location: "Esenboğa Campus – A Block Conference Hall",
-      time: "12:30-13:30",
-      date: "2025-11-24",
-      time: "12:30-13:30",
-      date: "2025-11-24",
-      registered: false,
-      rating: 4.8,
-      ratingCount: 67
-    },
-    {
-      id: 9,
-      image: new URL('../images/image9.jpg', import.meta.url).href,
-      alt: "Art Workshop Poster",
-      name: "Art Workshop",
-      community_name: "AYBU Art Community",
-      organizer: "Bilkent",
-      location: "Coffee & Tea Shop Cafe",
-      time: "14:00-17:00",
-      date: "2025-11-29",
-      time: "14:00-17:00",
-      date: "2025-11-29",
-      registered: false,
-      rating: 4.9,
-      ratingCount: 156
-    },
-    {
-      id: 10,
-      image: new URL('../images/image10.jpg', import.meta.url).href,
-      alt: "ÜNİDES Project Announcement Poster",
-      name: "ÜNİDES – Growing Together",
-      community_name: "Gençlik ve Spor Bakanlığı Project",
-      organizer: "ODTÜ",
-      location: "AYBU – Application Link in Bio",
-      time: "TBA",
-      date: "2025-11-15",
-      time: "TBA",
-      date: "2025-11-15",
-      registered: false,
-      rating: 4.4,
-      ratingCount: 28
-    },
-    {
-      id: 11,
-      image: new URL('../images/image11.jpg', import.meta.url).href,
-      alt: "TBMM Visit Poster",
-      name: "TBMM Visit – Youth in Politics",
-      community_name: "İstiklal Club",
-      organizer: "Hacettepe",
-      location: "Grand National Assembly of Türkiye",
-      time: "16:00",
-      date: "2025-11-18",
-      time: "16:00",
-      date: "2025-11-18",
-      registered: false,
-      rating: 4.7,
-      ratingCount: 92
-    },
-    {
-      id: 12,
-      image: new URL('../images/image12.jpg', import.meta.url).href,
-      alt: "Mete Gazoz Talk Poster",
-      name: "Mete Gazoz – Olympic Champion Talk",
-      community_name: "AYBU",
-      organizer: "AYBU",
-      location: "Milli İrade Campus – Conference Hall",
-      time: "14:00",
-      date: "2025-12-02",
-      time: "14:00",
-      date: "2025-12-02",
-      registered: false,
-      rating: 5.0,
-      ratingCount: 312
-    }
-  ],
+  events: [],
   // joinCommunity(community) {
   //   const target = this.communities.find(c => c.name === community.name);
   //   if (target) {
@@ -255,19 +62,23 @@ export const store = reactive({
   //   this.communities.push(newClub);
   // },
   // Event Actions
-  createEvent(eventData) {
-    const newId = this.events.length > 0
-      ? Math.max(...this.events.map(e => e.id)) + 1
-      : 1;
+async createEvent(formData) {
+  const res = await apiFetch("/api/general/events/create", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("user_token")}`
+    },
+    body: formData
+  });
 
-    const newEvent = {
-      id: newId,
-      ...eventData,
-      registered: false
-    };
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error || "Event creation failed");
+  }
 
-    this.events.push(newEvent);
-  },
+  const eventsRes = await apiFetch("/api/general/events");
+  this.events = await eventsRes.json();
+},
   updateEvent(eventData) {
     const index = this.events.findIndex(e => e.id === eventData.id);
     if (index !== -1) {
