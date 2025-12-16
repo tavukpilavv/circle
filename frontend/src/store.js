@@ -240,20 +240,20 @@ export const store = reactive({
 
     return { success: true };
   },
-  createClub(clubData) {
-    const newId = this.communities.length > 0
-      ? Math.max(...this.communities.map(c => c.id)) + 1
-      : 1;
+  // createClub(clubData) {
+  //   const newId = this.communities.length > 0
+  //     ? Math.max(...this.communities.map(c => c.id)) + 1
+  //     : 1;
 
-    const newClub = {
-      id: newId,
-      ...clubData,
-      members: 0, // Default start
-      joined: false
-    };
+  //   const newClub = {
+  //     id: newId,
+  //     ...clubData,
+  //     members: 0, // Default start
+  //     joined: false
+  //   };
 
-    this.communities.push(newClub);
-  },
+  //   this.communities.push(newClub);
+  // },
   // Event Actions
   createEvent(eventData) {
     const newId = this.events.length > 0

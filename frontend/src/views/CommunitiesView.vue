@@ -173,14 +173,15 @@ const loadCommunities = async () => {
       id: c.id,
       name: c.name,
       description: c.description || "",
-      members: c.members || 0,
+      members: c.member_count || 0, // ✅ FIX
       joined: c.joined || false,
-      image: c.image_url || "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=800&q=80"
+      image: c.image || "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=800&q=80" // ✅ FIX
     }))
   } catch (err) {
     console.error("Failed to load communities:", err)
   }
 }
+
 
 
 onMounted(() => {
@@ -235,18 +236,31 @@ const closeModal = () => {
   document.body.style.overflow = ''
 }
 
-const submitClub = () => {
-  // Use default image if none provided
-  const image = formData.image || 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=800&q=80'
-  
-  store.createClub({
-    name: formData.name,
-    description: formData.description,
-    image: image
-  })
-  
-  closeModal()
+const submitClub = async () => {
+  try {
+    const res = await apiFetch("/api/general/communities/create", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${localStorage.getItem("user_token")}`
+      },
+      body: JSON.stringify({
+        clubName: formData.name,
+        description: formData.description,
+        clubImage: formData.image || null
+      })
+    })
+
+    if (!res.ok) throw new Error("Community creation failed")
+
+    await loadCommunities()   // reload from backend
+    closeModal()
+  } catch (err) {
+    console.error(err)
+    alert("Failed to create community")
+  }
 }
+
 </script>
 
 <style scoped>
