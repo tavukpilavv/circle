@@ -48,14 +48,14 @@ class Community(db.Model):
     category = db.Column(db.String(50))
     short_description = db.Column(db.String(255))
     description = db.Column(db.Text)
-    
+
     contact_email = db.Column(db.String(120))
     contact_person = db.Column(db.String(100))
     instagram_link = db.Column(db.String(255))
     external_link = db.Column(db.String(255))
-    
-    image_url = db.Column(db.String(255))
-    proof_document_url = db.Column(db.String(255))
+
+    image_url = db.Column(db.String, nullable=True)
+    proof_document_url = db.Column(db.String, nullable=True)
 
     is_approved = db.Column(db.Boolean, default=False) # Onay Durumu
 
