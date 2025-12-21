@@ -14,9 +14,10 @@ from app.utils import upload_file
 
 bp = Blueprint("general", __name__)
 
-# -------------------------
-# Helpers
-# -------------------------
+
+# =========================
+# HELPERS
+# =========================
 def is_valid_http_url(url: str) -> bool:
     try:
         u = urlparse((url or "").strip())
@@ -24,22 +25,29 @@ def is_valid_http_url(url: str) -> bool:
     except Exception:
         return False
 
+
+def role_lower(user: User) -> str:
+    return (user.role or "").lower()
+
+
 def is_super_admin(user: User) -> bool:
-    # handle both spellings to avoid breaking your existing DB / logic
-    return (user.role or "").lower() in ("super_admin", "superadmin")
+    # Support both spellings so your app won’t break.
+    return role_lower(user) in ("super_admin", "superadmin")
+
 
 def is_admin(user: User) -> bool:
-    return (user.role or "").lower() == "admin"
+    return role_lower(user) == "admin"
 
 
 # =========================
 # EVENTS
 # =========================
-
 @bp.route("/events", methods=["GET"])
 def get_events():
+    """
+    Returns events list. Uses optional JWT to mark is_registered + user rating.
+    """
     try:
-        # optional JWT to set "registered" flag
         verify_jwt_in_request(optional=True)
         current_user_id = get_jwt_identity()
         current_user = User.query.get(current_user_id) if current_user_id else None
@@ -80,12 +88,12 @@ def get_events():
 
             output.append({
                 "id": e.id,
-                "name": e.title,
+                "name": e.title,          # keep compatibility
                 "title": e.title,
                 "date": e.date,
                 "time": e.time,
                 "location": e.location,
-                "image": e.image_url,  # keep frontend compatibility
+                "image": e.image_url,     # keep compatibility with older frontend
                 "alt": e.title,
                 "community_name": community_name,
                 "organizer": organizer_name,
@@ -110,7 +118,13 @@ def get_events():
 @bp.route("/events/create", methods=["POST"])
 @jwt_required()
 def create_event():
-    """Etkinlik Oluşturma (Admin Kontrollü)"""
+    """
+    Create Event (Admin/Super Admin)
+    IMPORTANT CHANGE:
+      - Admin: community forced to managed_community
+      - Super Admin: MUST send community_id (from dropdown fetched from backend)
+      - No more club name string matching
+    """
     try:
         user_id = get_jwt_identity()
         user = User.query.get(user_id)
@@ -118,34 +132,37 @@ def create_event():
             return jsonify({"error": "Kullanıcı bulunamadı"}), 404
 
         target_community_id = None
-        club_name = request.form.get("club")
+        r = role_lower(user)
 
         # admin => only their managed community
-        if is_admin(user):
+        if r == "admin":
             if user.managed_community:
                 target_community_id = user.managed_community.id
             else:
                 return jsonify({"error": "Yönettiğiniz bir kulüp yok!"}), 403
 
-        # super_admin => may pick club or community_id
-        elif is_super_admin(user):
-            if club_name:
-                found = Community.query.filter_by(name=club_name).first()
-                if found:
-                    target_community_id = found.id
-            if not target_community_id:
-                target_community_id = request.form.get("community_id")
+        # super_admin => must select community_id from dropdown
+        elif r in ("super_admin", "superadmin"):
+            target_community_id = request.form.get("community_id")
+
+        else:
+            return jsonify({"error": "Yetkiniz yok"}), 403
 
         if not target_community_id:
             return jsonify({"error": "Kulüp seçilmeli."}), 400
 
-        # ✅ already file upload supported (image/file)
-        image_url = upload_file(
-            request.files.get("file") or request.files.get("image"),
-            folder="events"
-        )
+        # verify community exists + approved
+        comm = Community.query.get(target_community_id)
+        if not comm or not comm.is_approved:
+            return jsonify({"error": "Selected community not found/approved"}), 400
+
+        # image file upload (file or image)
+        image_file = request.files.get("file") or request.files.get("image")
+        image_url = upload_file(image_file, folder="events") if image_file else None
 
         title = request.form.get("name") or request.form.get("eventName") or request.form.get("title")
+        if not title:
+            return jsonify({"error": "Event title is required"}), 400
 
         new_event = Event(
             title=title,
@@ -154,7 +171,7 @@ def create_event():
             location=request.form.get("location"),
             capacity=request.form.get("capacity"),
             description=request.form.get("description"),
-            community_id=target_community_id,
+            community_id=comm.id,
             image_url=image_url
         )
 
@@ -193,7 +210,7 @@ def register_event(id):
 @bp.route("/events/<int:id>/rate", methods=["POST"])
 @jwt_required()
 def rate_event(id):
-    """Puan Verme (Ekleme veya Güncelleme)"""
+    """Add/Update rating"""
     try:
         user_id = get_jwt_identity()
         data = request.get_json() or {}
@@ -222,7 +239,6 @@ def rate_event(id):
             db.session.commit()
             return jsonify({"message": "Puanınız güncellendi.", "new_rating": event.rating}), 200
 
-        # New rating
         new_rating_instance = Rating(
             user_id=user.id,
             event_id=event.id,
@@ -234,7 +250,6 @@ def rate_event(id):
 
         new_count = (event.rating_count or 0) + 1
         new_rating = (((event.rating or 0) * (event.rating_count or 0)) + rating_val) / new_count
-
         event.rating = round(new_rating, 1)
         event.rating_count = new_count
 
@@ -249,7 +264,7 @@ def rate_event(id):
 @bp.route("/events/<int:id>/participants", methods=["GET"])
 @jwt_required()
 def get_event_participants(id):
-    """Katılımcı Listesi (Admin)"""
+    """Participants list (admin / super admin)"""
     try:
         requester_id = get_jwt_identity()
         requester = User.query.get(requester_id)
@@ -297,9 +312,9 @@ def get_event_reviews(id):
         for r in event.feedbacks:
             user_name = "Incognito User"
             if not r.is_anonymous:
-                user = User.query.get(r.user_id)
-                if user:
-                    user_name = f"{user.first_name} {user.last_name}" if user.first_name else (user.username or "User")
+                u = User.query.get(r.user_id)
+                if u:
+                    user_name = f"{u.first_name} {u.last_name}" if u.first_name else (u.username or "User")
 
             is_current_user = bool(current_user_id and r.user_id == current_user_id)
 
@@ -370,16 +385,16 @@ def delete_event(id):
 # =========================
 # COMMUNITIES
 # =========================
-
 @bp.route("/communities", methods=["GET"])
 def get_communities():
+    """
+    Used by communities page (public listing)
+    """
     try:
-        # optional login; community page does not need joined anymore
         verify_jwt_in_request(optional=True)
-
         comms = Community.query.filter_by(is_approved=True).all()
-        output = []
 
+        output = []
         for c in comms:
             output.append({
                 "id": c.id,
@@ -389,7 +404,6 @@ def get_communities():
                 "website_url": c.external_link,
                 "members_count": c.members.count()
             })
-
         return jsonify(output), 200
 
     except Exception as e:
@@ -399,6 +413,11 @@ def get_communities():
 @bp.route("/communities", methods=["POST"])
 @jwt_required()
 def create_community_multipart():
+    """
+    Multipart create community for new community page:
+    - image file upload
+    - website_url saved to external_link
+    """
     try:
         user_id = get_jwt_identity()
         user = User.query.get(user_id)
@@ -459,6 +478,35 @@ def create_community_multipart():
         return jsonify({"error": str(e)}), 500
 
 
+@bp.route("/communities/options", methods=["GET"])
+@jwt_required()
+def communities_options_for_event():
+    """
+    Dropdown options for Create Event:
+    - super_admin: all approved communities
+    - admin: only their managed community (1 option)
+    """
+    user_id = get_jwt_identity()
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    r = role_lower(user)
+
+    if r in ("super_admin", "superadmin"):
+        comms = Community.query.filter_by(is_approved=True).all()
+        return jsonify([{"id": c.id, "name": c.name} for c in comms]), 200
+
+    if r == "admin":
+        if not user.managed_community:
+            return jsonify([]), 200
+        c = user.managed_community
+        return jsonify([{"id": c.id, "name": c.name}]), 200
+
+    return jsonify([]), 200
+
+
+# --------- legacy endpoints kept (optional) ----------
 @bp.route("/communities/pending", methods=["GET"])
 def get_pending_communities():
     try:
@@ -480,14 +528,15 @@ def get_pending_communities():
         return jsonify({"error": str(e)}), 500
 
 
-# KEEP OLD JSON CREATE ENDPOINT (so old frontend doesn’t break)
 @bp.route("/communities/create", methods=["POST"])
 @jwt_required()
-def create_community():
+def create_community_legacy_json():
+    """
+    Old JSON create endpoint (kept so older frontend won't break)
+    """
     try:
         user_id = get_jwt_identity()
         user = User.query.get(user_id)
-
         if not user:
             return jsonify({"error": "Unauthorized"}), 401
 
@@ -516,7 +565,7 @@ def create_community():
         db.session.add(new_c)
         db.session.commit()
 
-        # Admin auto join (optional)
+        # optional auto join
         user.joined_communities.append(new_c)
         db.session.commit()
 
@@ -555,7 +604,6 @@ def get_applications():
         user_id = get_jwt_identity()
         user = User.query.get(user_id)
 
-        # allow both spellings
         if not user or not is_super_admin(user):
             return jsonify({"error": "Yetkiniz yok"}), 403
 
@@ -591,7 +639,6 @@ def approve_community():
 
         comm.is_approved = True
 
-        # promote admin of that community (keep your logic)
         admin_user = User.query.get(comm.admin_id)
         if admin_user:
             admin_user.role = "admin"
