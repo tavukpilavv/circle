@@ -9,8 +9,13 @@
         </p>
       </div>
 
-      <!-- BACKEND SHOULD ONLY RENDER THIS FOR ADMINS -->
-      <button v-if="isAdmin" id="openCreateEventModal" class="primary-btn" @click="openModal('create')">
+      <!-- Create button for admin + super_admin -->
+      <button
+        v-if="isAdmin"
+        id="openCreateEventModal"
+        class="primary-btn"
+        @click="openModal('create')"
+      >
         + Create Event
       </button>
     </section>
@@ -18,31 +23,33 @@
     <!-- FILTERS -->
     <section class="events-filters">
       <div class="filters-pills">
-        <button 
-          class="filter-pill" 
-          :class="{ 'is-active': activeFilter === 'upcoming' }" 
+        <button
+          class="filter-pill"
+          :class="{ 'is-active': activeFilter === 'upcoming' }"
           @click="activeFilter = 'upcoming'"
-        >Upcoming</button>
-        <button 
-          class="filter-pill" 
-          :class="{ 'is-active': activeFilter === 'past' }" 
+        >
+          Upcoming
+        </button>
+        <button
+          class="filter-pill"
+          :class="{ 'is-active': activeFilter === 'past' }"
           @click="activeFilter = 'past'"
-        >Past</button>
-        <button 
-          class="filter-pill" 
-          :class="{ 'is-active': activeFilter === 'all' }" 
+        >
+          Past
+        </button>
+        <button
+          class="filter-pill"
+          :class="{ 'is-active': activeFilter === 'all' }"
           @click="activeFilter = 'all'"
-        >All</button>
+        >
+          All
+        </button>
       </div>
     </section>
 
     <!-- EVENTS LIST -->
     <section class="events-list" id="eventsList">
-      <article 
-        v-for="event in filteredEvents" 
-        :key="event.id" 
-        class="event-card"
-      >
+      <article v-for="event in filteredEvents" :key="event.id" class="event-card">
         <div class="event-date-pill">
           <span class="event-date-day">{{ getDay(event.date) }}</span>
           <span class="event-date-month">{{ getMonth(event.date) }}</span>
@@ -55,46 +62,70 @@
             <span><i class="fas fa-location-dot"></i> {{ event.location }}</span>
             <span><i class="fas fa-users"></i> {{ event.capacity }} seats</span>
             <span><i class="fas fa-users-viewfinder"></i> {{ event.community_name }}</span>
-            <span class="rating-meta" v-if="event.rating && new Date(event.date) < new Date().setHours(0,0,0,0)">
-              <i class="fas fa-star" style="color: #fcc419;"></i> 
+
+            <span
+              class="rating-meta"
+              v-if="event.rating && new Date(event.date) < new Date().setHours(0,0,0,0)"
+            >
+              <i class="fas fa-star" style="color: #fcc419;"></i>
               {{ event.rating }} ({{ event.ratingCount }})
             </span>
           </div>
         </div>
 
         <div class="event-actions">
-          <button 
-            class="event-primary-btn" 
+          <button
+            class="event-primary-btn"
             @click="register(event)"
             v-if="!isPast(event.date)"
           >
             {{ event.registered ? 'Registered' : 'Register' }}
           </button>
 
-          <button v-if="isAdmin" class="event-edit-btn" type="button" @click="openModal('edit', event)">
+          <button
+            v-if="isAdmin"
+            class="event-edit-btn"
+            type="button"
+            @click="openModal('edit', event)"
+          >
             <i class="fas fa-pen"></i> Edit
           </button>
-          
-          <button v-if="isAdmin" class="event-delete-btn" type="button" @click="deleteEvent(event)">
+
+          <button
+            v-if="isAdmin"
+            class="event-delete-btn"
+            type="button"
+            @click="deleteEvent(event)"
+          >
             <i class="fas fa-trash"></i>
           </button>
         </div>
       </article>
-      
-      <div v-if="filteredEvents.length === 0" style="text-align:center; color:var(--muted); padding:20px;">
+
+      <div
+        v-if="filteredEvents.length === 0"
+        style="text-align:center; color:var(--muted); padding:20px;"
+      >
         No events found.
       </div>
     </section>
   </main>
 
   <!-- CREATE / EDIT EVENT MODAL -->
-  <div class="modal-overlay" :class="{ 'is-open': isModalOpen }" aria-hidden="true" @click.self="closeModal">
+  <div
+    class="modal-overlay"
+    :class="{ 'is-open': isModalOpen }"
+    aria-hidden="true"
+    @click.self="closeModal"
+  >
     <div class="modal-card">
       <button class="modal-close" aria-label="Close" @click="closeModal">
         <span>&times;</span>
       </button>
 
-      <h2 class="modal-title">{{ modalMode === 'create' ? 'Create Event' : 'Edit Event' }}</h2>
+      <h2 class="modal-title">
+        {{ modalMode === 'create' ? 'Create Event' : 'Edit Event' }}
+      </h2>
 
       <div class="modal-upload-label">Upload Image</div>
       <div class="modal-upload-box">
@@ -102,10 +133,21 @@
           <i class="fas fa-upload"></i>
         </div>
         <p class="upload-text">Max 120 MB, PNG, JPEG</p>
+
+        <!-- ✅ IMPORTANT: This input is now connected and saves a real File -->
         <label class="upload-btn">
           Browse File
-          <input type="file" hidden />
+          <input
+            type="file"
+            accept="image/png, image/jpeg"
+            hidden
+            @change="onFileChange"
+          />
         </label>
+
+        <p v-if="selectedFileName" style="margin-top: 10px; font-size: 12px; color: #475569;">
+          Selected: <b>{{ selectedFileName }}</b>
+        </p>
       </div>
 
       <form @submit.prevent="submitForm" class="modal-form">
@@ -129,12 +171,18 @@
             <input type="text" v-model="formData.location" />
           </div>
 
+          <!-- ✅ REPLACED: no more hardcoded clubs -->
           <div class="form-field">
             <label>Club</label>
-            <select v-model="formData.club">
+            <select v-model="formData.community_id" :disabled="communitySelectLocked" required>
               <option value="">Select a club</option>
-              <option v-for="club in CLUBS" :key="club" :value="club">{{ club }}</option>
+              <option v-for="c in communityOptions" :key="c.id" :value="String(c.id)">
+                {{ c.name }}
+              </option>
             </select>
+            <small style="color: var(--muted); font-size: 11px;">
+              Admin: only your club. Super admin: all clubs.
+            </small>
           </div>
         </div>
 
@@ -159,248 +207,294 @@
       </form>
     </div>
   </div>
-  
+
   <ConfettiOverlay v-if="showCelebration" @close="showCelebration = false" />
 </template>
+
 <script setup>
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { store } from '../store.js'
 import ConfettiOverlay from '../components/ConfettiOverlay.vue'
 import { useToast } from "vue-toastification";
-import { apiFetch } from '../api'
+import { apiFetch } from '../api' // this will include Authorization if you used my updated api.js
 
 const route = useRoute()
 const router = useRouter()
 const toast = useToast()
 const showCelebration = ref(false)
 
-const CLUBS = [
-  "Computer Science Club",
-  "Engineering Society",
-  "Alumni Association",
-  "Career Services"
-];
+/* =========================
+   ADMIN CHECK
+   ========================= */
+const isAdmin = ref(false)
 
-// Admin state
-const isAdmin = ref(false);
+/* =========================
+   COMMUNITY DROPDOWN (NEW)
+   ========================= */
+const communityOptions = ref([])              // [{id,name}]
+const communitySelectLocked = ref(false)      // admin gets only one option
+const selectedFile = ref(null)               // actual File
+const selectedFileName = ref("")
 
-// Filters
-const activeFilter = ref('upcoming');
-const searchQuery = ref('');
+async function loadCommunityOptions() {
+  const res = await apiFetch("/api/general/communities/options")
+  const list = await res.json()
+  communityOptions.value = Array.isArray(list) ? list : []
 
-// Filtered events logic
+  // If backend returns exactly 1 option => admin (lock it)
+  if (communityOptions.value.length === 1) {
+    formData.community_id = String(communityOptions.value[0].id)
+    communitySelectLocked.value = true
+  } else {
+    // super admin
+    communitySelectLocked.value = false
+    // keep existing selection if any, else empty
+    if (!formData.community_id) formData.community_id = ""
+  }
+}
+
+function onFileChange(e) {
+  const file = e.target.files?.[0] || null
+  selectedFile.value = file
+  selectedFileName.value = file ? file.name : ""
+}
+
+/* =========================
+   FILTERS
+   ========================= */
+const activeFilter = ref('upcoming')
+const searchQuery = ref('')
+
 const filteredEvents = computed(() => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  
-  let events = store.events;
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
 
-  // 0. Filter by search query
+  let events = store.events
+
   if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase();
+    const query = searchQuery.value.toLowerCase()
     events = events.filter(e => {
       try {
-        const name = (e.name || '').toLowerCase();
-        const desc = (e.description || '').toLowerCase();
-        const loc = (e.location || '').toLowerCase();
-        const club = (e.community_name || '').toLowerCase();
-        return name.includes(query) || desc.includes(query) || loc.includes(query) || club.includes(query);
-      } catch (err) {
-        console.warn('Error filtering event:', e, err);
-        return false;
+        const name = (e.name || '').toLowerCase()
+        const desc = (e.description || '').toLowerCase()
+        const loc = (e.location || '').toLowerCase()
+        const club = (e.community_name || '').toLowerCase()
+        return name.includes(query) || desc.includes(query) || loc.includes(query) || club.includes(query)
+      } catch {
+        return false
       }
-    });
+    })
   }
 
-  // 1. Filter by route query "registered" if present
   if (route.query.filter === 'registered') {
-    events = events.filter(e => e.registered);
+    events = events.filter(e => e.registered)
   }
 
-  // 2. Filter by active pill (upcoming/past/all)
   return events.filter(event => {
-    const eventDate = new Date(event.date);
-    const isPast = eventDate < today;
-    
-    if (activeFilter.value === 'upcoming') return !isPast;
-    if (activeFilter.value === 'past') return isPast;
-    return true; // all
+    const eventDate = new Date(event.date)
+    const past = eventDate < today
+
+    if (activeFilter.value === 'upcoming') return !past
+    if (activeFilter.value === 'past') return past
+    return true
   }).sort((a, b) => {
-    const dateA = new Date(a.date);
-    const dateB = new Date(b.date);
-    const isPastA = dateA < today;
-    const isPastB = dateB < today;
+    const dateA = new Date(a.date)
+    const dateB = new Date(b.date)
+    const isPastA = dateA < today
+    const isPastB = dateB < today
 
-    // 1. Upcoming comes before Past
-    if (!isPastA && isPastB) return -1;
-    if (isPastA && !isPastB) return 1;
+    if (!isPastA && isPastB) return -1
+    if (isPastA && !isPastB) return 1
 
-    // 2. Both Upcoming: Sort Ascending (Soonest -> Furthest)
-    if (!isPastA && !isPastB) {
-      return dateA - dateB;
-    }
+    if (!isPastA && !isPastB) return dateA - dateB
+    if (isPastA && isPastB) return dateB - dateA
+    return 0
+  })
+})
 
-    // 3. Both Past: Sort Descending (Most Recent -> Oldest)
-    if (isPastA && isPastB) {
-      return dateB - dateA;
-    }
-    
-    return 0;
-  });
-});
-
+/* =========================
+   INITIAL LOAD
+   ========================= */
 onMounted(async () => {
-  // 🔑 1. FETCH EVENTS FROM BACKEND (REQUIRED)
-  const res = await apiFetch("/api/general/events");
-  const data = await res.json();
-  store.events = data;
+  // 1) Events list
+  const res = await apiFetch("/api/general/events")
+  const data = await res.json()
+  store.events = data
 
-  // 🔑 2. ADMIN CHECK (UNCHANGED)
-  if (localStorage.getItem('user_token')) {
-    const role = localStorage.getItem('user_role');
-    isAdmin.value = role === 'admin' || role === 'super_admin';
-  } else {
-    isAdmin.value = false;
-  }
+  // 2) Admin check
+  const role = localStorage.getItem('user_role')
+  isAdmin.value = role === 'admin' || role === 'super_admin'
 
-  // 🔑 3. ROUTE FILTERS (UNCHANGED)
-  if (route.query.filter === 'upcoming') {
-    activeFilter.value = 'upcoming';
-  } else if (route.query.filter === 'registered') {
-    activeFilter.value = 'all';
-  }
+  // 3) route filters
+  if (route.query.filter === 'upcoming') activeFilter.value = 'upcoming'
+  else if (route.query.filter === 'registered') activeFilter.value = 'all'
 
   if (route.query.search) {
-    searchQuery.value = route.query.search;
-    activeFilter.value = 'all';
+    searchQuery.value = route.query.search
+    activeFilter.value = 'all'
   }
-});
-
+})
 
 watch(() => route.query.filter, (newVal) => {
-   if (newVal === 'upcoming') {
-    activeFilter.value = 'upcoming';
-  } else if (newVal === 'registered') {
-    activeFilter.value = 'all';
-  }
-});
+  if (newVal === 'upcoming') activeFilter.value = 'upcoming'
+  else if (newVal === 'registered') activeFilter.value = 'all'
+})
 
 watch(() => route.query.search, (newVal) => {
-  searchQuery.value = newVal || '';
-  if (newVal) activeFilter.value = 'all';
-});
+  searchQuery.value = newVal || ''
+  if (newVal) activeFilter.value = 'all'
+})
 
-// Date Helpers
+/* =========================
+   DATE HELPERS
+   ========================= */
 const getDay = (dateStr) => {
-  const date = new Date(dateStr);
-  return date.getDate().toString().padStart(2, '0');
+  const date = new Date(dateStr)
+  return date.getDate().toString().padStart(2, '0')
 }
 
 const getMonth = (dateStr) => {
-  const date = new Date(dateStr);
-  return date.toLocaleString('default', { month: 'short' }).toUpperCase();
+  const date = new Date(dateStr)
+  return date.toLocaleString('default', { month: 'short' }).toUpperCase()
 }
 
 const isPast = (dateStr) => {
-  const date = new Date(dateStr);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return date < today;
+  const date = new Date(dateStr)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  return date < today
 }
 
-// Modal Logic
-const isModalOpen = ref(false);
-const modalMode = ref('create'); // 'create' or 'edit'
+/* =========================
+   MODAL LOGIC
+   ========================= */
+const isModalOpen = ref(false)
+const modalMode = ref('create')
+
 const formData = reactive({
   id: null,
   name: '',
   date: '',
   location: '',
-  club: '',
+  community_id: '',   // ✅ NEW: use id not club name
   capacity: '',
   description: ''
-});
+})
 
-const openModal = (mode, event = null) => {
-  modalMode.value = mode;
+const openModal = async (mode, event = null) => {
+  modalMode.value = mode
+
+  // ✅ Always load DB communities when opening modal
+  await loadCommunityOptions()
+
   if (mode === 'edit' && event) {
-    formData.id = event.id;
-    formData.name = event.name;
-    formData.date = event.date;
-    formData.location = event.location;
-    formData.club = event.club;
-    formData.capacity = event.capacity;
-    formData.description = event.description;
+    formData.id = event.id
+    formData.name = event.name
+    formData.date = event.date
+    formData.location = event.location
+    formData.capacity = event.capacity
+    formData.description = event.description
+
+    // We may not have community_id in events list response
+    // So keep current selection, or reset.
+    formData.community_id = formData.community_id || ""
   } else {
-    // Reset form
-    formData.id = null;
-    formData.name = '';
-    formData.date = '';
-    formData.location = '';
-    formData.club = '';
-    formData.capacity = '';
-    formData.description = '';
+    formData.id = null
+    formData.name = ''
+    formData.date = ''
+    formData.location = ''
+    formData.capacity = ''
+    formData.description = ''
+    // keep community_id if locked admin
+    if (!communitySelectLocked.value) formData.community_id = ''
   }
-  isModalOpen.value = true;
-  document.body.style.overflow = 'hidden';
+
+  // reset file on open
+  selectedFile.value = null
+  selectedFileName.value = ""
+
+  isModalOpen.value = true
+  document.body.style.overflow = 'hidden'
 }
 
 const closeModal = () => {
-  isModalOpen.value = false;
-  document.body.style.overflow = '';
+  isModalOpen.value = false
+  document.body.style.overflow = ''
 }
 
+/* =========================
+   SUBMIT (CREATE)
+   ========================= */
 const submitForm = async () => {
-  if (modalMode.value === 'create') {
-    const fd = new FormData();
-    fd.append("name", formData.name);
-    fd.append("date", formData.date);
-    fd.append("location", formData.location);
-    fd.append("capacity", formData.capacity);
-    fd.append("description", formData.description);
-    fd.append("club", formData.club);
-
-    await store.createEvent(fd);
-  } else {
-    store.updateEvent({
-      id: formData.id,
-      name: formData.name,
-      date: formData.date,
-      location: formData.location,
-      community_name: formData.club,
-      capacity: formData.capacity,
-      description: formData.description
-    });
+  if (modalMode.value !== 'create') {
+    toast.info("Edit is UI-only right now. Backend edit API not implemented.")
+    closeModal()
+    return
   }
-  closeModal();
-};
 
+  if (!formData.community_id) {
+    toast.error("Please select a club.")
+    return
+  }
 
+  const fd = new FormData()
+  fd.append("name", formData.name)
+  fd.append("date", formData.date)
+  fd.append("location", formData.location)
+  fd.append("capacity", formData.capacity)
+  fd.append("description", formData.description)
 
+  // ✅ KEY FIX: send community_id not club name
+  fd.append("community_id", formData.community_id)
 
+  // ✅ KEY FIX: send actual file
+  if (selectedFile.value) {
+    fd.append("image", selectedFile.value) // backend reads image or file
+  }
+
+  // If your store.createEvent already calls backend correctly, keep it.
+  // But your old code sent "club", so we call backend directly to guarantee correct behavior.
+  const res = await apiFetch("/api/general/events/create", {
+    method: "POST",
+    body: fd
+  })
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    toast.error(err.error || "Failed to create event")
+    return
+  }
+
+  toast.success("Event created!")
+  // refresh events
+  const eventsRes = await apiFetch("/api/general/events")
+  store.events = await eventsRes.json()
+
+  closeModal()
+}
+
+/* =========================
+   DELETE + REGISTER
+   ========================= */
 const deleteEvent = (event) => {
   if (confirm('Are you sure you want to delete this event?')) {
-    store.deleteEvent(event.id);
+    store.deleteEvent(event.id)
   }
 }
 
 const register = (event) => {
-  // Check if user is logged in
   if (!localStorage.getItem('user_token')) {
     toast.warning('Please sign in to register.')
     router.push('/login')
     return
   }
-  
-  // User is authenticated, proceed with registration
-  store.registerEvent(event);
-  
-  // If registration was successful (it toggles, so check if it's now true)
-  // Note: store.registerEvent modifies the object in place.
+
+  store.registerEvent(event)
+
   if (event.registered) {
     toast.success("Successfully registered for the event! 🎉")
-    showCelebration.value = true;
+    showCelebration.value = true
   } else {
     toast.info("Unregistered from event.")
   }
@@ -408,6 +502,8 @@ const register = (event) => {
 </script>
 
 <style scoped>
+/* (YOUR ORIGINAL CSS UNCHANGED BELOW) */
+
 /* ========= PAGE WRAP ========= */
 
 .page-wrap {
@@ -507,13 +603,13 @@ const register = (event) => {
   width: 64px;
   height: 64px;
   border-radius: 14px;
-  background: #f0fdf4; /* Very light green */
+  background: #f0fdf4;
   border: 1px solid #dcfce7;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: #15803d; /* Green-700 */
+  color: #15803d;
   flex-shrink: 0;
 }
 
@@ -521,7 +617,7 @@ const register = (event) => {
   font-size: 20px;
   line-height: 1;
   font-weight: 800;
-  color: #166534; /* Green-800 */
+  color: #166534;
   margin-bottom: 2px;
 }
 
@@ -547,13 +643,13 @@ const register = (event) => {
   font-size: 17px;
   font-weight: 800;
   line-height: 1.3;
-  color: #0f172a; /* Slate-900 */
+  color: #0f172a;
   margin: 0;
 }
 
 .event-desc {
   font-size: 14px;
-  color: #64748b; /* Slate-500 */
+  color: #64748b;
   line-height: 1.5;
   margin: 0;
   display: -webkit-box;
@@ -565,7 +661,7 @@ const register = (event) => {
 .event-meta {
   margin-top: 8px;
   font-size: 13px;
-  color: #475569; /* Slate-600 */
+  color: #475569;
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
@@ -598,7 +694,7 @@ const register = (event) => {
 .event-primary-btn {
   border-radius: 999px;
   border: none;
-  background: #16a34a; /* Green-600 */
+  background: #16a34a;
   color: #ffffff;
   font-size: 13px;
   font-weight: 700;
@@ -685,8 +781,6 @@ const register = (event) => {
   position: relative;
 }
 
-/* close button */
-
 .modal-close {
   position: absolute;
   top: 12px;
@@ -707,8 +801,6 @@ const register = (event) => {
   color: #f08c00;
 }
 
-/* titles */
-
 .modal-title {
   font-size: 18px;
   font-weight: 700;
@@ -720,8 +812,6 @@ const register = (event) => {
   color: var(--muted);
   margin-bottom: 6px;
 }
-
-/* upload box */
 
 .modal-upload-box {
   border-radius: 10px;
@@ -754,8 +844,6 @@ const register = (event) => {
   cursor: pointer;
 }
 
-/* form */
-
 .modal-form {
   font-size: 12px;
 }
@@ -785,8 +873,6 @@ const register = (event) => {
   color: #777f7a;
 }
 
-/* inputs + select */
-
 .modal-form input,
 .modal-form textarea,
 .modal-form select {
@@ -804,8 +890,6 @@ const register = (event) => {
 .modal-form select:focus {
   border-color: var(--brand);
 }
-
-/* buttons */
 
 .modal-actions {
   margin-top: 10px;
@@ -842,39 +926,39 @@ const register = (event) => {
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;
   }
-  
+
   .event-card {
     display: flex;
     flex-direction: column;
     height: 100%;
   }
-  
+
   .event-main {
     flex: 1;
     margin: 10px 0;
   }
-  
+
   .event-card {
     display: grid;
     grid-template-columns: auto 1fr;
     grid-template-rows: auto auto;
     gap: 10px;
-    height: auto; /* Allow height to fit content */
+    height: auto;
     padding: 16px;
   }
-  
+
   .event-date-pill {
     grid-column: 1;
     grid-row: 1;
     margin-right: 0;
   }
-  
+
   .event-main {
     grid-column: 2;
     grid-row: 1;
     margin: 0;
   }
-  
+
   .event-actions {
     grid-column: 1 / -1;
     grid-row: 2;

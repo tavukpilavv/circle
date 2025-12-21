@@ -21,6 +21,7 @@
       <!-- filter pills -->
       <div class="filters-row">
         <div class="filters-label-space"></div>
+
         <div class="filters-pills">
           <button
             class="filter-pill"
@@ -30,28 +31,36 @@
           >
             All
           </button>
+
+          <!-- You can remove these two pills if you no longer track joined communities -->
           <button
             class="filter-pill"
             :class="{ 'is-active': activeFilter === 'joined', 'primary': activeFilter === 'joined' }"
             type="button"
             @click="activeFilter = 'joined'"
+            :disabled="true"
+            title="Joining is disabled (external website redirect)"
+            style="opacity:.6; cursor:not-allowed;"
           >
             Joined
           </button>
+
           <button
             class="filter-pill"
             :class="{ 'is-active': activeFilter === 'discover', 'primary': activeFilter === 'discover' }"
             type="button"
             @click="activeFilter = 'discover'"
+            :disabled="true"
+            title="Joining is disabled (external website redirect)"
+            style="opacity:.6; cursor:not-allowed;"
           >
             Discover
           </button>
-          
+
           <button v-if="isSuperAdmin" class="add-club-btn" @click="openModal">
             + Add Club
           </button>
         </div>
-
       </div>
     </section>
 
@@ -59,7 +68,7 @@
     <section class="community-list" id="communityList">
       <article
         v-for="community in filteredCommunities"
-        :key="community.name"
+        :key="community.id"
         class="community-card"
       >
         <img
@@ -70,25 +79,27 @@
 
         <div class="community-main">
           <h2 class="community-name">{{ community.name }}</h2>
-          <p class="community-desc">
-            {{ community.description }}
-          </p>
+          <p class="community-desc">{{ community.description }}</p>
+
           <div class="community-meta">
             <span><i class="fas fa-user-group"></i> {{ community.members }} members</span>
           </div>
         </div>
 
-        <button 
-          class="status-pill" 
-          :class="community.joined ? 'joined' : 'outline'"
+        <!-- ✅ REPLACED: Join -> Visit Website -->
+        <button
+          class="status-pill outline"
           type="button"
-          @click="toggleJoin(community)"
+          @click="visitWebsite(community)"
+          :disabled="!community.website_url"
+          :title="community.website_url ? 'Open community website' : 'No website provided'"
+          style="min-width: 140px;"
         >
-          <i v-if="community.joined" class="fas fa-check"></i>
-          {{ community.joined ? 'Joined' : 'Join Community' }}
+          <i class="fas fa-arrow-up-right-from-square" style="margin-right: 6px;"></i>
+          Visit Website
         </button>
       </article>
-      
+
       <div v-if="filteredCommunities.length === 0" class="no-results">
         No communities found matching your criteria.
       </div>
@@ -115,17 +126,27 @@
           <textarea v-model="formData.description" rows="3" required></textarea>
         </div>
 
+        <!-- ✅ NEW: Website URL -->
         <div class="form-field">
-          <label>Image URL</label>
-          <input type="text" v-model="formData.image" placeholder="https://..." />
+          <label>Website URL</label>
+          <input type="url" v-model="formData.website_url" placeholder="https://..." required />
+        </div>
+
+        <!-- ✅ NEW: Image File slot (NOT URL) -->
+        <div class="form-field">
+          <label>Image (PNG/JPG)</label>
+          <input type="file" accept="image/png, image/jpeg" @change="onFileChange" required />
+          <small v-if="selectedFileName" style="color: var(--muted); font-size: 11px;">
+            Selected: <b>{{ selectedFileName }}</b>
+          </small>
         </div>
 
         <div class="modal-actions">
           <button type="button" class="btn-secondary" @click="closeModal">
             Cancel
           </button>
-          <button type="submit" class="btn-primary">
-            Create Club
+          <button type="submit" class="btn-primary" :disabled="isSubmitting">
+            {{ isSubmitting ? "Creating..." : "Create Club" }}
           </button>
         </div>
       </form>
@@ -135,25 +156,27 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted, watch } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { store } from '../store.js'
 import { apiFetch } from '../api'
 
-import ConfettiOverlay from '../components/ConfettiOverlay.vue'
-
-const router = useRouter()
 const route = useRoute()
+
 const searchQuery = ref('')
 const activeFilter = ref('all')
-const isSuperAdmin = ref(false)
-const showCelebration = ref(false)
 
-// Modal State
+const isSuperAdmin = ref(false)
+
 const isModalOpen = ref(false)
+const isSubmitting = ref(false)
+
+const selectedFile = ref(null)
+const selectedFileName = ref("")
+
 const formData = reactive({
   name: '',
   description: '',
-  image: ''
+  website_url: ''
 })
 
 const applyFilters = () => {
@@ -169,20 +192,18 @@ const loadCommunities = async () => {
     const res = await apiFetch("/api/general/communities")
     const data = await res.json()
 
-    store.communities = data.map(c => ({
+    store.communities = (Array.isArray(data) ? data : []).map(c => ({
       id: c.id,
       name: c.name,
       description: c.description || "",
-      members: c.member_count || 0, // ✅ FIX
-      joined: c.joined || false,
-      image: c.image || "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=800&q=80" // ✅ FIX
+      members: c.members_count ?? 0,
+      website_url: c.website_url || c.external_link || "",
+      image: c.image_url || "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=800&q=80"
     }))
   } catch (err) {
     console.error("Failed to load communities:", err)
   }
 }
-
-
 
 onMounted(() => {
   applyFilters()
@@ -198,41 +219,33 @@ watch(() => route.query.filter, () => {
 
 const filteredCommunities = computed(() => {
   const q = searchQuery.value.trim().toLowerCase()
-  
+
+  // NOTE: joined/discover are disabled now (no joining), but we keep "all" functionality
   return store.communities.filter(community => {
-    // Filter by type
-    if (activeFilter.value === 'joined' && !community.joined) return false
-    if (activeFilter.value === 'discover' && community.joined) return false
-    
-    // Filter by search
     if (q && !community.name.toLowerCase().includes(q)) return false
-    
     return true
   })
 })
 
-const toggleJoin = async (community) => {
-  if (!localStorage.getItem('user_token')) {
-    router.push('/login')
-    return
-  }
-
-  await apiFetch(`/api/general/communities/${community.id}/join`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("user_token")}`
-    }
-  })
-
-  await loadCommunities()
+function visitWebsite(community) {
+  if (!community.website_url) return
+  window.open(community.website_url, "_blank", "noopener,noreferrer")
 }
 
+function onFileChange(e) {
+  const file = e.target.files?.[0] || null
+  selectedFile.value = file
+  selectedFileName.value = file ? file.name : ""
+  e.target.value = "" // allow selecting same file again
+}
 
 // Modal Methods
 const openModal = () => {
   formData.name = ''
   formData.description = ''
-  formData.image = ''
+  formData.website_url = ''
+  selectedFile.value = null
+  selectedFileName.value = ""
   isModalOpen.value = true
   document.body.style.overflow = 'hidden'
 }
@@ -243,34 +256,45 @@ const closeModal = () => {
 }
 
 const submitClub = async () => {
+  if (!selectedFile.value) {
+    alert("Please choose an image file.")
+    return
+  }
+
+  isSubmitting.value = true
   try {
-    const res = await apiFetch("/api/general/communities/create", {
+    const fd = new FormData()
+    fd.append("name", formData.name)
+    fd.append("description", formData.description)
+    fd.append("website_url", formData.website_url)
+    fd.append("image", selectedFile.value)
+
+    // ✅ IMPORTANT: new endpoint is multipart POST /communities
+    const res = await apiFetch("/api/general/communities", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${localStorage.getItem("user_token")}`
-      },
-      body: JSON.stringify({
-        clubName: formData.name,
-        description: formData.description,
-        clubImage: formData.image || null
-      })
+      body: fd
     })
 
-    if (!res.ok) throw new Error("Community creation failed")
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      throw new Error(err.error || "Community creation failed")
+    }
 
-    await loadCommunities()   // reload from backend
+    await loadCommunities()
     closeModal()
   } catch (err) {
     console.error(err)
-    alert("Failed to create community")
+    alert(err.message || "Failed to create community")
+  } finally {
+    isSubmitting.value = false
   }
 }
-
 </script>
 
 <style scoped>
-/* Design Tokens (scoped to this component) */
+/* Your CSS is mostly fine; only one small change:
+   status-pill is always "outline" now, no joined state needed */
+
 .page-wrap {
   --brand: #1b8f48;
   --brand-600: #167a3d;
@@ -297,7 +321,6 @@ const submitClub = async () => {
   color: var(--ink);
 }
 
-/* Intro + Search */
 .intro-text {
   font-size: 14px;
   color: var(--muted);
@@ -335,7 +358,6 @@ const submitClub = async () => {
   color: #a5b9ab;
 }
 
-/* Filters */
 .filters-row {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -371,7 +393,6 @@ const submitClub = async () => {
   color: #fff;
 }
 
-/* Add Club Button */
 .add-club-btn {
   margin-left: 10px;
   border: none;
@@ -384,7 +405,6 @@ const submitClub = async () => {
   cursor: pointer;
 }
 
-/* Community List */
 .community-list {
   display: flex;
   flex-direction: column;
@@ -437,7 +457,6 @@ const submitClub = async () => {
   margin-right: 6px;
 }
 
-/* Status Pill */
 .status-pill {
   align-self: center;
   margin-right: 18px;
@@ -450,20 +469,15 @@ const submitClub = async () => {
   white-space: nowrap;
 }
 
-.status-pill.joined {
-  background: #e5f7e7;
-  color: #1e8b47;
-  border-color: #bce5c4;
-}
-
-.status-pill.joined i {
-  margin-right: 6px;
-}
-
 .status-pill.outline {
   background: #fff;
   border-color: var(--brand);
   color: var(--brand);
+}
+
+.status-pill.outline:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .no-results {
@@ -473,8 +487,7 @@ const submitClub = async () => {
   font-style: italic;
 }
 
-/* ========= MODAL ========= */
-
+/* MODAL */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -585,13 +598,12 @@ const submitClub = async () => {
   color: #ffffff;
 }
 
-/* Responsive */
 @media (max-width: 960px) {
   .community-card {
     grid-template-columns: 180px minmax(0, 1fr);
     grid-template-rows: auto auto;
   }
-  
+
   .status-pill {
     grid-column: 1 / -1;
     margin: 0 0 10px 18px;
@@ -604,15 +616,15 @@ const submitClub = async () => {
     margin: 18px auto 32px;
     padding: 0 14px 30px;
   }
-  
+
   .community-card {
     grid-template-columns: 1fr;
   }
-  
+
   .community-image {
     height: 140px;
   }
-  
+
   .status-pill {
     margin-left: 18px;
   }
