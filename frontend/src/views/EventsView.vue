@@ -238,16 +238,28 @@ const selectedFile = ref(null)               // actual File
 const selectedFileName = ref("")
 
 async function loadCommunityOptions() {
-  const res = await apiFetch("/api/general/communities/options")
-  const list = await res.json()
+  const role = localStorage.getItem('user_role')
+  const isSuper = (role === 'super_admin' || role === 'superadmin')
+  
+  let list = []
+  if (isSuper) {
+    // Super Admin: get ALL communities
+    const res = await apiFetch("/api/general/communities")
+    list = await res.json()
+  } else {
+    // Regular Admin: get ONLY my communities
+    const res = await apiFetch("/api/general/communities/options")
+    list = await res.json()
+  }
+  
   communityOptions.value = Array.isArray(list) ? list : []
 
-  // If backend returns exactly 1 option => admin (lock it)
-  if (communityOptions.value.length === 1) {
+  // If regular admin has exactly 1 option => lock it
+  // Super admin always unlocked (unless 0 options, but that's edge case)
+  if (!isSuper && communityOptions.value.length === 1) {
     formData.community_id = String(communityOptions.value[0].id)
     communitySelectLocked.value = true
   } else {
-    // super admin
     communitySelectLocked.value = false
     // keep existing selection if any, else empty
     if (!formData.community_id) formData.community_id = ""

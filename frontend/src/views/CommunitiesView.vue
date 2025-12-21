@@ -144,19 +144,37 @@
           <textarea v-model="formData.description" rows="3" required></textarea>
         </div>
 
-        <!-- ✅ Website URL -->
+        <!-- ✅ Website / Instagram URL -->
         <div class="form-field">
-          <label>Website URL</label>
-          <input type="url" v-model="formData.website_url" placeholder="https://..." required />
+          <label>Instagram / Website Link</label>
+          <input type="url" v-model="formData.website_url" placeholder="https://instagram.com/..." required />
         </div>
 
         <!-- ✅ Image File slot -->
         <div class="form-field">
-          <label>Image (PNG/JPG)</label>
-          <input type="file" accept="image/png, image/jpeg" @change="onFileChange" required />
-          <small v-if="selectedFileName" style="color: var(--muted); font-size: 11px;">
-            Selected: <b>{{ selectedFileName }}</b>
-          </small>
+          <label>Club Image</label>
+          <div class="file-upload-box" @click="triggerFileInput" :class="{ 'has-file': !!previewUrl }">
+            <input
+              ref="fileInput"
+              type="file"
+              accept="image/png, image/jpeg"
+              @change="onFileChange"
+              style="display: none;"
+            />
+            
+            <div v-if="previewUrl" class="preview-container">
+              <img :src="previewUrl" alt="Preview" class="preview-img" />
+              <button type="button" class="remove-file-btn" @click.stop="removeFile">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+
+            <div v-else class="upload-placeholder">
+              <i class="fas fa-cloud-upload-alt"></i>
+              <span>Click to upload image</span>
+              <small>(PNG, JPG)</small>
+            </div>
+          </div>
         </div>
 
         <div class="modal-actions">
@@ -188,8 +206,9 @@ const isSuperAdmin = ref(false)
 const isModalOpen = ref(false)
 const isSubmitting = ref(false)
 
+const fileInput = ref(null)
 const selectedFile = ref(null)
-const selectedFileName = ref("")
+const previewUrl = ref(null)
 
 const formData = reactive({
   name: '',
@@ -255,9 +274,25 @@ function visitWebsite(community) {
 
 function onFileChange(e) {
   const file = e.target.files?.[0] || null
-  selectedFile.value = file
-  selectedFileName.value = file ? file.name : ""
-  // ❗ do NOT clear input here — can break FormData in some browsers
+  if (file) {
+    selectedFile.value = file
+    // create preview
+    const reader = new FileReader()
+    reader.onload = (evt) => {
+      previewUrl.value = evt.target.result
+    }
+    reader.readAsDataURL(file)
+  }
+}
+
+function triggerFileInput() {
+  fileInput.value?.click()
+}
+
+function removeFile() {
+  selectedFile.value = null
+  previewUrl.value = null
+  if (fileInput.value) fileInput.value.value = ""
 }
 
 // Modal Methods
@@ -266,7 +301,7 @@ const openModal = () => {
   formData.description = ''
   formData.website_url = ''
   selectedFile.value = null
-  selectedFileName.value = ""
+  previewUrl.value = null
   isModalOpen.value = true
   document.body.style.overflow = 'hidden'
 }
@@ -295,6 +330,11 @@ const submitClub = async () => {
     fd.append("description", formData.description)
     fd.append("website_url", formData.website_url)
     fd.append("image", selectedFile.value)
+
+    // Log for verification
+    for (let [key, value] of fd.entries()) {
+      console.log(`FormData: ${key} =`, value)
+    }
 
     // ✅ multipart POST /communities requires JWT
     const res = await apiFetch("/api/general/communities", {
@@ -685,5 +725,81 @@ const submitClub = async () => {
   .status-pill {
     margin-left: 18px;
   }
+}
+
+/* FILE UPLOAD CSS */
+.file-upload-box {
+  border: 2px dashed #dadfd4;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  background: #fdfdfd;
+  transition: all 0.2s;
+  position: relative;
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.file-upload-box:hover {
+  border-color: var(--brand);
+  background: #f4faf4;
+}
+
+.file-upload-box.has-file {
+  border-style: solid;
+  padding: 0;
+  overflow: hidden;
+  background: #000;
+}
+
+.upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+}
+
+.upload-placeholder i {
+  font-size: 24px;
+  color: #a5b9ab;
+}
+
+.preview-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+}
+
+.preview-img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  display: block;
+}
+
+.remove-file-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+
+.remove-file-btn:hover {
+  background: rgba(200, 50, 50, 0.9);
 }
 </style>

@@ -352,26 +352,37 @@ const handleSubmit = async () => {
 
   let token = localStorage.getItem('user_token');
   // let payload = JSON.stringify(form);
-  const payload = JSON.stringify({
-    clubName: form.clubName,
-    university: form.university,
-    category: form.category,
-    shortDescription: form.description, // ✅ FIX
-    description: form.description,
-    contactName: form.contactName,
-    email: form.email,
-    instagram: form.instagram,
-    otherLink: form.otherLink,
-    clubImage: null
-  })
+  const fd = new FormData();
+  fd.append("clubName", form.clubName);
+  fd.append("university", form.university);
+  fd.append("clubType", form.clubType);
+  fd.append("category", form.category);
+  fd.append("shortDescription", form.description); // preserving duplication if backend expects it
+  fd.append("description", form.description);
+  fd.append("contactName", form.contactName);
+  fd.append("events", form.events);
+  fd.append("studentNumber", form.studentNumber);
+  fd.append("email", form.email);
+  fd.append("instagram", form.instagram);
+  fd.append("otherLink", form.otherLink);
+  
+  if (form.clubImage) {
+    fd.append("clubImage", form.clubImage);
+  }
+
+  // Log for verification
+  for (let [key, value] of fd.entries()) {
+    console.log(`FormData Apply: ${key} =`, value)
+  }
+
+
 
   let response = await apiFetch('/api/general/communities/apply', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`
     },
-    body: payload
+    body: fd
   })
     if (response.status === 422) {
       response.json().then(error => {
