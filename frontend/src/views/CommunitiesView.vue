@@ -110,7 +110,6 @@
           class="status-pill outline"
           type="button"
           @click="visitWebsite(community)"
-          :disabled="!community.website_url"
           :title="community.website_url ? 'Open community website' : 'No website provided'"
           style="min-width: 140px;"
         >
@@ -247,7 +246,10 @@ const filteredCommunities = computed(() => {
 })
 
 function visitWebsite(community) {
-  if (!community.website_url) return
+  if (!community.website_url) {
+    alert("No website provided for this community.")
+    return
+  }
   window.open(community.website_url, "_blank", "noopener,noreferrer")
 }
 
