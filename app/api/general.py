@@ -39,6 +39,11 @@ def is_admin(user: User) -> bool:
     return role_lower(user) == "admin"
 
 
+def _is_multipart_request() -> bool:
+    ct = (request.content_type or "").lower()
+    return "multipart/form-data" in ct
+
+
 # =========================
 # EVENTS
 # =========================
@@ -88,12 +93,12 @@ def get_events():
 
             output.append({
                 "id": e.id,
-                "name": e.title,          # keep compatibility
+                "name": e.title,       
                 "title": e.title,
                 "date": e.date,
                 "time": e.time,
                 "location": e.location,
-                "image": e.image_url,     # keep compatibility with older frontend
+                "image": e.image_url,     
                 "alt": e.title,
                 "community_name": community_name,
                 "organizer": organizer_name,
@@ -120,10 +125,8 @@ def get_events():
 def create_event():
     """
     Create Event (Admin/Super Admin)
-    IMPORTANT CHANGE:
-      - Admin: community forced to managed_community
-      - Super Admin: MUST send community_id (from dropdown fetched from backend)
-      - No more club name string matching
+    - Admin: community forced to managed_community
+    - Super Admin: MUST send community_id (dropdown)
     """
     try:
         user_id = get_jwt_identity()
@@ -134,29 +137,23 @@ def create_event():
         target_community_id = None
         r = role_lower(user)
 
-        # admin => only their managed community
         if r == "admin":
             if user.managed_community:
                 target_community_id = user.managed_community.id
             else:
                 return jsonify({"error": "Yönettiğiniz bir kulüp yok!"}), 403
-
-        # super_admin => must select community_id from dropdown
         elif r in ("super_admin", "superadmin"):
             target_community_id = request.form.get("community_id")
-
         else:
             return jsonify({"error": "Yetkiniz yok"}), 403
 
         if not target_community_id:
             return jsonify({"error": "Kulüp seçilmeli."}), 400
 
-        # verify community exists + approved
         comm = Community.query.get(target_community_id)
         if not comm or not comm.is_approved:
             return jsonify({"error": "Selected community not found/approved"}), 400
 
-        # image file upload (file or image)
         image_file = request.files.get("file") or request.files.get("image")
         image_url = upload_file(image_file, folder="events") if image_file else None
 
@@ -414,8 +411,8 @@ def get_communities():
 @jwt_required()
 def create_community_multipart():
     """
-    Multipart create community for new community page:
-    - image file upload
+    Multipart create community:
+    - image FILE upload
     - website_url saved to external_link
     """
     try:
@@ -506,7 +503,6 @@ def communities_options_for_event():
     return jsonify([]), 200
 
 
-# --------- legacy endpoints kept (optional) ----------
 @bp.route("/communities/pending", methods=["GET"])
 def get_pending_communities():
     try:
@@ -533,6 +529,7 @@ def get_pending_communities():
 def create_community_legacy_json():
     """
     Old JSON create endpoint (kept so older frontend won't break)
+    ✅ FIX: accept website_url and store it to external_link
     """
     try:
         user_id = get_jwt_identity()
@@ -544,7 +541,10 @@ def create_community_legacy_json():
             return jsonify({"error": "Only admins can create communities"}), 403
 
         data = request.get_json() or {}
+
         file_url = data.get("clubImage")
+
+        website_url = (data.get("website_url") or data.get("otherLink") or "").strip()
 
         new_c = Community(
             name=data.get("clubName"),
@@ -555,7 +555,7 @@ def create_community_legacy_json():
             contact_person=data.get("contactName"),
             contact_email=data.get("email"),
             instagram_link=data.get("instagram"),
-            external_link=data.get("otherLink"),
+            external_link=website_url,
             image_url=file_url,
             proof_document_url=file_url,
             is_approved=True,
@@ -654,30 +654,87 @@ def approve_community():
 @bp.route("/communities/apply", methods=["POST"])
 @jwt_required()
 def apply_community():
+    
     try:
         user_id = get_jwt_identity()
         user = User.query.get(user_id)
         if not user:
             return jsonify({"error": "Unauthorized"}), 401
 
+        if _is_multipart_request():
+            club_name = (request.form.get("clubName") or "").strip()
+            university = (request.form.get("university") or "").strip()
+            category = (request.form.get("category") or "").strip()
+            short_desc = (request.form.get("shortDescription") or request.form.get("description") or "").strip()
+            desc = (request.form.get("description") or "").strip()
+            contact_name = (request.form.get("contactName") or "").strip()
+            email = (request.form.get("email") or "").strip()
+            instagram = (request.form.get("instagram") or "").strip()
+            other_link = (request.form.get("otherLink") or "").strip()
+            website_url = (request.form.get("website_url") or request.form.get("websiteUrl") or "").strip()
+
+            if not club_name:
+                return jsonify({"error": "clubName is required"}), 400
+
+            existing = Community.query.filter_by(name=club_name).first()
+            if existing:
+                return jsonify({"error": "Community name already exists"}), 409
+
+            image_file = request.files.get("clubImage") or request.files.get("image") or request.files.get("file")
+            image_url = upload_file(image_file, folder="community_applications") if image_file else None
+
+            new_c = Community(
+                name=club_name,
+                university=university,
+                category=category,
+                short_description=short_desc,
+                description=desc,
+                contact_person=contact_name,
+                contact_email=email,
+                instagram_link=instagram,
+                external_link=website_url or other_link, 
+                image_url=image_url,
+                proof_document_url=image_url,
+                is_approved=False,
+                admin_id=user.id
+            )
+
+            db.session.add(new_c)
+            db.session.commit()
+            return jsonify({"message": "Application submitted"}), 201
+
+        # -----------------------------
+        # Case B: legacy JSON
+        # -----------------------------
         data = request.get_json() or {}
 
-        existing = Community.query.filter_by(name=data.get("clubName")).first()
+        club_name = (data.get("clubName") or "").strip()
+        if not club_name:
+            return jsonify({"error": "clubName is required"}), 400
+
+        existing = Community.query.filter_by(name=club_name).first()
         if existing:
             return jsonify({"error": "Community name already exists"}), 409
 
+        club_image_val = data.get("clubImage")
+        if isinstance(club_image_val, dict) or isinstance(club_image_val, list):
+            club_image_val = None  
+
+        website_url = (data.get("website_url") or data.get("websiteUrl") or "").strip()
+        other_link = (data.get("otherLink") or "").strip()
+
         new_c = Community(
-            name=data.get("clubName"),
+            name=club_name,
             university=data.get("university"),
             category=data.get("category"),
-            short_description=data.get("shortDescription"),
+            short_description=data.get("shortDescription") or data.get("description"),
             description=data.get("description"),
             contact_person=data.get("contactName"),
             contact_email=data.get("email"),
             instagram_link=data.get("instagram"),
-            external_link=data.get("otherLink"),
-            image_url=data.get("clubImage"),
-            proof_document_url=data.get("clubImage"),
+            external_link=website_url or other_link,
+            image_url=club_image_val,
+            proof_document_url=club_image_val,
             is_approved=False,
             admin_id=user.id
         )
