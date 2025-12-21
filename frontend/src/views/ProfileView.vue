@@ -51,19 +51,13 @@
     </section>
 
     <!-- TABS UNDER PROFILE -->
-    <section class="dual-tabs" :style="{ gridTemplateColumns: isSuperAdmin ? '1fr 1fr 1fr' : '1fr 1fr' }">
+    <section class="dual-tabs" :style="{ gridTemplateColumns: isSuperAdmin ? '1fr 1fr' : '1fr' }">
       <button 
         class="tabbtn" 
         :class="activePanel === 'events' ? 'solid' : 'outline'" 
         @click="activePanel = 'events'"
         :aria-pressed="activePanel === 'events'"
       >My Events</button>
-      <button 
-        class="tabbtn" 
-        :class="activePanel === 'communities' ? 'solid' : 'outline'" 
-        @click="activePanel = 'communities'"
-        :aria-pressed="activePanel === 'communities'"
-      >My Communities</button>
       <button 
         v-if="isSuperAdmin"
         class="tabbtn" 
@@ -200,43 +194,7 @@
       </section>
     </div>
 
-    <div v-show="activePanel === 'communities'" class="panel is-active">
-      <section class="section-head">
-        <h3>Joined Communities</h3>
-        <span class="community-count">{{ joinedCommunities.length }} communities</span>
-      </section>
 
-      <section class="community-grid" aria-label="Joined communities">
-        <article 
-          class="community-card" 
-          v-for="community in joinedCommunities" 
-          :key="community.id"
-        >
-          <img class="community-cover"
-            :src="community.image"
-            alt="Community cover image">
-          <div class="community-body">
-            <h4>{{ community.name }}</h4>
-            <p>{{ community.description }}</p>
-            <div class="community-meta">
-              <span class="community-chip">{{ community.role || 'Member' }}</span>
-              <span>Joined {{ community.joinedDate || 'recently' }}</span>
-            </div>
-          </div>
-        </article>
-        
-        <div v-if="joinedCommunities.length === 0" class="empty-state">
-          <div class="empty-icon">
-            <i class="fas fa-users"></i>
-          </div>
-          <h3>No communities yet</h3>
-          <p>Join a community to connect with others and see their events here.</p>
-          <router-link to="/communities" class="empty-btn">
-            Browse Communities
-          </router-link>
-        </div>
-      </section>
-    </div>
 
     <!-- PENDING APPLICATIONS PANEL -->
     <div v-show="activePanel === 'applications'" class="panel is-active">
@@ -507,9 +465,7 @@ const getEventRating = (eventId) => {
   return userReview ? userReview.rating : 0
 }
 
-const joinedCommunities = computed(() => {
-  return store.communities.filter(c => c.joined)
-})
+
 
 const registeredEvents = computed(() => {
   const today = new Date();

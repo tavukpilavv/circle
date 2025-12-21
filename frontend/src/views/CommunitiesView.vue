@@ -84,6 +84,25 @@
           <div class="community-meta">
             <span><i class="fas fa-user-group"></i> {{ community.members }} members</span>
           </div>
+
+          <!-- ✅ NEW: website slot under meta -->
+          <div class="community-website" v-if="community.website_url">
+            <i class="fas fa-link"></i>
+            <a
+              class="website-link"
+              :href="community.website_url"
+              target="_blank"
+              rel="noopener noreferrer"
+              :title="community.website_url"
+            >
+              {{ community.website_url }}
+            </a>
+          </div>
+
+          <div class="community-website muted" v-else>
+            <i class="fas fa-link"></i>
+            <span>No website provided</span>
+          </div>
         </div>
 
         <!-- ✅ REPLACED: Join -> Visit Website -->
@@ -126,13 +145,13 @@
           <textarea v-model="formData.description" rows="3" required></textarea>
         </div>
 
-        <!-- ✅ NEW: Website URL -->
+        <!-- ✅ Website URL -->
         <div class="form-field">
           <label>Website URL</label>
           <input type="url" v-model="formData.website_url" placeholder="https://..." required />
         </div>
 
-        <!-- ✅ NEW: Image File slot (NOT URL) -->
+        <!-- ✅ Image File slot -->
         <div class="form-field">
           <label>Image (PNG/JPG)</label>
           <input type="file" accept="image/png, image/jpeg" @change="onFileChange" required />
@@ -197,6 +216,7 @@ const loadCommunities = async () => {
       name: c.name,
       description: c.description || "",
       members: c.members_count ?? 0,
+      // ✅ accept either backend field
       website_url: c.website_url || c.external_link || "",
       image: c.image_url || "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=800&q=80"
     }))
@@ -209,8 +229,9 @@ onMounted(() => {
   applyFilters()
   loadCommunities()
 
-  const role = localStorage.getItem('user_role')
-  isSuperAdmin.value = role === 'super_admin'
+  // ✅ support both spellings
+  const role = (localStorage.getItem('user_role') || '').toLowerCase()
+  isSuperAdmin.value = role === 'super_admin' || role === 'superadmin'
 })
 
 watch(() => route.query.filter, () => {
@@ -219,10 +240,8 @@ watch(() => route.query.filter, () => {
 
 const filteredCommunities = computed(() => {
   const q = searchQuery.value.trim().toLowerCase()
-
-  // NOTE: joined/discover are disabled now (no joining), but we keep "all" functionality
   return store.communities.filter(community => {
-    if (q && !community.name.toLowerCase().includes(q)) return false
+    if (q && !String(community.name || "").toLowerCase().includes(q)) return false
     return true
   })
 })
@@ -236,7 +255,7 @@ function onFileChange(e) {
   const file = e.target.files?.[0] || null
   selectedFile.value = file
   selectedFileName.value = file ? file.name : ""
-  e.target.value = "" // allow selecting same file again
+  // ❗ do NOT clear input here — can break FormData in some browsers
 }
 
 // Modal Methods
@@ -261,6 +280,12 @@ const submitClub = async () => {
     return
   }
 
+  const token = localStorage.getItem("user_token")
+  if (!token) {
+    alert("Please login first.")
+    return
+  }
+
   isSubmitting.value = true
   try {
     const fd = new FormData()
@@ -269,9 +294,13 @@ const submitClub = async () => {
     fd.append("website_url", formData.website_url)
     fd.append("image", selectedFile.value)
 
-    // ✅ IMPORTANT: new endpoint is multipart POST /communities
+    // ✅ multipart POST /communities requires JWT
     const res = await apiFetch("/api/general/communities", {
       method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`
+        // ❗ no Content-Type (browser will set boundary)
+      },
       body: fd
     })
 
@@ -292,8 +321,7 @@ const submitClub = async () => {
 </script>
 
 <style scoped>
-/* Your CSS is mostly fine; only one small change:
-   status-pill is always "outline" now, no joined state needed */
+/* Your CSS is mostly fine; I added ONLY website styles */
 
 .page-wrap {
   --brand: #1b8f48;
@@ -455,6 +483,33 @@ const submitClub = async () => {
 
 .community-meta i {
   margin-right: 6px;
+}
+
+/* ✅ NEW */
+.community-website {
+  margin-top: 6px;
+  font-size: 12px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: #556b5f;
+}
+
+.community-website.muted {
+  color: #7a8b84;
+}
+
+.website-link {
+  color: var(--brand);
+  text-decoration: none;
+  max-width: 520px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.website-link:hover {
+  text-decoration: underline;
 }
 
 .status-pill {
