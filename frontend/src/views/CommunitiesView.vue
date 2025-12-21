@@ -85,24 +85,7 @@
             <span><i class="fas fa-user-group"></i> {{ community.members }} members</span>
           </div>
 
-          <!-- ✅ NEW: website slot under meta -->
-          <div class="community-website" v-if="community.website_url">
-            <i class="fas fa-link"></i>
-            <a
-              class="website-link"
-              :href="community.website_url"
-              target="_blank"
-              rel="noopener noreferrer"
-              :title="community.website_url"
-            >
-              {{ community.website_url }}
-            </a>
-          </div>
 
-          <div class="community-website muted" v-else>
-            <i class="fas fa-link"></i>
-            <span>No website provided</span>
-          </div>
         </div>
 
         <!-- ✅ REPLACED: Join -> Visit Website -->
@@ -115,6 +98,17 @@
         >
           <i class="fas fa-arrow-up-right-from-square" style="margin-right: 6px;"></i>
           Visit Website
+        </button>
+
+        <button
+          v-if="isSuperAdmin"
+          class="status-pill outline"
+          type="button"
+          @click="deleteClub(community)"
+          title="Delete this club"
+          style="min-width: 40px; border-color:#e55353; color:#e55353; margin-left: 8px;"
+        >
+          <i class="fas fa-trash"></i>
         </button>
       </article>
 
@@ -270,6 +264,17 @@ function visitWebsite(community) {
     return
   }
   window.open(community.website_url, "_blank", "noopener,noreferrer")
+}
+
+async function deleteClub(community) {
+  if (!confirm(`Are you sure you want to delete "${community.name}"? This cannot be undone.`)) {
+    return
+  }
+  
+  const success = await store.deleteCommunity(community.id)
+  if (success) {
+    // optional: show success toast or alert
+  }
 }
 
 function onFileChange(e) {

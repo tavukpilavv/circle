@@ -27,7 +27,7 @@ export const store = reactive({
     }
   },
 
-  
+
   async createCommunityMultipart({ name, description, website_url, imageFile }) {
     try {
       const token = localStorage.getItem("user_token")
@@ -82,8 +82,8 @@ export const store = reactive({
         clubName: name,
         description: description,
         shortDescription: description,
-        clubImage: image_url || null, 
-        website_url: website_url || "" 
+        clubImage: image_url || null,
+        website_url: website_url || ""
       }
 
       const res = await apiFetch("/api/general/communities/create", {
@@ -106,6 +106,35 @@ export const store = reactive({
     } catch (e) {
       console.error("createCommunityLegacyJson failed:", e)
       alert("Failed to create community")
+      return false
+    }
+  },
+
+  async deleteEvent(eventId) {
+    try {
+      const { deleteEvent } = await import("./api")
+      await deleteEvent(eventId)
+
+      // Update local state
+      this.events = this.events.filter(e => e.id !== eventId)
+      return true
+    } catch (e) {
+      console.error("Failed to delete event:", e)
+      alert(e.message || "Failed to delete event")
+      return false
+    }
+  },
+
+  async deleteCommunity(id) {
+    try {
+      const { deleteCommunity } = await import("./api")
+      await deleteCommunity(id)
+
+      this.communities = this.communities.filter(c => c.id !== id)
+      return true
+    } catch (e) {
+      console.error("Failed to delete community:", e)
+      alert(e.message || "Failed to delete community")
       return false
     }
   }

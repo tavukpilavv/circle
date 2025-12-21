@@ -153,6 +153,10 @@ export async function createCommunity(formData) {
   return postForm("/api/general/communities", formData);
 }
 
+export async function deleteCommunity(id) {
+  return del(`/api/general/communities/${id}`);
+}
+
 /* =========================
    SMALL FIX: POST shortcut
    (used above by registerEvent)
