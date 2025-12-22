@@ -23,39 +23,7 @@
         <div class="filters-label-space"></div>
 
         <div class="filters-pills">
-          <button
-            class="filter-pill"
-            :class="{ 'is-active': activeFilter === 'all', 'primary': activeFilter === 'all' }"
-            type="button"
-            @click="activeFilter = 'all'"
-          >
-            All
-          </button>
 
-          <!-- You can remove these two pills if you no longer track joined communities -->
-          <button
-            class="filter-pill"
-            :class="{ 'is-active': activeFilter === 'joined', 'primary': activeFilter === 'joined' }"
-            type="button"
-            @click="activeFilter = 'joined'"
-            :disabled="true"
-            title="Joining is disabled (external website redirect)"
-            style="opacity:.6; cursor:not-allowed;"
-          >
-            Joined
-          </button>
-
-          <button
-            class="filter-pill"
-            :class="{ 'is-active': activeFilter === 'discover', 'primary': activeFilter === 'discover' }"
-            type="button"
-            @click="activeFilter = 'discover'"
-            :disabled="true"
-            title="Joining is disabled (external website redirect)"
-            style="opacity:.6; cursor:not-allowed;"
-          >
-            Discover
-          </button>
 
           <button v-if="isSuperAdmin" class="add-club-btn" @click="openModal">
             + Add Club
@@ -144,7 +112,7 @@
         <!-- ✅ Website / Instagram URL -->
         <div class="form-field">
           <label>Instagram / Website Link</label>
-          <input type="url" v-model="formData.website_url" placeholder="https://instagram.com/..." required />
+          <input type="url" v-model="formData.website_url" placeholder="https://instagram.com/..." />
         </div>
 
         <!-- ✅ Image File slot -->

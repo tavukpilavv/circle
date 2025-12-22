@@ -120,6 +120,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { apiFetch } from '../api'
 
 // ====== AVATAR LOGIC ======
 const DICEBEAR_BASE = "https://api.dicebear.com/7.x/notionists/svg?seed="
@@ -149,16 +150,28 @@ const selectAvatar = (seed) => {
   avatarMessageClass.value = ""
 }
 
-const saveAvatar = () => {
-  // Save full URL to localStorage
+const saveAvatar = async () => {
   const url = avatarUrl(selectedSeed.value)
-  localStorage.setItem('user_avatar', url)
   
-  // Dispatch custom event for instant update
-  window.dispatchEvent(new Event('avatar-changed'))
-
-  avatarMessage.value = "Avatar saved successfully!"
-  avatarMessageClass.value = "success"
+  try {
+     const res = await apiFetch('/api/user/profile', {
+        method: 'PUT',
+        body: JSON.stringify({ avatar_url: url })
+     })
+     
+     if (res.ok) {
+         localStorage.setItem('user_avatar', url)
+         window.dispatchEvent(new Event('avatar-changed'))
+         avatarMessage.value = "Avatar saved successfully!"
+         avatarMessageClass.value = "success"
+     } else {
+         throw new Error('Failed to save')
+     }
+  } catch (e) {
+      console.error(e)
+      avatarMessage.value = "Failed to save avatar."
+      avatarMessageClass.value = "error"
+  }
 }
 
 const removeAvatar = () => {
@@ -175,26 +188,46 @@ const removeAvatar = () => {
   avatarMessageClass.value = "success"
 }
 
-onMounted(() => {
-  const storedUrl = localStorage.getItem('user_avatar')
-  if (storedUrl) {
-    // Try to extract seed from URL
-    const match = storedUrl.match(/seed=([^&]+)/)
-    if (match && avatarSeeds.includes(match[1])) {
-      currentSeed.value = match[1]
-      selectedSeed.value = match[1]
-    } else {
-      currentSeed.value = ''
-      selectedSeed.value = ''
-    }
-  } else {
-    currentSeed.value = ''
-    selectedSeed.value = ''
+onMounted(async () => {
+  // 1. Try fetching from backend
+  try {
+      const res = await apiFetch('/api/user/profile')
+      if (res.ok) {
+          const data = await res.json()
+          // Update profile name
+          if (data.name) {
+              profileName.value = data.name
+              localStorage.setItem('user_name', data.name)
+          }
+          // Update avatar
+          if (data.avatar_url) {
+              const match = data.avatar_url.match(/seed=([^&]+)/)
+              if (match && avatarSeeds.includes(match[1])) {
+                  currentSeed.value = match[1]
+                  selectedSeed.value = match[1]
+              }
+              localStorage.setItem('user_avatar', data.avatar_url)
+          }
+      }
+  } catch (e) {
+      console.error("Failed to load profile", e)
+  }
+
+  // Fallback to local storage if API didn't populate or for initial render
+  if (!currentSeed.value) {
+      const storedUrl = localStorage.getItem('user_avatar')
+      if (storedUrl) {
+        const match = storedUrl.match(/seed=([^&]+)/)
+        if (match && avatarSeeds.includes(match[1])) {
+          currentSeed.value = match[1]
+          selectedSeed.value = match[1]
+        }
+      }
   }
   
-  // Load Profile Info
-  profileName.value = localStorage.getItem('user_name') || ''
-  profileName.value = localStorage.getItem('user_name') || ''
+  if (!profileName.value) {
+      profileName.value = localStorage.getItem('user_name') || ''
+  }
 })
 
 
@@ -203,17 +236,25 @@ onMounted(() => {
 const profileName = ref('')
 const profileSuccess = ref('')
 
-const saveProfileInfo = () => {
-  localStorage.setItem('user_name', profileName.value)
-  
-  profileSuccess.value = "Profile information updated successfully."
-  
-  // Dispatch event to update other components if needed
-  window.dispatchEvent(new Event('auth-changed'))
-  
-  setTimeout(() => {
-    profileSuccess.value = ''
-  }, 3000)
+const saveProfileInfo = async () => {
+  try {
+      const res = await apiFetch('/api/user/profile', {
+          method: 'PUT',
+          body: JSON.stringify({ name: profileName.value })
+      })
+      
+      if (res.ok) {
+          localStorage.setItem('user_name', profileName.value)
+          profileSuccess.value = "Profile information updated successfully."
+          window.dispatchEvent(new Event('auth-changed'))
+          setTimeout(() => { profileSuccess.value = '' }, 3000)
+      } else {
+          throw new Error("Failed to update")
+      }
+  } catch (e) {
+      console.error(e)
+      alert("Failed to update profile info")
+  }
 }
 
 // ====== PASSWORD LOGIC ======
@@ -228,7 +269,7 @@ const showConfirmPass = ref(false)
 const passwordError = ref('')
 const passwordSuccess = ref('')
 
-const savePassword = () => {
+const savePassword = async () => {
   passwordError.value = ""
   passwordSuccess.value = ""
 
@@ -253,12 +294,29 @@ const savePassword = () => {
     return
   }
 
-  passwordSuccess.value = "Password saved successfully."
-  
-  // Reset fields
-  currentPassword.value = ''
-  newPassword.value = ''
-  confirmPassword.value = ''
+  try {
+      const res = await apiFetch('/api/user/change-password', {
+          method: 'POST',
+          body: JSON.stringify({
+              current_password: currentPassword.value,
+              new_password: newPass
+          })
+      })
+      
+      const data = await res.json()
+      
+      if (res.ok) {
+          passwordSuccess.value = "Password changed successfully."
+          currentPassword.value = ''
+          newPassword.value = ''
+          confirmPassword.value = ''
+      } else {
+          passwordError.value = data.error || "Failed to change password."
+      }
+  } catch (e) {
+      console.error(e)
+      passwordError.value = "Server error. Please try again."
+  }
 }
 </script>
 
