@@ -437,11 +437,12 @@ def create_community_multipart():
         if not is_valid_http_url(website_url):
             return jsonify({"error": "website_url must be a valid http(s) URL"}), 400
 
+        # Satır 266-271 arasını şöyle güncelle:
         image_file = request.files.get("image") or request.files.get("file")
         image_url = None
-
         if image_file and image_file.filename != '':
             image_url = upload_file(image_file, folder="communities")
+            # Sadece resim gelmiş ama yüklenememişse hata ver:
             if not image_url:
                 return jsonify({"error": "Image upload failed"}), 500
 
@@ -750,43 +751,88 @@ def apply_community():
         return jsonify({"error": str(e)}), 500
 
 
+# ==========================================
+# EVENTS & COMMUNITIES - EDIT AND DELETE
+# ==========================================
+@bp.route("/events/<int:id>", methods=["PUT"])
+@jwt_required()
+def update_event(id):
+    try:
+        user_id = get_jwt_identity()
+        user = User.query.get(user_id)
+        event = Event.query.get(id)
+
+        if not event or not user:
+            return jsonify({"error": "Event or User not found"}), 404
+
+        # YETKİ KONTROLÜ (Garantili Yöntem)
+        authorized = False
+        if is_super_admin(user):
+            authorized = True
+        else:
+            # Event modelindeki community_id üzerinden kontrol yapalım
+            comm = Community.query.get(event.community_id)
+            if comm and comm.admin_id == user.id:
+                authorized = True
+
+        if not authorized:
+            return jsonify({"error": "You are not authorized to edit this event"}), 403
+
+        # GÜNCELLEME İŞLEMLERİ
+        # Frontend'den 'name' veya 'title' gelebilir, ikisini de kontrol ediyoruz
+        event.title = request.form.get("title") or request.form.get("name") or event.title
+        event.description = request.form.get("description") or event.description
+        event.date = request.form.get("date") or event.date
+        event.location = request.form.get("location") or event.location
+        
+        # Kapasite sayısal olmalı, hata almamak için kontrol ekledik
+        try:
+            new_capacity = request.form.get("capacity")
+            if new_capacity:
+                event.capacity = int(new_capacity)
+        except:
+            pass 
+
+        # RESİM GÜNCELLEME
+        image_file = request.files.get("image") or request.files.get("file")
+        if image_file and image_file.filename != '':
+            new_url = upload_file(image_file, folder="events")
+            if new_url:
+                event.image_url = new_url
+
+        db.session.commit()
+        return jsonify({"message": "Event updated successfully", "id": event.id}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"FATAL ERROR: {str(e)}")
+        # Hatayı terminalde görmek için print ekledik:
+        print(f"DEBUG BACKEND HATA: {str(e)}")
+        return jsonify({"error": "Sunucu hatası oluştu, terminali kontrol edin."}), 500
+
 
 @bp.route("/communities/<int:id>", methods=["DELETE"])
 @jwt_required()
 def delete_community(id):
     """
-    Delete Community Endpoint.
-    Allowed only for: Super Admins OR the Admin of that specific community.
+    Delete a community. 
+    Authorized for: Super Admins OR the specific Community Admin.
     """
     try:
         user_id = get_jwt_identity()
         user = User.query.get(user_id)
-        
-        # Find the community to delete
         comm = Community.query.get(id)
 
         if not comm:
             return jsonify({"error": "Community not found"}), 404
 
-        # AUTHORIZATION CHECK:
-        # 1. Is the user a Super Admin?
-        # 2. OR Is the user the specific Admin of this community?
-        is_authorized = False
-        if is_super_admin(user):
-            is_authorized = True
-        elif comm.admin_id == user.id:
-            is_authorized = True
-        
+        is_authorized = is_super_admin(user) or (comm.admin_id == user.id)
         if not is_authorized:
-            return jsonify({"error": "You are not authorized to delete this community"}), 403
+            return jsonify({"error": "Unauthorized delete request"}), 403
 
-        # PERFORM DELETE
-        # Thanks to cascade="all, delete" in models.py, events will be deleted automatically.
         db.session.delete(comm)
         db.session.commit()
-
         return jsonify({"message": "Community deleted successfully"}), 200
-
     except Exception as e:
-        current_app.logger.error(f"Community Delete Error: {str(e)}")
+        db.session.rollback()
         return jsonify({"error": str(e)}), 500
