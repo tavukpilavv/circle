@@ -11,6 +11,7 @@ from flask_jwt_extended import (
 from app import db
 from app.models import Community, Event, User, Rating
 from app.utils import upload_file
+from app.services.image_service import upload_image
 
 bp = Blueprint("general", __name__)
 
@@ -125,8 +126,7 @@ def get_events():
 def create_event():
     """
     Create Event (Admin/Super Admin)
-    - Admin: community forced to managed_community
-    - Super Admin: MUST send community_id (dropdown)
+    Resim ve veriler Multipart Form Data olarak gelir.
     """
     try:
         user_id = get_jwt_identity()
@@ -137,12 +137,14 @@ def create_event():
         target_community_id = None
         r = role_lower(user)
 
+        # --- YETKİ VE KULÜP KONTROLÜ ---
         if r == "admin":
             if user.managed_community:
                 target_community_id = user.managed_community.id
             else:
                 return jsonify({"error": "Yönettiğiniz bir kulüp yok!"}), 403
         elif r in ("super_admin", "superadmin"):
+            # Superadmin dropdown'dan seçer, form data içinde 'community_id' gelir
             target_community_id = request.form.get("community_id")
         else:
             return jsonify({"error": "Yetkiniz yok"}), 403
@@ -150,33 +152,45 @@ def create_event():
         if not target_community_id:
             return jsonify({"error": "Kulüp seçilmeli."}), 400
 
-        comm = Community.query.get(target_community_id)
-        if not comm or not comm.is_approved:
-            return jsonify({"error": "Selected community not found/approved"}), 400
-
-        image_file = request.files.get("file") or request.files.get("image")
+        # --- RESİM YÜKLEME (Yeni Servis) ---
+        # Frontend'de formData.append('image', file) denilmeli
+        image_file = request.files.get("image")
         image_url = None
-        if image_file and image_file.filename != '':
-            image_url = upload_file(image_file, folder="events")
+        
+        if image_file:
+            try:
+                # Yeni yazdığımız image_service.py dosyasındaki fonksiyonu kullanıyoruz
+                image_url = upload_image(image_file, folder="circle_events")
+            except Exception as e:
+                return jsonify({"error": f"Resim yüklenemedi: {str(e)}"}), 400
 
-        title = request.form.get("name") or request.form.get("eventName") or request.form.get("title")
+        # --- DİĞER VERİLER (Form Data) ---
+        # JSON olmadığı için request.form.get kullanıyoruz
+        title = request.form.get("title") or request.form.get("name")
+        date = request.form.get("date")
+        time = request.form.get("time")
+        location = request.form.get("location")
+        description = request.form.get("description")
+        capacity = request.form.get("capacity")
+
         if not title:
-            return jsonify({"error": "Event title is required"}), 400
+            return jsonify({"error": "Etkinlik başlığı gereklidir."}), 400
 
+        # Yeni Event Nesnesi
         new_event = Event(
             title=title,
-            date=request.form.get("date"),
-            time=request.form.get("time"),
-            location=request.form.get("location"),
-            capacity=request.form.get("capacity"),
-            description=request.form.get("description"),
-            community_id=comm.id,
+            date=date,
+            time=time,
+            location=location,
+            capacity=int(capacity) if capacity and capacity.isdigit() else 0,
+            description=description,
+            community_id=target_community_id,
             image_url=image_url
         )
 
         db.session.add(new_event)
         db.session.commit()
-        return jsonify({"message": "Etkinlik oluşturuldu!"}), 201
+        return jsonify({"message": "Etkinlik başarıyla oluşturuldu!"}), 201
 
     except Exception as e:
         current_app.logger.error(f"Event Create Error: {str(e)}")
