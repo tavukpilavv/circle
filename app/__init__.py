@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
+from flask_mail import Mail
 from app.config import Config
 from sqlalchemy import MetaData
 import logging
@@ -35,6 +36,7 @@ db = SQLAlchemy(metadata=metadata)
 
 migrate = Migrate()
 jwt = JWTManager()
+mail = Mail()
 
 def create_app(config_class=Config):
     app = Flask(
@@ -63,6 +65,7 @@ def create_app(config_class=Config):
     db.init_app(app)
     migrate.init_app(app, db, render_as_batch=True)
     jwt.init_app(app)
+    mail.init_app(app)
 
 
     @app.before_request

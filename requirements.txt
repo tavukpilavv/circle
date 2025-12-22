@@ -8,3 +8,4 @@ psycopg2-binary
 cloudinary
 python-dotenv
 Werkzeug>=2.3,<3.0
+Flask-Mail
