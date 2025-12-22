@@ -34,7 +34,7 @@
                             <input type="checkbox" id="remember" checked>
                             <label for="remember">Remember me</label>
                         </div>
-                        <router-link to="/forgot-password" class="forgot-password">Forget password?</router-link>
+                        <span @click="$router.push('/forgot-password')" class="forgot-password" style="cursor: pointer; position: relative; z-index: 10;">Forget password?</span>
                         
                     </div>
                 </form>
