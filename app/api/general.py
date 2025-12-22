@@ -427,9 +427,10 @@ def get_communities():
 @jwt_required()
 def create_community_multipart():
     """
-    Multipart create community:
-    - image FILE upload
-    - website_url saved to external_link
+    YENİ SİSTEM:
+    - Multipart/Form-Data kabul eder.
+    - Resmi 'image_service' ile Cloudinary'e yükler.
+    - 'website_url' verisini 'external_link' sütununa kaydeder.
     """
     try:
         user_id = get_jwt_identity()
@@ -437,54 +438,65 @@ def create_community_multipart():
         if not user:
             return jsonify({"error": "Unauthorized"}), 401
 
+        # Sadece Admin veya Super Admin oluşturabilir
         if not (is_admin(user) or is_super_admin(user)):
             return jsonify({"error": "Only admins can create communities"}), 403
 
+        # 1. Form Verilerini Al (request.form)
         name = (request.form.get("name") or "").strip()
         description = (request.form.get("description") or "").strip()
         website_url = (request.form.get("website_url") or "").strip()
 
         if not name:
-            return jsonify({"error": "name is required"}), 400
+            return jsonify({"error": "Club name is required"}), 400
         if not description:
-            return jsonify({"error": "description is required"}), 400
-        if not is_valid_http_url(website_url):
-            return jsonify({"error": "website_url must be a valid http(s) URL"}), 400
+            return jsonify({"error": "Description is required"}), 400
 
-        # Satır 266-271 arasını şöyle güncelle:
+        # 2. Resim Yükleme İşlemi (request.files)
+        # Frontend 'image' ismiyle gönderiyor
         image_file = request.files.get("image") or request.files.get("file")
         image_url = None
-        if image_file and image_file.filename != '':
-            image_url = upload_file(image_file, folder="communities")
-            # Sadece resim gelmiş ama yüklenememişse hata ver:
-            if not image_url:
-                return jsonify({"error": "Image upload failed"}), 500
+        
+        if image_file:
+            try:
+                # Yeni servisimizle yükleyelim
+                image_url = upload_image(image_file, folder="communities")
+            except Exception as e:
+                print(f"Resim yükleme hatası: {e}")
+                return jsonify({"error": "Resim yüklenirken hata oluştu."}), 500
 
+        # Aynı isimde kulüp var mı?
         existing = Community.query.filter_by(name=name).first()
         if existing:
             return jsonify({"error": "Community name already exists"}), 409
 
+        # 3. Veritabanına Kayıt
         new_c = Community(
             name=name,
             description=description,
-            image_url=image_url,
-            external_link=website_url,
-            is_approved=True,
+            image_url=image_url,       # Cloudinary Linki
+            external_link=website_url, # Frontend'den gelen link buraya
+            is_approved=True,          # Admin eklediği için direkt onaylı
             admin_id=user.id
         )
 
         db.session.add(new_c)
         db.session.commit()
 
+        # Opsiyonel: Oluşturan kişiyi otomatik üye yap
+        try:
+            new_c.members.append(user)
+            db.session.commit()
+        except:
+            pass
+
         return jsonify({
-            "message": "Community created",
+            "message": "Community created successfully",
             "community": {
                 "id": new_c.id,
                 "name": new_c.name,
-                "description": new_c.description,
                 "image_url": new_c.image_url,
-                "website_url": new_c.external_link,
-                "members_count": new_c.members.count()
+                "website_url": new_c.external_link
             }
         }), 201
 
@@ -671,95 +683,67 @@ def approve_community():
 @bp.route("/communities/apply", methods=["POST"])
 @jwt_required()
 def apply_community():
-    
+    """
+    Öğrenci Başvurusu (Apply):
+    - FormData kabul eder.
+    - Resmi yükler ve 'is_approved=False' olarak kaydeder.
+    """
     try:
         user_id = get_jwt_identity()
         user = User.query.get(user_id)
         if not user:
             return jsonify({"error": "Unauthorized"}), 401
 
-        if _is_multipart_request():
-            club_name = (request.form.get("clubName") or "").strip()
-            university = (request.form.get("university") or "").strip()
-            category = (request.form.get("category") or "").strip()
-            short_desc = (request.form.get("shortDescription") or request.form.get("description") or "").strip()
-            desc = (request.form.get("description") or "").strip()
-            contact_name = (request.form.get("contactName") or "").strip()
-            email = (request.form.get("email") or "").strip()
-            instagram = (request.form.get("instagram") or "").strip()
-            other_link = (request.form.get("otherLink") or "").strip()
-            website_url = (request.form.get("website_url") or request.form.get("websiteUrl") or "").strip()
+        # 1. Form Verilerini Al
+        club_name = (request.form.get("clubName") or request.form.get("name") or "").strip()
+        description = (request.form.get("description") or "").strip()
+        website_url = (request.form.get("website_url") or request.form.get("websiteUrl") or "").strip()
+        
+        # Diğer alanlar (opsiyonel doldurulabilir)
+        university = (request.form.get("university") or "").strip()
+        category = (request.form.get("category") or "").strip()
+        contact_name = (request.form.get("contactName") or "").strip()
+        email = (request.form.get("email") or "").strip()
 
-            if not club_name:
-                return jsonify({"error": "clubName is required"}), 400
-
-            existing = Community.query.filter_by(name=club_name).first()
-            if existing:
-                return jsonify({"error": "Community name already exists"}), 409
-
-            image_file = request.files.get("clubImage") or request.files.get("image") or request.files.get("file")
-            image_url = upload_file(image_file, folder="community_applications") if image_file else None
-
-            new_c = Community(
-                name=club_name,
-                university=university,
-                category=category,
-                short_description=short_desc,
-                description=desc,
-                contact_person=contact_name,
-                contact_email=email,
-                instagram_link=instagram,
-                external_link=website_url or other_link, 
-                image_url=image_url,
-                proof_document_url=image_url,
-                is_approved=False,
-                admin_id=user.id
-            )
-
-            db.session.add(new_c)
-            db.session.commit()
-            return jsonify({"message": "Application submitted"}), 201
-
-        # -----------------------------
-        # Case B: legacy JSON
-        # -----------------------------
-        data = request.get_json() or {}
-
-        club_name = (data.get("clubName") or "").strip()
         if not club_name:
-            return jsonify({"error": "clubName is required"}), 400
+            return jsonify({"error": "Club name is required"}), 400
 
         existing = Community.query.filter_by(name=club_name).first()
         if existing:
             return jsonify({"error": "Community name already exists"}), 409
 
-        club_image_val = data.get("clubImage")
-        if isinstance(club_image_val, dict) or isinstance(club_image_val, list):
-            club_image_val = None  
+        # 2. Resim Yükleme
+        # Frontend bazen 'clubImage', bazen 'image' gönderebilir, hepsini kontrol edelim
+        image_file = request.files.get("clubImage") or request.files.get("image") or request.files.get("file")
+        image_url = None
 
-        website_url = (data.get("website_url") or data.get("websiteUrl") or "").strip()
-        other_link = (data.get("otherLink") or "").strip()
+        if image_file:
+            try:
+                image_url = upload_image(image_file, folder="community_applications")
+            except Exception as e:
+                print(f"Başvuru resmi yüklenemedi: {e}")
+                # Başvuru olduğu için resim zorunlu değilse devam edebiliriz
+                # return jsonify({"error": "Resim yükleme hatası"}), 500
 
+        # 3. Kayıt (Onaysız)
         new_c = Community(
             name=club_name,
-            university=data.get("university"),
-            category=data.get("category"),
-            short_description=data.get("shortDescription") or data.get("description"),
-            description=data.get("description"),
-            contact_person=data.get("contactName"),
-            contact_email=data.get("email"),
-            instagram_link=data.get("instagram"),
-            external_link=website_url or other_link,
-            image_url=club_image_val,
-            proof_document_url=club_image_val,
-            is_approved=False,
+            university=university,
+            category=category,
+            description=description,
+            contact_person=contact_name,
+            contact_email=email,
+            external_link=website_url,
+            image_url=image_url,
+            proof_document_url=image_url, # Kanıt dosyası olarak da aynı resmi tutuyoruz
+            is_approved=False,            # Onay Bekliyor
             admin_id=user.id
         )
 
         db.session.add(new_c)
         db.session.commit()
 
-        return jsonify({"message": "Application submitted"}), 201
+        return jsonify({"message": "Application submitted successfully"}), 201
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
