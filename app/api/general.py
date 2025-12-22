@@ -155,7 +155,9 @@ def create_event():
             return jsonify({"error": "Selected community not found/approved"}), 400
 
         image_file = request.files.get("file") or request.files.get("image")
-        image_url = upload_file(image_file, folder="events") if image_file else None
+        image_url = None
+        if image_file and image_file.filename != '':
+            image_url = upload_file(image_file, folder="events")
 
         title = request.form.get("name") or request.form.get("eventName") or request.form.get("title")
         if not title:
@@ -436,12 +438,12 @@ def create_community_multipart():
             return jsonify({"error": "website_url must be a valid http(s) URL"}), 400
 
         image_file = request.files.get("image") or request.files.get("file")
-        if not image_file:
-            return jsonify({"error": "image file is required"}), 400
+        image_url = None
 
-        image_url = upload_file(image_file, folder="communities")
-        if not image_url:
-            return jsonify({"error": "Image upload failed"}), 500
+        if image_file and image_file.filename != '':
+            image_url = upload_file(image_file, folder="communities")
+            if not image_url:
+                return jsonify({"error": "Image upload failed"}), 500
 
         existing = Community.query.filter_by(name=name).first()
         if existing:
