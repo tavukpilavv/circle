@@ -157,6 +157,9 @@ def create_app(config_class=Config):
     from app.api.general import bp as general_bp
     app.register_blueprint(general_bp, url_prefix="/api/general")
 
+    from app.api.user import bp as user_bp
+    app.register_blueprint(user_bp, url_prefix="/api/user")
+
     # SPA Route
     @app.route("/", defaults={"path": ""})
     @app.route("/<path:path>")

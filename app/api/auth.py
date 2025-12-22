@@ -97,7 +97,7 @@ def forgot_password():
 
         # Token Oluşturma
         s = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
-        token = s.dumps(user.email, salt='password-reset-salt')
+        token = s.dumps(user.email, salt=current_app.config['SECURITY_PASSWORD_SALT'])
         
         # Link Oluşturma
         # Frontend URL'i config'den alıyoruz (yoksa varsayılan localhost:5173)
@@ -140,7 +140,7 @@ def reset_password():
         
         try:
             # Token geçerlilik süresi: 3600 saniye (1 saat)
-            email = s.loads(token, salt='password-reset-salt', max_age=3600)
+            email = s.loads(token, salt=current_app.config['SECURITY_PASSWORD_SALT'], max_age=3600)
         except SignatureExpired:
             return jsonify({'error': 'Sıfırlama bağlantısının süresi dolmuş.'}), 400
         except BadSignature:
