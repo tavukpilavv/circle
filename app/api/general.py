@@ -748,3 +748,45 @@ def apply_community():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+
+@bp.route("/communities/<int:id>", methods=["DELETE"])
+@jwt_required()
+def delete_community(id):
+    """
+    Delete Community Endpoint.
+    Allowed only for: Super Admins OR the Admin of that specific community.
+    """
+    try:
+        user_id = get_jwt_identity()
+        user = User.query.get(user_id)
+        
+        # Find the community to delete
+        comm = Community.query.get(id)
+
+        if not comm:
+            return jsonify({"error": "Community not found"}), 404
+
+        # AUTHORIZATION CHECK:
+        # 1. Is the user a Super Admin?
+        # 2. OR Is the user the specific Admin of this community?
+        is_authorized = False
+        if is_super_admin(user):
+            is_authorized = True
+        elif comm.admin_id == user.id:
+            is_authorized = True
+        
+        if not is_authorized:
+            return jsonify({"error": "You are not authorized to delete this community"}), 403
+
+        # PERFORM DELETE
+        # Thanks to cascade="all, delete" in models.py, events will be deleted automatically.
+        db.session.delete(comm)
+        db.session.commit()
+
+        return jsonify({"message": "Community deleted successfully"}), 200
+
+    except Exception as e:
+        current_app.logger.error(f"Community Delete Error: {str(e)}")
+        return jsonify({"error": str(e)}), 500
