@@ -36,16 +36,14 @@ export const store = reactive({
         return false
       }
 
-      if (!imageFile) {
-        alert("Please select an image file.")
-        return false
-      }
-
       const fd = new FormData()
       fd.append("name", name || "")
       fd.append("description", description || "")
       fd.append("website_url", website_url || "")
-      fd.append("image", imageFile)
+
+      if (imageFile) {
+        fd.append("image", imageFile)
+      }
 
       const res = await apiFetch("/api/general/communities", {
         method: "POST",
