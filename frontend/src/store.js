@@ -135,5 +135,25 @@ export const store = reactive({
       alert(e.message || "Failed to delete community")
       return false
     }
+  },
+
+  async updateEvent(eventId, formData) {
+    try {
+      const { updateEvent } = await import("./api")
+      await updateEvent(eventId, formData)
+
+      // Refresh events list
+      const res = await apiFetch("/api/general/events")
+      const data = await res.json()
+      this.events = data
+
+      return true
+    } catch (e) {
+      console.error("Failed to update event:", e)
+      alert(e.message || "Failed to update event")
+      return false
+    }
   }
-})
+});
+
+

@@ -439,52 +439,51 @@ const closeModal = () => {
    SUBMIT (CREATE)
    ========================= */
 const submitForm = async () => {
-  if (modalMode.value !== 'create') {
-    toast.info("Edit is UI-only right now. Backend edit API not implemented.")
-    closeModal()
-    return
-  }
-
+  // 1. Kulüp seçili mi kontrolü
   if (!formData.community_id) {
-    toast.error("Please select a club.")
-    return
+    toast.error("Please select a club.");
+    return;
   }
 
-  const fd = new FormData()
-  fd.append("name", formData.name)
-  fd.append("date", formData.date)
-  fd.append("location", formData.location)
-  fd.append("capacity", formData.capacity)
-  fd.append("description", formData.description)
+  const fd = new FormData();
+  // Backend hem 'name' hem 'title' alabilsin diye ikisini de ekliyoruz
+  
+  fd.append("title", formData.name); 
+  
+  fd.append("date", formData.date);
+  fd.append("location", formData.location);
+  fd.append("capacity", formData.capacity);
+  fd.append("description", formData.description);
+  fd.append("community_id", formData.community_id);
 
-  // ✅ KEY FIX: send community_id not club name
-  fd.append("community_id", formData.community_id)
-
-  // ✅ KEY FIX: send actual file
   if (selectedFile.value) {
-    fd.append("image", selectedFile.value) // backend reads image or file
+    fd.append("image", selectedFile.value);
   }
 
-  // If your store.createEvent already calls backend correctly, keep it.
-  // But your old code sent "club", so we call backend directly to guarantee correct behavior.
-  const res = await apiFetch("/api/general/events/create", {
-    method: "POST",
-    body: fd
-  })
+  try {
+    if (modalMode.value === 'create') {
+      // --- SADECE CREATE ---
+      const res = await apiFetch("/api/general/events/create", {
+        method: "POST",
+        body: fd
+      });
+      if (!res.ok) throw new Error("Creation failed");
+      toast.success("Event created! 🎉");
+    } else {
+      // --- SADECE EDIT ---
+      const success = await store.updateEvent(formData.id, fd);
+      if (!success) return; 
+      toast.success("Event updated! ✏️");
+    }
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}))
-    toast.error(err.error || "Failed to create event")
-    return
+    // Listeyi tazele ve kapat
+    const eventsRes = await apiFetch("/api/general/events");
+    store.events = await eventsRes.json();
+    closeModal();
+  } catch (err) {
+    toast.error(err.message || "Something went wrong");
   }
-
-  toast.success("Event created!")
-  // refresh events
-  const eventsRes = await apiFetch("/api/general/events")
-  store.events = await eventsRes.json()
-
-  closeModal()
-}
+};
 
 /* =========================
    DELETE + REGISTER

@@ -93,8 +93,17 @@ export async function postForm(path, formData) {
   return handle(res);
 }
 
+
 export async function del(path) {
   const res = await apiFetch(path, { method: "DELETE" });
+  return handle(res);
+}
+
+export async function putForm(path, formData) {
+  const res = await apiFetch(path, {
+    method: "PUT",
+    body: formData,
+  });
   return handle(res);
 }
 
@@ -109,6 +118,10 @@ export async function getEvents(q = "") {
 
 export async function createEvent(formData) {
   return postForm("/api/general/events/create", formData);
+}
+
+export async function updateEvent(eventId, formData) {
+  return putForm(`/api/general/events/${eventId}`, formData);
 }
 
 
