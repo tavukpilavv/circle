@@ -58,29 +58,29 @@
 
         <!-- ✅ REPLACED: Join -> Visit Website -->
         <!-- ✅ REPLACED: Join -> Visit Website -->
-        <a
-          v-if="community.website_url"
-          class="status-pill outline"
-          :href="community.website_url"
-          target="_blank"
-          rel="noopener noreferrer"
-          title="Open community website"
-          style="min-width: 140px; text-decoration: none; display: flex; align-items: center; justify-content: center;"
-        >
-          <i class="fas fa-arrow-up-right-from-square" style="margin-right: 6px;"></i>
-          Visit Website
-        </a>
+        <div class="community-actions">
+          <a
+            v-if="community.website_url"
+            class="status-pill outline website-btn"
+            :href="community.website_url"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Open community website"
+          >
+            <i class="fas fa-arrow-up-right-from-square"></i>
+            Visit Website
+          </a>
 
-        <button
-          v-if="isSuperAdmin"
-          class="status-pill outline"
-          type="button"
-          @click="deleteClub(community)"
-          title="Delete this club"
-          style="min-width: 40px; border-color:#e55353; color:#e55353; margin-left: 8px;"
-        >
-          <i class="fas fa-trash"></i>
-        </button>
+          <button
+            v-if="isSuperAdmin"
+            class="status-pill outline delete-btn"
+            type="button"
+            @click="deleteClub(community)"
+            title="Delete this club"
+          >
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
       </article>
 
       <div v-if="filteredCommunities.length === 0" class="no-results">
@@ -521,9 +521,20 @@ const submitClub = async () => {
   text-decoration: underline;
 }
 
+/* Actions Column */
+.community-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end; /* Align right */
+  justify-content: center;
+  padding-right: 18px;
+}
+
 .status-pill {
-  align-self: center;
-  margin-right: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 6px 14px;
   border-radius: 999px;
   font-size: 12px;
@@ -531,12 +542,28 @@ const submitClub = async () => {
   border: 1px solid transparent;
   cursor: pointer;
   white-space: nowrap;
+  text-decoration: none;
 }
 
 .status-pill.outline {
   background: #fff;
   border-color: var(--brand);
   color: var(--brand);
+}
+
+.website-btn {
+  min-width: 140px;
+}
+
+.website-btn i {
+  margin-right: 6px;
+}
+
+.delete-btn {
+  border-color: #e55353 !important;
+  color: #e55353 !important;
+  width: 40px; /* Small square-ish button for trash */
+  padding: 6px 0; /* Center icon */
 }
 
 .status-pill.outline:disabled {

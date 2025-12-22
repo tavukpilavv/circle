@@ -408,9 +408,8 @@ const openModal = async (mode, event = null) => {
     formData.capacity = event.capacity
     formData.description = event.description
 
-    // We may not have community_id in events list response
-    // So keep current selection, or reset.
-    formData.community_id = formData.community_id || ""
+    // ✅ FIXED: Populate the community ID if it exists
+    formData.community_id = event.community_id ? String(event.community_id) : ""
   } else {
     formData.id = null
     formData.name = ''
