@@ -127,8 +127,8 @@
         {{ modalMode === 'create' ? 'Create Event' : 'Edit Event' }}
       </h2>
 
-      <div class="modal-upload-label">Upload Image</div>
-      <div class="modal-upload-box">
+        <div class="modal-upload-label">Upload Image <span style="font-weight:normal; color:#666; font-size:0.85em;">(Optional)</span></div>
+        <div class="modal-upload-box">
         <div class="upload-icon">
           <i class="fas fa-upload"></i>
         </div>

@@ -89,16 +89,19 @@
         </div>
 
         <!-- ✅ REPLACED: Join -> Visit Website -->
-        <button
+        <!-- ✅ REPLACED: Join -> Visit Website -->
+        <a
+          v-if="community.website_url"
           class="status-pill outline"
-          type="button"
-          @click="visitWebsite(community)"
-          :title="community.website_url ? 'Open community website' : 'No website provided'"
-          style="min-width: 140px;"
+          :href="community.website_url"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Open community website"
+          style="min-width: 140px; text-decoration: none; display: flex; align-items: center; justify-content: center;"
         >
           <i class="fas fa-arrow-up-right-from-square" style="margin-right: 6px;"></i>
           Visit Website
-        </button>
+        </a>
 
         <button
           v-if="isSuperAdmin"
@@ -258,13 +261,7 @@ const filteredCommunities = computed(() => {
   })
 })
 
-function visitWebsite(community) {
-  if (!community.website_url) {
-    alert("No website provided for this community.")
-    return
-  }
-  window.open(community.website_url, "_blank", "noopener,noreferrer")
-}
+
 
 async function deleteClub(community) {
   if (!confirm(`Are you sure you want to delete "${community.name}"? This cannot be undone.`)) {
@@ -317,11 +314,6 @@ const closeModal = () => {
 }
 
 const submitClub = async () => {
-  if (!selectedFile.value) {
-    alert("Please choose an image file.")
-    return
-  }
-
   const token = localStorage.getItem("user_token")
   if (!token) {
     alert("Please login first.")
@@ -334,7 +326,9 @@ const submitClub = async () => {
     fd.append("name", formData.name)
     fd.append("description", formData.description)
     fd.append("website_url", formData.website_url)
-    fd.append("image", selectedFile.value)
+    if (selectedFile.value) {
+      fd.append("image", selectedFile.value)
+    }
 
     // Log for verification
     for (let [key, value] of fd.entries()) {
