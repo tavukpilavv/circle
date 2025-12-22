@@ -111,7 +111,8 @@ def get_events():
                 "participant_count": e.participants.count(),
                 "is_rated": is_rated,
                 "user_rating": user_rating,
-                "user_comment": user_comment
+                "user_comment": user_comment,
+                "community_id": e.community_id
             })
 
         return jsonify(output), 200
@@ -790,6 +791,18 @@ def update_event(id):
                 event.capacity = int(new_capacity)
         except:
             pass 
+        
+        # KULÜP GÜNCELLEME (Community Change)
+        # Sadece community_id varsa ve geçerliyse güncelle
+        new_community_id = request.form.get("community_id")
+        if new_community_id:
+            try:
+                # Varlığını kontrol edelim (Opsiyonel ama iyi olur)
+                target_comm = Community.query.get(new_community_id)
+                if target_comm:
+                    event.community_id = int(new_community_id)
+            except:
+                pass 
 
         # RESİM GÜNCELLEME
         image_file = request.files.get("image") or request.files.get("file")
