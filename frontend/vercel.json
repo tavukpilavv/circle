@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://senin-backend-adresin.onrender.com/api/:path*"
+      "destination": "http://circle-9srg.onrender.com/api/:path*"
     }
   ]
 }
