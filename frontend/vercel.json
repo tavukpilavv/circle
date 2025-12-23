@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://senin-backend-adresin.onrender.com/api/:path*"
+    }
+  ]
+}
