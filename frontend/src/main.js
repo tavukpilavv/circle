@@ -1,4 +1,5 @@
 import { createApp } from 'vue'
+import { inject } from '@vercel/analytics'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
@@ -8,6 +9,9 @@ import '../style.css' // Import global styles
 import './assets/main.css' // Import custom Element Plus overrides
 import Toast from "vue-toastification";
 import "vue-toastification/dist/index.css";
+
+// Initialize Vercel Analytics
+inject()
 
 const app = createApp(App)
 
