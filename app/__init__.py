@@ -1,4 +1,4 @@
-from flask import Flask, render_template, abort
+from flask import Flask, render_template, abort, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_cors import CORS
@@ -7,9 +7,6 @@ from flask_mail import Mail
 from app.config import Config
 from sqlalchemy import MetaData
 import logging
-from flask import request
-from flask_jwt_extended import jwt_required, get_jwt_identity
-from flask_jwt_extended.exceptions import NoAuthorizationError
 from flask_jwt_extended.exceptions import (
     NoAuthorizationError,
     InvalidHeaderError,
@@ -19,8 +16,6 @@ from flask_jwt_extended.exceptions import (
 
 # Logging'i aktif edin
 logging.basicConfig(level=logging.DEBUG)
-
-
 
 # --- OTOMATİK İSİMLENDİRME KURALI (SQLite Fix) ---
 convention = {
@@ -46,111 +41,79 @@ def create_app(config_class=Config):
         static_url_path=""
     )
 
-    # Load base config (includes default SQLite)
+    # Load base config
     app.config.from_object(config_class)
 
-    # 🔹 IMPORTANT: override DB from env (Render / prod)
+    # Override DB from env (Render / prod)
     import os
     db_url = os.getenv("DATABASE_URL")
     if db_url:
         app.config["SQLALCHEMY_DATABASE_URI"] = db_url
 
+    # JWT Config
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = False
     app.config['JWT_COOKIE_CSRF_PROTECT'] = False
     app.config['JWT_CSRF_CHECK_FORM'] = False
     app.config['JWT_TOKEN_LOCATION'] = ['headers']
     app.config['JWT_HEADER_NAME'] = 'Authorization'
     app.config['JWT_HEADER_TYPE'] = 'Bearer'
-    app.config['JWT_ACCESS_TOKEN_EXPIRES'] = False    
+    
     db.init_app(app)
     migrate.init_app(app, db, render_as_batch=True)
     jwt.init_app(app)
     mail.init_app(app)
 
+    # --- GLOBAL CORS AYARI (EN ÖNEMLİ KISIM) ---
+    # Resources kısmını kaldırdım, tüm route'lara her yerden izin veriyoruz.
+    # Development aşamasında en sorunsuz yöntem budur.
+    CORS(app, supports_credentials=True) 
 
     @app.before_request
     def log_request_info():
+        # Sağlık kontrolü loglarını kirletmemesi için filtreleyebilirsin
+        if "/health" in request.url:
+            return
         print("\n=== INCOMING REQUEST ===")
         print(f"Method: {request.method}")
         print(f"URL: {request.url}")
         print(f"Headers: {dict(request.headers)}")
-        print(f"Content-Type: {request.content_type}")
-        
-        # Body'yi oku (dikkat: bir kere okunabilir)
         if request.is_json:
             print(f"JSON Data: {request.get_json()}")
-        else:
-            print(f"Form Data: {request.form}")
-            print(f"Raw Data: {request.get_data()}")
         print("=====================\n")
-    @app.errorhandler(Exception)
-    def handle_all_exceptions(e):
-        import traceback
-        print("\n!!! EXCEPTION CAUGHT !!!")
-        print(f"Type: {type(e).__name__}")
-        print(f"Message: {str(e)}")
-        print("Traceback:")
-        traceback.print_exc()
-        print("!!!!!!!!!!!!!!!!!!!!!\n")
-        return {"error": str(e), "type": type(e).__name__}, 500
 
-    @app.errorhandler(422)
-    def handle_422(e):
-        import traceback
-        print("\n!!! 422 ERROR !!!")
-        print(f"Error: {e}")
-        traceback.print_exc()
-        print("!!!!!!!!!!!!!!!\n")
-        return {"error": str(e)}, 422
+    # --- ERROR HANDLERS (Tekrar edenleri temizledim) ---
 
     @app.errorhandler(NoAuthorizationError)
-    def handle_no_auth(e):
-        print(f"JWT Error: {e}")
-        return {"msg": str(e)}, 401  # 422 yerine 401 dönsün
-
-
-
-
-    @app.errorhandler(NoAuthorizationError)
-    def handle_no_auth_error(e):
-        print(f"NoAuthorizationError: {e}")
+    def handle_auth_error(e):
         return {"msg": "Missing Authorization Header"}, 401
 
     @app.errorhandler(InvalidHeaderError)
     def handle_invalid_header_error(e):
-        print(f"InvalidHeaderError: {e}")
         return {"msg": "Invalid Authorization Header"}, 422
 
     @app.errorhandler(JWTDecodeError)
     def handle_jwt_decode_error(e):
-        print(f"JWTDecodeError: {e}")
         return {"msg": "Token decode failed"}, 422
 
     @app.errorhandler(CSRFError)
     def handle_csrf_error(e):
-        print(f"CSRFError: {e}")
         return {"msg": "CSRF token missing or invalid"}, 422
 
-    # Tüm hataları yakala
+    @app.errorhandler(422)
+    def handle_422(e):
+        return {"error": str(e)}, 422
+
     @app.errorhandler(Exception)
     def handle_all_exceptions(e):
         import traceback
         print(f"\n!!! EXCEPTION: {type(e).__name__} !!!")
         print(f"Message: {str(e)}")
         traceback.print_exc()
-        print("!!!!!!!!!!!!!!!\n")
         return {"msg": str(e), "type": type(e).__name__}, 500
 
-
-    # CORS
-    # CORS (FIXED)
-    CORS(
-        app,
-        resources={r"/api/*": {"origins": "*"}},
-        supports_credentials=True
-    )
-
-    # API Blueprints
+    # --- BLUEPRINTS ---
+    # Dikkat: URL Prefixleri '/api/...' şeklinde ayarlı.
+    
     from app.api.auth import bp as auth_bp
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
 
@@ -173,21 +136,14 @@ def create_app(config_class=Config):
     def health():
         return {"status": "healthy"}, 200
 
-    # --- SÜPER ADMIN KONTROLÜ (DOĞRU YER: return'den önce!) ---
-    # --- GÜNCELLENMİŞ SÜPER ADMIN TOHUMLAMA ---
+    # --- SÜPER ADMIN SEEDING ---
     with app.app_context():
         db.create_all()
-        
-        # User modelini import et
         from app.models import User 
         
-        # 1. Önce superadmin var mı diye bakalım
         admin = User.query.filter_by(username='superadmin').first()
-        
-        # 2. Yoksa sıfırdan oluşturalım
         if not admin:
             print("--- Creating Super Admin... ---")
-
             admin = User(
                 username='superadmin',
                 email='admin@circle.app',
@@ -195,18 +151,14 @@ def create_app(config_class=Config):
                 last_name='Admin',
                 major='Management'
             )
-            
             db.session.add(admin)
         
-        # 3. VARSA DA YOKSA DA ŞUNLARI GÜNCELLE (ZORLA YAP)
-        # Bu satırlar sayesinde eski hatalı rolü düzeltiyoruz!
-        admin.role = 'super_admin' 
-        admin.set_password('123456') # Şifreyi de garantiye alalım
-        
+        # Rolü ve şifreyi güncelle
+        admin.role = 'super_admin'
+        admin.set_password('123456')
         db.session.commit()
-        print(f"--- Super Admin Role Updated to: {admin.role} ---")
-    # -----------------------------------------------------------
+        print(f"--- Super Admin Check: {admin.username} is ready ---")
 
-    return app  # TEK VE SON return BU OLMALI
+    return app
 
 from app import models

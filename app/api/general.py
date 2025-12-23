@@ -12,6 +12,7 @@ from app import db
 from app.models import Community, Event, User, Rating
 from app.utils import upload_file
 from app.services.image_service import upload_image
+from sqlalchemy import func
 
 bp = Blueprint("general", __name__)
 
@@ -821,6 +822,46 @@ def update_event(id):
         print(f"DEBUG BACKEND HATA: {str(e)}")
         return jsonify({"error": "Sunucu hatası oluştu, terminali kontrol edin."}), 500
 
+@bp.route("/stats", methods=["GET"])
+def get_home_stats():
+    """
+    Landing page (Anasayfa) istatistikleri.
+    Public endpoint (Login gerekmez).
+    """
+    try:
+        # 1. Üniversite Sayısı:
+        # Community tablosundaki 'university' sütunundaki benzersiz (distinct) isimleri sayar.
+        # Sadece onaylı (is_approved=True) kulüplerin üniversitelerini baz alıyoruz.
+        uni_count = db.session.query(func.count(func.distinct(Community.university)))\
+            .filter(Community.university != None)\
+            .filter(Community.university != "")\
+            .filter(Community.is_approved == True)\
+            .scalar() or 0
+
+        if uni_count == 0:
+            uni_count = 1
+
+        # 2. Kulüp Sayısı (Sadece onaylılar)
+        club_count = Community.query.filter_by(is_approved=True).count()
+
+        # 3. Öğrenci Sayısı (Tüm kullanıcılar)
+        # İstersen sadece rolü 'student' olanları da saydırabilirsin: filter_by(role='student')
+        student_count = User.query.count()
+
+        # 4. Etkinlik Sayısı
+        event_count = Event.query.count()
+
+        return jsonify({
+            "universities": uni_count,
+            "clubs": club_count,
+            "students": student_count,
+            "events": event_count
+        }), 200
+
+    except Exception as e:
+        # Hata olursa logla ama frontend patlamasın diye 0 döndür veya hata mesajı ver
+        print(f"Stats Error: {e}")
+        return jsonify({"error": str(e)}), 500
 
 @bp.route("/communities/<int:id>", methods=["DELETE"])
 @jwt_required()

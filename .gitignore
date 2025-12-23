@@ -1,6 +1,30 @@
-venv/
-*.pyc
+# --- Python Derleme ve Önbellek Dosyaları ---
 __pycache__/
+*.py[cod]
+*$py.class
+
+# --- Sanal Ortam (Virtual Environment) ---
+venv/
+.venv/
+env/
+
+# --- Flask Özel Klasörleri ---
 instance/
+.webassets-cache
+
+# --- Veritabanı Dosyaları (Local) ---
+*.db
+*.sqlite3
+*.sqlite
+
+# --- Güvenlik ve Ortam Değişkenleri (ÇOK ÖNEMLİ) ---
 .env
-.DS_Storeapp.db
+.env.local
+
+# --- IDE ve Editör Ayarları (Gereksiz kalabalık yapmasın) ---
+.vscode/
+.idea/
+
+# --- İşletim Sistemi Önemsiz Dosyaları ---
+.DS_Store
+Thumbs.db
