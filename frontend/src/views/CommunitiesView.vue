@@ -49,14 +49,9 @@
           <h2 class="community-name">{{ community.name }}</h2>
           <p class="community-desc">{{ community.description }}</p>
 
-          <div class="community-meta">
-            <span><i class="fas fa-user-group"></i> {{ community.members }} members</span>
-          </div>
-
 
         </div>
 
-        <!-- ✅ REPLACED: Join -> Visit Website -->
         <!-- ✅ REPLACED: Join -> Visit Website -->
         <div class="community-actions">
           <a
@@ -484,15 +479,6 @@ const submitClub = async () => {
   margin: 0;
 }
 
-.community-meta {
-  margin-top: 4px;
-  font-size: 12px;
-  color: #556b5f;
-}
-
-.community-meta i {
-  margin-right: 6px;
-}
 
 /* ✅ NEW */
 .community-website {

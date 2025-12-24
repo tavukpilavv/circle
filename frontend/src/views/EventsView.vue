@@ -59,6 +59,7 @@
           <h2 class="event-name">{{ event.name }}</h2>
           <p class="event-desc">{{ event.description }}</p>
           <div class="event-meta">
+            <span v-if="event.time"><i class="fas fa-clock"></i> {{ event.time }}</span>
             <span><i class="fas fa-location-dot"></i> {{ event.location }}</span>
             <span><i class="fas fa-users"></i> {{ event.capacity }} seats</span>
             <span><i class="fas fa-users-viewfinder"></i> {{ event.community_name }}</span>
@@ -164,7 +165,10 @@
             <input type="date" v-model="formData.date" required />
           </div>
         </div>
-
+        <div class="form-field">
+          <label>Time</label>
+          <input type="time" v-model="formData.time" required />
+        </div>
         <div class="form-row">
           <div class="form-field">
             <label>Location</label>
@@ -388,6 +392,7 @@ const formData = reactive({
   id: null,
   name: '',
   date: '',
+  time: '',
   location: '',
   community_id: '',   // ✅ NEW: use id not club name
   capacity: '',
@@ -404,6 +409,7 @@ const openModal = async (mode, event = null) => {
     formData.id = event.id
     formData.name = event.name
     formData.date = event.date
+    formData.time = event.time || ''
     formData.location = event.location
     formData.capacity = event.capacity
     formData.description = event.description
@@ -414,6 +420,7 @@ const openModal = async (mode, event = null) => {
     formData.id = null
     formData.name = ''
     formData.date = ''
+    formData.time = ''
     formData.location = ''
     formData.capacity = ''
     formData.description = ''
@@ -448,8 +455,8 @@ const submitForm = async () => {
   // Backend hem 'name' hem 'title' alabilsin diye ikisini de ekliyoruz
   
   fd.append("title", formData.name); 
-  
   fd.append("date", formData.date);
+  fd.append("time", formData.time);
   fd.append("location", formData.location);
   fd.append("capacity", formData.capacity);
   fd.append("description", formData.description);
