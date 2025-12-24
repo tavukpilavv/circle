@@ -120,7 +120,7 @@ export async function createEvent(formData) {
   return postForm("/api/general/events/create", formData);
 }
 
-export async function updateEvent(eventId, formData) {
+export async function updateEvent(eventId, formData){
   return putForm(`/api/general/events/${eventId}`, formData);
 }
 
