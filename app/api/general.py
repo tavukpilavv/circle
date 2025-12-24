@@ -771,28 +771,41 @@ def update_event(id):
             authorized = True
         else:
             # Event modelindeki community_id üzerinden kontrol yapalım
-            comm = Community.query.get(event.community_id)
-            if comm and comm.admin_id == user.id:
-                authorized = True
+            if event.community_id:
+                comm = Community.query.get(event.community_id)
+                if comm and comm.admin_id == user.id:
+                    authorized = True
 
         if not authorized:
             return jsonify({"error": "You are not authorized to edit this event"}), 403
 
         # GÜNCELLEME İŞLEMLERİ
         # Frontend'den 'name' veya 'title' gelebilir, ikisini de kontrol ediyoruz
-        event.title = request.form.get("title") or request.form.get("name") or event.title
-        event.description = request.form.get("description") or event.description
-        event.date = request.form.get("date") or event.date
-        event.location = request.form.get("location") or event.location
+
+       
+        title = request.form.get("title") or request.form.get("name")
+        if title:
+            event.title = title
+        date = request.form.get("date")
+        if date:
+            event.date = date
+        description = request.form.get("description")
+        if description:
+            event.description = description
+        new_time = request.form.get("time")
+        if new_time and new_time.strip():
+            event.time = new_time.strip()
+        location = request.form.get("location")
+        if location:
+            event.location = location
         
         # Kapasite sayısal olmalı, hata almamak için kontrol ekledik
-        try:
-            new_capacity = request.form.get("capacity")
-            if new_capacity:
-                event.capacity = int(new_capacity)
-        except:
-            pass 
-        
+        capacity = request.form.get("capacity")
+        if capacity is not None and capacity != "":
+            try:
+                event.capacity = int(capacity)
+            except ValueError:
+                pass
         # KULÜP GÜNCELLEME (Community Change)
         # Sadece community_id varsa ve geçerliyse güncelle
         new_community_id = request.form.get("community_id")
