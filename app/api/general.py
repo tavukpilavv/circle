@@ -315,7 +315,7 @@ def rate_event(id):
 @bp.route("/events/<int:id>/participants", methods=["GET"])
 @jwt_required()
 def get_event_participants(id):
-    """Participants list (Fixed Query)"""
+    """Participants list (Fixed & Safer Query)"""
     try:
         requester_id = get_jwt_identity()
         requester = User.query.get(requester_id)
@@ -334,9 +334,10 @@ def get_event_participants(id):
         if not authorized:
             return jsonify({"error": "Yetkiniz yok"}), 403
 
-        # DÜZELTME: İlişki üzerinden değil, veritabanından taze sorgu (Explicit Join)
-        # Bu yöntem önbellek sorunlarını aşar.
-        participants = User.query.join(User.registered_events).filter(Event.id == id).all()
+        # --- DÜZELTİLEN KISIM: .any() SORGUSU ---
+        # "registered_events" listesinin içinde ID'si bu event olan var mı?
+        # Bu yöntem en hatasız çalışan yöntemdir.
+        participants = User.query.filter(User.registered_events.any(id=id)).all()
 
         participants_list = []
         for p in participants:
@@ -350,6 +351,8 @@ def get_event_participants(id):
         return jsonify(participants_list), 200
 
     except Exception as e:
+        # Hata detayını terminale yazdıralım ki Render loglarında görebilesin
+        print(f"DEBUG: Participants Error: {str(e)}") 
         return jsonify({"error": str(e)}), 500
 
 
