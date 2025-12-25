@@ -220,7 +220,29 @@ def register_event(id):
     except Exception as e:
         current_app.logger.error(f"Register Error: {str(e)}")
         return jsonify({"error": str(e)}), 500
+    
+@bp.route("/events/<int:id>/unregister", methods=["POST"])
+@jwt_required()
+def unregister_event(id):
+    try:
+        user_id = get_jwt_identity()
+        user = User.query.get(user_id)
+        event = Event.query.get(id)
 
+        if not user or not event:
+            return jsonify({"error": "Not found"}), 404
+
+        if event not in user.registered_events:
+            return jsonify({"message": "Not registered"}), 400
+
+        user.registered_events.remove(event)
+        db.session.commit()
+
+        return jsonify({"message": "Unregistered successfully"}), 200
+
+    except Exception as e:
+        current_app.logger.error(f"Unregister Error: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 
 @bp.route("/events/<int:id>/rate", methods=["POST"])
 @jwt_required()
