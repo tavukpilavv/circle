@@ -1,6 +1,6 @@
 import os
 from urllib.parse import urlparse
-from datetime import datetime
+from datetime import datetime, timedelta # timedelta eklendi
 
 from flask import Blueprint, jsonify, request, current_app
 from flask_jwt_extended import (
@@ -34,7 +34,6 @@ def role_lower(user: User) -> str:
 
 
 def is_super_admin(user: User) -> bool:
-    # Support both spellings so your app won’t break.
     return role_lower(user) in ("super_admin", "superadmin")
 
 
@@ -46,15 +45,17 @@ def _is_multipart_request() -> bool:
     ct = (request.content_type or "").lower()
     return "multipart/form-data" in ct
 
+# --- YENİ HELPER: TÜRKİYE SAATİ ---
+def get_turkey_time():
+    # Render sunucusu UTC çalışır. Türkiye UTC+3'tür.
+    return datetime.utcnow() + timedelta(hours=3)
+
 
 # =========================
 # EVENTS
 # =========================
 @bp.route("/events", methods=["GET"])
 def get_events():
-    """
-    Returns events list. Uses optional JWT to mark is_registered + user rating.
-    """
     try:
         verify_jwt_in_request(optional=True)
         current_user_id = get_jwt_identity()
@@ -127,10 +128,6 @@ def get_events():
 @bp.route("/events/create", methods=["POST"])
 @jwt_required()
 def create_event():
-    """
-    Create Event (Admin/Super Admin)
-    Resim ve veriler Multipart Form Data olarak gelir.
-    """
     try:
         user_id = get_jwt_identity()
         user = User.query.get(user_id)
@@ -140,14 +137,12 @@ def create_event():
         target_community_id = None
         r = role_lower(user)
 
-        # --- YETKİ VE KULÜP KONTROLÜ ---
         if r == "admin":
             if user.managed_community:
                 target_community_id = user.managed_community.id
             else:
                 return jsonify({"error": "Yönettiğiniz bir kulüp yok!"}), 403
         elif r in ("super_admin", "superadmin"):
-            # Superadmin dropdown'dan seçer, form data içinde 'community_id' gelir
             target_community_id = request.form.get("community_id")
         else:
             return jsonify({"error": "Yetkiniz yok"}), 403
@@ -155,7 +150,6 @@ def create_event():
         if not target_community_id:
             return jsonify({"error": "Kulüp seçilmeli."}), 400
 
-        # --- RESİM YÜKLEME ---
         image_file = request.files.get("image")
         image_url = None
         
@@ -165,7 +159,6 @@ def create_event():
             except Exception as e:
                 return jsonify({"error": f"Resim yüklenemedi: {str(e)}"}), 400
 
-        # --- DİĞER VERİLER (Form Data) ---
         title = request.form.get("title") or request.form.get("name")
         date = request.form.get("date")
         time = request.form.get("time")
@@ -176,7 +169,6 @@ def create_event():
         if not title:
             return jsonify({"error": "Etkinlik başlığı gereklidir."}), 400
 
-        # Yeni Event Nesnesi
         new_event = Event(
             title=title,
             date=date,
@@ -260,42 +252,34 @@ def rate_event(id):
         if not event or not user:
             return jsonify({"error": "Hata: Etkinlik veya kullanıcı bulunamadı."}), 404
 
-        # --- 1. SIKI KATILIM KONTROLÜ ---
-        # Kullanıcı kayıtlı değilse yorum yapamaz
+        # 1. SIKI KATILIM KONTROLÜ
         if event not in user.registered_events:
              return jsonify({"error": "Sadece etkinliğe kayıtlı katılımcılar yorum yapabilir."}), 403
 
-        # --- 2. TARİH VE SAAT KONTROLÜ (GÜNCELLENDİ) ---
-        # Dakikası dakikasına kontrol eder
+        # 2. TARİH VE SAAT KONTROLÜ (TÜRKİYE SAATİ FİX)
         if event.date:
             try:
-                # Varsayılan saat yoksa gün sonunu veya başını baz alabilirsin
                 event_time = event.time if event.time else "00:00"
-                
-                # Tarih ve saati birleştir: "2025-12-25 15:20"
                 event_dt_str = f"{event.date} {event_time}"
-                
-                # Python tarih objesine çevir (Format: YYYY-MM-DD HH:MM)
                 event_dt_obj = datetime.strptime(event_dt_str, "%Y-%m-%d %H:%M")
                 
-                # Şu anki zaman, etkinlik saatinden gerideyse hata ver
-                if datetime.now() < event_dt_obj:
+                # Render (UTC) vs Türkiye (UTC+3) farkını düzeltiyoruz
+                current_tr_time = get_turkey_time()
+                
+                if current_tr_time < event_dt_obj:
                      return jsonify({"error": "Etkinlik henüz bitmediği için yorum yapamazsınız."}), 400
             except ValueError:
-                # Tarih formatı uymazsa pas geç
                 pass
 
-        # --- 3. GÜNCELLEME MANTIĞI ---
+        # 3. GÜNCELLEME MANTIĞI
         existing = Rating.query.filter_by(user_id=user.id, event_id=event.id).first()
 
         if existing:
-            # Kullanıcı zaten yorum yapmışsa, yenisini eklemek yerine ESKİSİNİ GÜNCELLİYORUZ
             old_score = existing.score or 0
             existing.score = rating_val
             existing.comment = feedback_text
             existing.is_anonymous = is_anonymous
 
-            # Etkinlik ortalamasını yeniden hesapla
             current_total = (event.rating or 0) * (event.rating_count or 0)
             new_total = current_total - old_score + rating_val
             
@@ -325,14 +309,13 @@ def rate_event(id):
 
     except Exception as e:
         current_app.logger.error(f"Rating Error: {str(e)}")
-        # db.session.rollback()
         return jsonify({"error": str(e)}), 500
 
 
 @bp.route("/events/<int:id>/participants", methods=["GET"])
 @jwt_required()
 def get_event_participants(id):
-    """Participants list (admin / super admin)"""
+    """Participants list (Fixed Query)"""
     try:
         requester_id = get_jwt_identity()
         requester = User.query.get(requester_id)
@@ -351,8 +334,12 @@ def get_event_participants(id):
         if not authorized:
             return jsonify({"error": "Yetkiniz yok"}), 403
 
+        # DÜZELTME: İlişki üzerinden değil, veritabanından taze sorgu (Explicit Join)
+        # Bu yöntem önbellek sorunlarını aşar.
+        participants = User.query.join(User.registered_events).filter(Event.id == id).all()
+
         participants_list = []
-        for p in event.participants:
+        for p in participants:
             participants_list.append({
                 "first_name": p.first_name,
                 "last_name": p.last_name,
@@ -373,7 +360,6 @@ def get_event_reviews(id):
         current_user_id = get_jwt_identity()
         user = User.query.get(current_user_id) 
 
-        # --- Admin Değilse Gösterme ---
         if not (is_admin(user) or is_super_admin(user)):
              return jsonify({"error": "Yorumları görüntüleme yetkiniz yok."}), 403
         
