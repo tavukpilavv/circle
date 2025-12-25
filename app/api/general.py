@@ -1,5 +1,6 @@
 import os
 from urllib.parse import urlparse
+from datetime import datetime
 
 from flask import Blueprint, jsonify, request, current_app
 from flask_jwt_extended import (
@@ -154,20 +155,17 @@ def create_event():
         if not target_community_id:
             return jsonify({"error": "Kulüp seçilmeli."}), 400
 
-        # --- RESİM YÜKLEME (Yeni Servis) ---
-        # Frontend'de formData.append('image', file) denilmeli
+        # --- RESİM YÜKLEME ---
         image_file = request.files.get("image")
         image_url = None
         
         if image_file:
             try:
-                # Yeni yazdığımız image_service.py dosyasındaki fonksiyonu kullanıyoruz
                 image_url = upload_image(image_file, folder="circle_events")
             except Exception as e:
                 return jsonify({"error": f"Resim yüklenemedi: {str(e)}"}), 400
 
         # --- DİĞER VERİLER (Form Data) ---
-        # JSON olmadığı için request.form.get kullanıyoruz
         title = request.form.get("title") or request.form.get("name")
         date = request.form.get("date")
         time = request.form.get("time")
@@ -258,24 +256,50 @@ def rate_event(id):
 
         event = Event.query.get(id)
         user = User.query.get(user_id)
+        
         if not event or not user:
-            return jsonify({"error": "Hata"}), 404
+            return jsonify({"error": "Hata: Etkinlik veya kullanıcı bulunamadı."}), 404
 
+        # --- 1. SIKI KATILIM KONTROLÜ ---
+        # SQLAlchemy ilişkisi üzerinden doğrudan kontrol
+        if event not in user.registered_events:
+             return jsonify({"error": "Sadece etkinliğe kayıtlı katılımcılar yorum yapabilir."}), 403
+
+        # --- 2. TARİH KONTROLÜ (AKTİF EDİLDİ) ---
+        if event.date:
+            try:
+                # Veritabanında String 'YYYY-MM-DD' ise parse et
+                event_date_obj = datetime.strptime(event.date, "%Y-%m-%d")
+                
+                # Etkinlik tarihi bugünden (şimdi) ileri bir tarihse yorum yapılamaz
+                # Not: Saat kontrolü hassas değilse sadece gün bazlı çalışır.
+                if datetime.now() < event_date_obj:
+                     return jsonify({"error": "Etkinlik henüz bitmediği için yorum yapamazsınız."}), 400
+            except ValueError:
+                # Tarih formatı uymazsa veya parse edilemezse es geç
+                pass
+
+        # --- 3. GÜNCELLEME MANTIĞI ---
         existing = Rating.query.filter_by(user_id=user.id, event_id=event.id).first()
 
         if existing:
+            # Kullanıcı zaten yorum yapmışsa, yenisini eklemek yerine ESKİSİNİ GÜNCELLİYORUZ
             old_score = existing.score or 0
             existing.score = rating_val
             existing.comment = feedback_text
             existing.is_anonymous = is_anonymous
 
-            current_total_score = (event.rating or 0) * (event.rating_count or 0)
-            new_total_score = current_total_score - old_score + rating_val
-            event.rating = round(new_total_score / (event.rating_count or 1), 1)
+            # Etkinlik ortalamasını yeniden hesapla
+            current_total = (event.rating or 0) * (event.rating_count or 0)
+            new_total = current_total - old_score + rating_val
+            
+            count = event.rating_count if event.rating_count > 0 else 1
+            event.rating = round(new_total / count, 1)
 
             db.session.commit()
-            return jsonify({"message": "Puanınız güncellendi.", "new_rating": event.rating}), 200
+            return jsonify({"message": "Yorumunuz güncellendi.", "new_rating": event.rating}), 200
 
+        # Yeni Yorum Ekleme
         new_rating_instance = Rating(
             user_id=user.id,
             event_id=event.id,
@@ -291,10 +315,11 @@ def rate_event(id):
         event.rating_count = new_count
 
         db.session.commit()
-        return jsonify({"message": "Geri bildiriminiz kaydedildi.", "new_rating": event.rating}), 200
+        return jsonify({"message": "Yorumunuz kaydedildi.", "new_rating": event.rating}), 200
 
     except Exception as e:
         current_app.logger.error(f"Rating Error: {str(e)}")
+        # db.session.rollback()
         return jsonify({"error": str(e)}), 500
 
 
@@ -336,11 +361,16 @@ def get_event_participants(id):
 
 
 @bp.route("/events/<int:id>/reviews", methods=["GET"])
+@jwt_required()
 def get_event_reviews(id):
     try:
-        verify_jwt_in_request(optional=True)
         current_user_id = get_jwt_identity()
+        user = User.query.get(current_user_id) 
 
+        # --- Admin Değilse Gösterme ---
+        if not (is_admin(user) or is_super_admin(user)):
+             return jsonify({"error": "Yorumları görüntüleme yetkiniz yok."}), 403
+        
         event = Event.query.get(id)
         if not event:
             return jsonify({"error": "Etkinlik bulunamadı"}), 404
@@ -424,9 +454,6 @@ def delete_event(id):
 # =========================
 @bp.route("/communities", methods=["GET"])
 def get_communities():
-    """
-    Used by communities page (public listing)
-    """
     try:
         verify_jwt_in_request(optional=True)
         comms = Community.query.filter_by(is_approved=True).all()
@@ -450,23 +477,15 @@ def get_communities():
 @bp.route("/communities", methods=["POST"])
 @jwt_required()
 def create_community_multipart():
-    """
-    YENİ SİSTEM:
-    - Multipart/Form-Data kabul eder.
-    - Resmi 'image_service' ile Cloudinary'e yükler.
-    - 'website_url' verisini 'external_link' sütununa kaydeder.
-    """
     try:
         user_id = get_jwt_identity()
         user = User.query.get(user_id)
         if not user:
             return jsonify({"error": "Unauthorized"}), 401
 
-        # Sadece Admin veya Super Admin oluşturabilir
         if not (is_admin(user) or is_super_admin(user)):
             return jsonify({"error": "Only admins can create communities"}), 403
 
-        # 1. Form Verilerini Al (request.form)
         name = (request.form.get("name") or "").strip()
         description = (request.form.get("description") or "").strip()
         website_url = (request.form.get("website_url") or "").strip()
@@ -476,38 +495,32 @@ def create_community_multipart():
         if not description:
             return jsonify({"error": "Description is required"}), 400
 
-        # 2. Resim Yükleme İşlemi (request.files)
-        # Frontend 'image' ismiyle gönderiyor
         image_file = request.files.get("image") or request.files.get("file")
         image_url = None
         
         if image_file:
             try:
-                # Yeni servisimizle yükleyelim
                 image_url = upload_image(image_file, folder="communities")
             except Exception as e:
                 print(f"Resim yükleme hatası: {e}")
                 return jsonify({"error": "Resim yüklenirken hata oluştu."}), 500
 
-        # Aynı isimde kulüp var mı?
         existing = Community.query.filter_by(name=name).first()
         if existing:
             return jsonify({"error": "Community name already exists"}), 409
 
-        # 3. Veritabanına Kayıt
         new_c = Community(
             name=name,
             description=description,
-            image_url=image_url,       # Cloudinary Linki
-            external_link=website_url, # Frontend'den gelen link buraya
-            is_approved=True,          # Admin eklediği için direkt onaylı
+            image_url=image_url,      
+            external_link=website_url, 
+            is_approved=True,          
             admin_id=user.id
         )
 
         db.session.add(new_c)
         db.session.commit()
 
-        # Opsiyonel: Oluşturan kişiyi otomatik üye yap
         try:
             new_c.members.append(user)
             db.session.commit()
@@ -531,11 +544,6 @@ def create_community_multipart():
 @bp.route("/communities/options", methods=["GET"])
 @jwt_required()
 def communities_options_for_event():
-    """
-    Dropdown options for Create Event:
-    - super_admin: all approved communities
-    - admin: only their managed community (1 option)
-    """
     user_id = get_jwt_identity()
     user = User.query.get(user_id)
     if not user:
@@ -580,10 +588,6 @@ def get_pending_communities():
 @bp.route("/communities/create", methods=["POST"])
 @jwt_required()
 def create_community_legacy_json():
-    """
-    Old JSON create endpoint (kept so older frontend won't break)
-    ✅ FIX: accept website_url and store it to external_link
-    """
     try:
         user_id = get_jwt_identity()
         user = User.query.get(user_id)
@@ -618,7 +622,6 @@ def create_community_legacy_json():
         db.session.add(new_c)
         db.session.commit()
 
-        # optional auto join
         user.joined_communities.append(new_c)
         db.session.commit()
 
@@ -707,23 +710,16 @@ def approve_community():
 @bp.route("/communities/apply", methods=["POST"])
 @jwt_required()
 def apply_community():
-    """
-    Öğrenci Başvurusu (Apply):
-    - FormData kabul eder.
-    - Resmi yükler ve 'is_approved=False' olarak kaydeder.
-    """
     try:
         user_id = get_jwt_identity()
         user = User.query.get(user_id)
         if not user:
             return jsonify({"error": "Unauthorized"}), 401
 
-        # 1. Form Verilerini Al
         club_name = (request.form.get("clubName") or request.form.get("name") or "").strip()
         description = (request.form.get("description") or "").strip()
         website_url = (request.form.get("website_url") or request.form.get("websiteUrl") or "").strip()
         
-        # Diğer alanlar (opsiyonel doldurulabilir)
         university = (request.form.get("university") or "").strip()
         category = (request.form.get("category") or "").strip()
         contact_name = (request.form.get("contactName") or "").strip()
@@ -736,8 +732,6 @@ def apply_community():
         if existing:
             return jsonify({"error": "Community name already exists"}), 409
 
-        # 2. Resim Yükleme
-        # Frontend bazen 'clubImage', bazen 'image' gönderebilir, hepsini kontrol edelim
         image_file = request.files.get("clubImage") or request.files.get("image") or request.files.get("file")
         image_url = None
 
@@ -746,10 +740,7 @@ def apply_community():
                 image_url = upload_image(image_file, folder="community_applications")
             except Exception as e:
                 print(f"Başvuru resmi yüklenemedi: {e}")
-                # Başvuru olduğu için resim zorunlu değilse devam edebiliriz
-                # return jsonify({"error": "Resim yükleme hatası"}), 500
 
-        # 3. Kayıt (Onaysız)
         new_c = Community(
             name=club_name,
             university=university,
@@ -759,8 +750,8 @@ def apply_community():
             contact_email=email,
             external_link=website_url,
             image_url=image_url,
-            proof_document_url=image_url, # Kanıt dosyası olarak da aynı resmi tutuyoruz
-            is_approved=False,            # Onay Bekliyor
+            proof_document_url=image_url, 
+            is_approved=False,            
             admin_id=user.id
         )
 
@@ -773,9 +764,6 @@ def apply_community():
         return jsonify({"error": str(e)}), 500
 
 
-# ==========================================
-# EVENTS & COMMUNITIES - EDIT AND DELETE
-# ==========================================
 @bp.route("/events/<int:id>", methods=["PUT"])
 @jwt_required()
 def update_event(id):
@@ -787,12 +775,10 @@ def update_event(id):
         if not event or not user:
             return jsonify({"error": "Event or User not found"}), 404
 
-        # YETKİ KONTROLÜ (Garantili Yöntem)
         authorized = False
         if is_super_admin(user):
             authorized = True
         else:
-            # Event modelindeki community_id üzerinden kontrol yapalım
             if event.community_id:
                 comm = Community.query.get(event.community_id)
                 if comm and comm.admin_id == user.id:
@@ -800,11 +786,7 @@ def update_event(id):
 
         if not authorized:
             return jsonify({"error": "You are not authorized to edit this event"}), 403
-
-        # GÜNCELLEME İŞLEMLERİ
-        # Frontend'den 'name' veya 'title' gelebilir, ikisini de kontrol ediyoruz
-
-       
+        
         title = request.form.get("title") or request.form.get("name")
         if title:
             event.title = title
@@ -821,26 +803,21 @@ def update_event(id):
         if location:
             event.location = location
         
-        # Kapasite sayısal olmalı, hata almamak için kontrol ekledik
         capacity = request.form.get("capacity")
         if capacity is not None and capacity != "":
             try:
                 event.capacity = int(capacity)
             except ValueError:
                 pass
-        # KULÜP GÜNCELLEME (Community Change)
-        # Sadece community_id varsa ve geçerliyse güncelle
         new_community_id = request.form.get("community_id")
         if new_community_id:
             try:
-                # Varlığını kontrol edelim (Opsiyonel ama iyi olur)
                 target_comm = Community.query.get(new_community_id)
                 if target_comm:
                     event.community_id = int(new_community_id)
             except:
                 pass 
 
-        # RESİM GÜNCELLEME
         image_file = request.files.get("image") or request.files.get("file")
         if image_file and image_file.filename != '':
             new_url = upload_file(image_file, folder="events")
@@ -853,20 +830,12 @@ def update_event(id):
     except Exception as e:
         db.session.rollback()
         current_app.logger.error(f"FATAL ERROR: {str(e)}")
-        # Hatayı terminalde görmek için print ekledik:
         print(f"DEBUG BACKEND HATA: {str(e)}")
         return jsonify({"error": "Sunucu hatası oluştu, terminali kontrol edin."}), 500
 
 @bp.route("/stats", methods=["GET"])
 def get_home_stats():
-    """
-    Landing page (Anasayfa) istatistikleri.
-    Public endpoint (Login gerekmez).
-    """
     try:
-        # 1. Üniversite Sayısı:
-        # Community tablosundaki 'university' sütunundaki benzersiz (distinct) isimleri sayar.
-        # Sadece onaylı (is_approved=True) kulüplerin üniversitelerini baz alıyoruz.
         uni_count = db.session.query(func.count(func.distinct(Community.university)))\
             .filter(Community.university != None)\
             .filter(Community.university != "")\
@@ -876,14 +845,8 @@ def get_home_stats():
         if uni_count == 0:
             uni_count = 1
 
-        # 2. Kulüp Sayısı (Sadece onaylılar)
         club_count = Community.query.filter_by(is_approved=True).count()
-
-        # 3. Öğrenci Sayısı (Tüm kullanıcılar)
-        # İstersen sadece rolü 'student' olanları da saydırabilirsin: filter_by(role='student')
         student_count = User.query.count()
-
-        # 4. Etkinlik Sayısı
         event_count = Event.query.count()
 
         return jsonify({
@@ -894,17 +857,12 @@ def get_home_stats():
         }), 200
 
     except Exception as e:
-        # Hata olursa logla ama frontend patlamasın diye 0 döndür veya hata mesajı ver
         print(f"Stats Error: {e}")
         return jsonify({"error": str(e)}), 500
 
 @bp.route("/communities/<int:id>", methods=["DELETE"])
 @jwt_required()
 def delete_community(id):
-    """
-    Delete a community. 
-    Authorized for: Super Admins OR the specific Community Admin.
-    """
     try:
         user_id = get_jwt_identity()
         user = User.query.get(user_id)
@@ -923,6 +881,7 @@ def delete_community(id):
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
+
 @bp.route("/communities/<int:id>", methods=["PUT"])
 @jwt_required()
 def update_community(id):
@@ -934,7 +893,6 @@ def update_community(id):
         if not user or not comm:
             return jsonify({"error": "Community or user not found"}), 404
 
-        # AUTH
         if not (is_super_admin(user) or comm.admin_id == user.id):
             return jsonify({"error": "Unauthorized"}), 403
 
@@ -942,7 +900,6 @@ def update_community(id):
         description = request.form.get("description")
         website_url = request.form.get("website_url")
 
-        # NAME CHECK
         if name and name.strip():
             existing = Community.query.filter(
                 Community.name == name.strip(),

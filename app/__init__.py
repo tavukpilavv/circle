@@ -1,3 +1,5 @@
+import logging
+import os
 from flask import Flask, render_template, abort, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -6,7 +8,6 @@ from flask_jwt_extended import JWTManager
 from flask_mail import Mail
 from app.config import Config
 from sqlalchemy import MetaData
-import logging
 from flask_jwt_extended.exceptions import (
     NoAuthorizationError,
     InvalidHeaderError,
@@ -14,10 +15,10 @@ from flask_jwt_extended.exceptions import (
     CSRFError
 )
 
-# Logging'i aktif edin
+# Logging Ayarı
 logging.basicConfig(level=logging.DEBUG)
 
-# --- OTOMATİK İSİMLENDİRME KURALI (SQLite Fix) ---
+# --- OTOMATİK İSİMLENDİRME KURALI ---
 convention = {
     "ix": 'ix_%(column_0_label)s',
     "uq": "uq_%(table_name)s_%(column_0_name)s",
@@ -26,9 +27,9 @@ convention = {
     "pk": "pk_%(table_name)s"
 }
 metadata = MetaData(naming_convention=convention)
-db = SQLAlchemy(metadata=metadata)
-# ----------------------------------------------------------
 
+# 1. db nesnesini EN BAŞTA tanımlıyoruz ki diğer dosyalar bunu import edebilsin
+db = SQLAlchemy(metadata=metadata)
 migrate = Migrate()
 jwt = JWTManager()
 mail = Mail()
@@ -41,14 +42,13 @@ def create_app(config_class=Config):
         static_url_path=""
     )
 
-    # Load base config
+    # Config yükle
     app.config.from_object(config_class)
 
-    # Override DB from env (Render / prod)
-    import os
+    # Render/Prod ortamı için DB URL override
     db_url = os.getenv("DATABASE_URL")
     if db_url:
-        app.config["SQLALCHEMY_DATABASE_URI"] = db_url
+        app.config["SQLALCHEMY_DATABASE_URI"] = db_url.replace("postgres://", "postgresql://")
 
     # JWT Config
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = False
@@ -58,31 +58,29 @@ def create_app(config_class=Config):
     app.config['JWT_HEADER_NAME'] = 'Authorization'
     app.config['JWT_HEADER_TYPE'] = 'Bearer'
     
+    # Eklentileri başlat
     db.init_app(app)
     migrate.init_app(app, db, render_as_batch=True)
     jwt.init_app(app)
     mail.init_app(app)
 
-    # --- GLOBAL CORS AYARI (EN ÖNEMLİ KISIM) ---
-    # Resources kısmını kaldırdım, tüm route'lara her yerden izin veriyoruz.
-    # Development aşamasında en sorunsuz yöntem budur.
+    # CORS Ayarı
     CORS(app, supports_credentials=True) 
 
+    # Request Logger
     @app.before_request
     def log_request_info():
-        # Sağlık kontrolü loglarını kirletmemesi için filtreleyebilirsin
         if "/health" in request.url:
             return
         print("\n=== INCOMING REQUEST ===")
         print(f"Method: {request.method}")
         print(f"URL: {request.url}")
-        print(f"Headers: {dict(request.headers)}")
+        # print(f"Headers: {dict(request.headers)}") # Log kirliliği yapmasın diye kapattım
         if request.is_json:
             print(f"JSON Data: {request.get_json()}")
         print("=====================\n")
 
-    # --- ERROR HANDLERS (Tekrar edenleri temizledim) ---
-
+    # --- ERROR HANDLERS ---
     @app.errorhandler(NoAuthorizationError)
     def handle_auth_error(e):
         return {"msg": "Missing Authorization Header"}, 401
@@ -112,7 +110,8 @@ def create_app(config_class=Config):
         return {"msg": str(e), "type": type(e).__name__}, 500
 
     # --- BLUEPRINTS ---
-    # Dikkat: URL Prefixleri '/api/...' şeklinde ayarlı.
+    # KRİTİK NOKTA: Blueprint importlarını BURADA (fonksiyon içinde) yapıyoruz.
+    # Böylece 'db' nesnesi çoktan oluşmuş oluyor ve Circular Import hatası almıyoruz.
     
     from app.api.auth import bp as auth_bp
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
@@ -138,27 +137,32 @@ def create_app(config_class=Config):
 
     # --- SÜPER ADMIN SEEDING ---
     with app.app_context():
+        # Tabloları oluştur (Dev ortamı için)
         db.create_all()
+        
+        # Modeli burada import ediyoruz ki döngüye girmesin
         from app.models import User 
         
-        admin = User.query.filter_by(username='superadmin').first()
-        if not admin:
-            print("--- Creating Super Admin... ---")
-            admin = User(
-                username='superadmin',
-                email='admin@circle.app',
-                first_name='Super',
-                last_name='Admin',
-                major='Management'
-            )
-            db.session.add(admin)
-        
-        # Rolü ve şifreyi güncelle
-        admin.role = 'super_admin'
-        admin.set_password('123456')
-        db.session.commit()
-        print(f"--- Super Admin Check: {admin.username} is ready ---")
+        try:
+            admin = User.query.filter_by(username='superadmin').first()
+            if not admin:
+                print("--- Creating Super Admin... ---")
+                admin = User(
+                    username='superadmin',
+                    email='admin@circle.app',
+                    first_name='Super',
+                    last_name='Admin',
+                    major='Management',
+                    role='super_admin'
+                )
+                admin.set_password('123456')
+                db.session.add(admin)
+                db.session.commit()
+                print(f"--- Super Admin Check: {admin.username} is ready ---")
+        except Exception as e:
+            print(f"Seeding Error (Ignored): {e}")
 
     return app
 
+# Modelleri en sonda import ediyoruz ki migrate algılasın
 from app import models
