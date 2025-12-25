@@ -203,19 +203,33 @@ const form = ref({
 })
 const showSuccess = ref(false)
 
-const handleSubmit = () => {
-  // Simulate API call
-  console.log('Form submitted:', form.value)
-  
-  // Reset form
-  form.value = { name: '', email: '', issue: '' }
-  
-  // Show success message
-  alert('Message sent to help@circleevent.app')
-  showSuccess.value = true
-  setTimeout(() => {
-    showSuccess.value = false
-  }, 4000)
+const handleSubmit = async () => {
+  try {
+    const response = await fetch('https://circle-9srg.onrender.com/api/general/send-support', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(form.value)
+    })
+
+    if (response.ok) {
+      // Reset form
+      form.value = { name: '', email: '', issue: '' }
+      
+      // Show success message
+      alert('Message sent successfully!')
+      showSuccess.value = true
+      setTimeout(() => {
+        showSuccess.value = false
+      }, 4000)
+    } else {
+      alert('Failed to send message. Please try again.')
+    }
+  } catch (error) {
+    console.error('Error submitting form:', error)
+    alert('An error occurred. Please try again later.')
+  }
 }
 </script>
 
