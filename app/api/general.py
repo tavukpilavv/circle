@@ -934,7 +934,7 @@ def update_community(id):
 # =========================
 @bp.route("/send-support", methods=["POST", "OPTIONS"])
 def send_support_mail():
-    # CORS Handling for OPTIONS
+    # 1. CORS Ön Kontrolü
     if request.method == "OPTIONS":
         return jsonify({"status": "ok"}), 200, {
             "Access-Control-Allow-Origin": "*",
@@ -943,54 +943,64 @@ def send_support_mail():
         }
 
     try:
-        # Get data from request
-        data = request.get_json() or {}
-        
-        name = data.get('name')
-        user_email = data.get('email')
-        issue = data.get('issue')
+        # LOG: Kodun güncel olup olmadığını anlamak için konsola yazdırıyoruz
+        print("--- DEBUG: UTF-8 MAIL FONKSIYONU TETIKLENDI ---")
 
-        # Get credentials from Render Environment Variables
-        sender_email = os.environ.get('MAIL_USER') # help@circleevent.app
-        sender_password = os.environ.get('MAIL_PASS') # Google App Password
+        data = request.get_json() or {}
+        name = data.get('name', 'Unknown')
+        user_email = data.get('email', 'no-reply@example.com')
+        issue = data.get('issue', 'No issue')
+
+        sender_email = os.environ.get('MAIL_USER') 
+        sender_password = os.environ.get('MAIL_PASS')
 
         if not sender_email or not sender_password:
-            print("Error: Mail credentials missing.")
-            return jsonify({"error": "Server email configuration is missing (Check Environment Variables)"}), 500
+            print("HATA: Mail sifresi veya kullanicisi eksik.")
+            return jsonify({"error": "Server email config missing"}), 500
 
-        # Create the Email
+        # Mail Objesi
         msg = MIMEMultipart()
         msg['From'] = sender_email
-        msg['To'] = sender_email  # Send to yourself (help@circleevent.app)
+        msg['To'] = sender_email 
+        msg['Reply-To'] = user_email
         
-        # Use Header for UTF-8 Subject
+        # BAŞLIK KORUMASI (Header Sınıfı ile)
         subject_text = f"Support Request: {name}"
         msg['Subject'] = Header(subject_text, 'utf-8')
-        
-        msg['Reply-To'] = user_email # Replies go to the user
 
         body = f"""
-        New Support Request from Website:
-        ---------------------------------
+        New Support Request:
+        --------------------
         Name: {name}
         User Email: {user_email}
         
-        Issue Description:
+        Issue:
         {issue}
         """
         
-        # UTF-8 Encoding for Body
+        # İÇERİK KORUMASI (MIMEText UTF-8)
         msg.attach(MIMEText(body, 'plain', 'utf-8'))
 
-        # Send via Gmail SMTP
+        # --- KRİTİK DEĞİŞİKLİK BURADA ---
         server = smtplib.SMTP('smtp.gmail.com', 587)
         server.starttls()
         server.login(sender_email, sender_password)
-        server.sendmail(sender_email, sender_email, msg.as_string())
-        server.quit()
         
-        return jsonify({"success": True, "message": "Email sent successfully"}), 200
+        # ESKİSİ (Hata veren): server.sendmail(sender, receiver, msg.as_string())
+        # YENİSİ (Modern):
+        server.send_message(msg) 
+        
+        server.quit()
+        # -------------------------------
+        
+        print("--- DEBUG: MAIL BASARIYLA GONDERILDI ---")
+        return jsonify({"success": True, "message": "Email sent successfully"}), 200, {
+            "Access-Control-Allow-Origin": "*"
+        }
 
     except Exception as e:
-        print(f"Email Sending Error: {str(e)}")
-        return jsonify({"success": False, "error": str(e)}), 500
+        print(f"!!! MAIL HATASI !!!: {str(e)}")
+        # Hatayı frontend'e de net dönelim
+        return jsonify({"success": False, "error": str(e)}), 500, {
+            "Access-Control-Allow-Origin": "*"
+        }
