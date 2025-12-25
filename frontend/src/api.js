@@ -129,6 +129,11 @@ export async function registerEvent(eventId) {
   return post(`/api/general/events/${eventId}/register`);
 }
 
+export async function unregisterEvent(eventId) {
+  return post(`/api/general/events/${eventId}/unregister`);
+}
+
+
 
 export async function rateEvent(eventId, payload) {
   return postJson(`/api/general/events/${eventId}/rate`, payload);

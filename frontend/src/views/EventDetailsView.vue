@@ -209,20 +209,19 @@ const toggleRegistration = async () => {
   isRegistering.value = true
 
   try {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000))
-
-    store.registerEvent(event.value)
-    
     if (event.value.registered) {
+      // 🔁 UNREGISTER
+      await store.unregisterEvent(event.value.id)
+      toast.info("You have unregistered from the event.")
+    } else {
+      // ✅ REGISTER
+      await store.registerEvent(event.value.id)
       toast.success("Successfully registered for the event! 🎉")
       showCelebration.value = true
-    } else {
-      toast.info("Unregistered from event.")
     }
-  } catch (error) {
-    toast.error("Failed to join. Please try again.")
-    console.error(error)
+  } catch (err) {
+    toast.error(err.message || "Something went wrong")
+    console.error(err)
   } finally {
     isRegistering.value = false
   }

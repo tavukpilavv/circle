@@ -154,6 +154,53 @@ export const store = reactive({
       return false
     }
   }
+  ,
+ async registerEvent(eventId) {
+  try {
+    const res = await apiFetch(`/api/general/events/${eventId}/register`, {
+      method: "POST"
+    })
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}))
+      throw new Error(data.error || "Register failed")
+    }
+
+    // Refresh events from backend
+    const eventsRes = await apiFetch("/api/general/events")
+    this.events = await eventsRes.json()
+
+    return true
+  } catch (e) {
+    console.error("Register error:", e)
+    alert(e.message || "Failed to register")
+    return false
+  }
+},
+
+async unregisterEvent(eventId) {
+  try {
+    const res = await apiFetch(`/api/general/events/${eventId}/unregister`, {
+      method: "POST"
+    })
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}))
+      throw new Error(data.error || "Unregister failed")
+    }
+
+    // Refresh events from backend
+    const eventsRes = await apiFetch("/api/general/events")
+    this.events = await eventsRes.json()
+
+    return true
+  } catch (e) {
+    console.error("Unregister error:", e)
+    alert(e.message || "Failed to unregister")
+    return false
+  }
+},
+
 });
 
 

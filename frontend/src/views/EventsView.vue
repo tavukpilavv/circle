@@ -499,20 +499,24 @@ const deleteEvent = (event) => {
   }
 }
 
-const register = (event) => {
+const register = async (event) => {
   if (!localStorage.getItem('user_token')) {
     toast.warning('Please sign in to register.')
     router.push('/login')
     return
   }
 
-  store.registerEvent(event)
+  let ok = false
 
   if (event.registered) {
-    toast.success("Successfully registered for the event! 🎉")
-    showCelebration.value = true
+    ok = await store.unregisterEvent(event.id)
+    if (ok) toast.info("You have unregistered from the event.")
   } else {
-    toast.info("Unregistered from event.")
+    ok = await store.registerEvent(event.id)
+    if (ok) {
+      toast.success("Successfully registered! 🎉")
+      showCelebration.value = true
+    }
   }
 }
 </script>
