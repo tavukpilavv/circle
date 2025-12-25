@@ -15,6 +15,11 @@ from app.utils import upload_file
 from app.services.image_service import upload_image
 from sqlalchemy import func
 
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import os
+
 bp = Blueprint("general", __name__)
 
 
@@ -922,3 +927,54 @@ def update_community(id):
         db.session.rollback()
         current_app.logger.error(str(e))
         return jsonify({"error": "Failed to update community"}), 500
+
+# =========================
+# SUPPORT EMAIL ROUTE
+# =========================
+@bp.route("/send-support", methods=["POST"])
+def send_support_mail():
+    try:
+        # Get data from request
+        data = request.get_json() or {}
+        
+        name = data.get('name')
+        user_email = data.get('email')
+        issue = data.get('issue')
+
+        # Get credentials from Render Environment Variables
+        sender_email = os.environ.get('MAIL_USER') # help@circleevent.app
+        sender_password = os.environ.get('MAIL_PASS') # Google App Password
+
+        if not sender_email or not sender_password:
+            return jsonify({"error": "Server email configuration is missing (Check Environment Variables)"}), 500
+
+        # Create the Email
+        msg = MIMEMultipart()
+        msg['From'] = sender_email
+        msg['To'] = sender_email  # Send to yourself (help@circleevent.app)
+        msg['Subject'] = f"Support Request: {name}"
+        msg['Reply-To'] = user_email # Replies go to the user
+
+        body = f"""
+        New Support Request from Website:
+        ---------------------------------
+        Name: {name}
+        User Email: {user_email}
+        
+        Issue Description:
+        {issue}
+        """
+        msg.attach(MIMEText(body, 'plain'))
+
+        # Send via Gmail SMTP
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login(sender_email, sender_password)
+        server.sendmail(sender_email, sender_email, msg.as_string())
+        server.quit()
+        
+        return jsonify({"success": True, "message": "Email sent successfully"}), 200
+
+    except Exception as e:
+        print(f"Email Sending Error: {str(e)}")
+        return jsonify({"success": False, "error": str(e)}), 500
