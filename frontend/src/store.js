@@ -33,10 +33,9 @@ export const store = reactive({
       const token = localStorage.getItem("user_token")
       if (!token) {
         alert("Lütfen önce giriş yapın.")
-        return false 
+        return false
       }
 
-      // ID Kontrolü: Bazen tüm obje, bazen sadece ID gelebilir
       const eventId = event.id ? event.id : event
 
       const res = await apiFetch(`/api/general/events/${eventId}/register`, {
@@ -46,20 +45,18 @@ export const store = reactive({
 
       const data = await res.json()
 
-      // Eğer kullanıcı zaten kayıtlıysa backend 400 dönebilir, bunu başarı sayıp devam ediyoruz
       if (!res.ok) {
-        if(res.status === 400 && (data.message === "Zaten kayıtlısınız" || data.message.includes("registered"))) {
-             if (typeof event === 'object') event.registered = true
-             return true
+        if (res.status === 400 && (data.message === "Zaten kayıtlısınız" || (data.message || "").includes("registered"))) {
+          if (typeof event === 'object') event.registered = true
+          return true
         }
         throw new Error(data.message || data.error || "Kayıt başarısız oldu")
       }
 
-      // Başarılı olduysa UI'ı güncelle
       if (typeof event === 'object') {
         event.registered = true
       }
-      
+
       return true
     } catch (e) {
       console.error("Register error:", e)
@@ -76,9 +73,8 @@ export const store = reactive({
 
       const eventId = event.id ? event.id : event
 
-      // Arkadaşının backend'e eklediği endpoint
       const res = await apiFetch(`/api/general/events/${eventId}/unregister`, {
-        method: "POST", 
+        method: "POST",
         headers: { Authorization: `Bearer ${token}` }
       })
 
@@ -86,7 +82,7 @@ export const store = reactive({
         const data = await res.json()
         throw new Error(data.error || "Kayıt iptali başarısız")
       }
-      
+
       if (typeof event === 'object') {
         event.registered = false
       }
@@ -121,10 +117,9 @@ export const store = reactive({
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || "Hata oluştu")
 
-      // Yeni puanı ekrana anlık yansıt
       const eventToUpdate = this.events.find(e => e.id === eventId)
       if (eventToUpdate && data.new_rating !== undefined) {
-         eventToUpdate.rating = data.new_rating
+        eventToUpdate.rating = data.new_rating
       }
       return true
     } catch (e) {
@@ -135,61 +130,91 @@ export const store = reactive({
 
   // --- YORUMLARI GETİR ---
   async fetchReviews(eventId) {
-      try {
-        const res = await apiFetch(`/api/general/events/${eventId}/reviews`)
-        if (res.ok) return await res.json()
-      } catch (e) { console.error(e) }
-      return []
+    try {
+      const res = await apiFetch(`/api/general/events/${eventId}/reviews`)
+      if (res.ok) return await res.json()
+    } catch (e) { console.error(e) }
+    return []
+  },
+
+  // ✅ YENİ: PARTICIPANTS GETİR
+  async fetchParticipants(eventId) {
+    try {
+      const token = localStorage.getItem("user_token")
+      if (!token) throw new Error("Missing token. Please login.")
+
+      const res = await apiFetch(`/api/general/events/${eventId}/participants`, {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` }
+      })
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        throw new Error(data.msg || data.error || `Request failed (${res.status})`)
+      }
+
+      const data = await res.json().catch(() => [])
+      return Array.isArray(data) ? data : []
+    } catch (e) {
+      console.error("fetchParticipants failed:", e)
+      throw e
+    }
   },
 
   // --- DİĞER STANDART FONKSİYONLAR ---
   async createCommunityMultipart(payload) { return this._genericPost("/api/general/communities", payload, true) },
   async createCommunityLegacyJson(payload) { return this._genericPost("/api/general/communities/create", payload, false) },
-  
+
   async _genericPost(url, body, isFormData) {
-      try {
-          const token = localStorage.getItem("user_token")
-          if (!token) { alert("Please login"); return false; }
-          const options = {
-              method: "POST",
-              headers: { Authorization: `Bearer ${token}` },
-              body: isFormData ? body : JSON.stringify(body)
-          }
-          if (!isFormData) options.headers["Content-Type"] = "application/json"
-          
-          const res = await apiFetch(url, options)
-          if (!res.ok) { 
-              const data = await res.json().catch(()=>({}))
-              alert(data.error || "İşlem başarısız"); 
-              return false; 
-          }
-          await this.loadCommunitiesFromBackend()
-          return true
-      } catch(e) { console.error(e); return false; }
+    try {
+      const token = localStorage.getItem("user_token")
+      if (!token) { alert("Please login"); return false }
+      const options = {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: isFormData ? body : JSON.stringify(body)
+      }
+      if (!isFormData) options.headers["Content-Type"] = "application/json"
+
+      const res = await apiFetch(url, options)
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        alert(data.error || "İşlem başarısız")
+        return false
+      }
+      await this.loadCommunitiesFromBackend()
+      return true
+    } catch (e) { console.error(e); return false }
   },
 
-  async deleteEvent(id) { 
-      try {
-        const { deleteEvent } = await import("./api"); await deleteEvent(id);
-        this.events = this.events.filter(e => e.id !== id); return true;
-      } catch(e) { console.error(e); return false; }
+  async deleteEvent(id) {
+    try {
+      const { deleteEvent } = await import("./api")
+      await deleteEvent(id)
+      this.events = this.events.filter(e => e.id !== id)
+      return true
+    } catch (e) { console.error(e); return false }
   },
-  async deleteCommunity(id) { 
-       try {
-        const { deleteCommunity } = await import("./api"); await deleteCommunity(id);
-        this.communities = this.communities.filter(c => c.id !== id); return true;
-      } catch(e) { console.error(e); return false; }
+
+  async deleteCommunity(id) {
+    try {
+      const { deleteCommunity } = await import("./api")
+      await deleteCommunity(id)
+      this.communities = this.communities.filter(c => c.id !== id)
+      return true
+    } catch (e) { console.error(e); return false }
   },
-  async updateEvent(id, fd) { 
-       try {
-        const { updateEvent } = await import("./api"); await updateEvent(id, fd);
-        // Listeyi yenilemek için
-        const res = await apiFetch("/api/general/events"); 
-        if(res.ok) this.events = await res.json(); 
-        return true;
-      } catch(e) { console.error(e); return false; }
+
+  async updateEvent(id, fd) {
+    try {
+      const { updateEvent } = await import("./api")
+      await updateEvent(id, fd)
+
+      const res = await apiFetch("/api/general/events")
+      if (res.ok) this.events = await res.json()
+      return true
+    } catch (e) { console.error(e); return false }
   },
+
   getReviewsByEventId(id) { return [] }
-});
-
-
+})

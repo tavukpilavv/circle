@@ -15,25 +15,26 @@
       </div>
 
       <div class="tab-controls">
-        <button 
-          class="tab-btn" 
+        <button
+          class="tab-btn"
           :class="{ active: activeTab === 'details' }"
           @click="activeTab = 'details'"
         >
           About Event
         </button>
-        <button 
+
+        <button
           v-if="isPastEvent"
-          class="tab-btn" 
+          class="tab-btn"
           :class="{ active: activeTab === 'reviews' }"
           @click="activeTab = 'reviews'"
         >
           Reviews & Ratings
         </button>
-        
-        <button 
+
+        <button
           v-if="isAdmin"
-          class="tab-btn" 
+          class="tab-btn"
           :class="{ active: activeTab === 'participants' }"
           @click="fetchParticipants"
         >
@@ -42,7 +43,6 @@
       </div>
 
       <div class="content-area">
-        
         <div v-if="activeTab === 'details'" id="details-content" class="fade-in">
           <div class="info-card">
             <div class="info-row">
@@ -65,8 +65,8 @@
           </div>
 
           <template v-if="!isPastEvent">
-            <button 
-              class="register-btn" 
+            <button
+              class="register-btn"
               :class="{ 'registered': event.registered, 'is-loading': isRegistering }"
               @click="toggleRegistration"
               :disabled="isRegistering"
@@ -79,13 +79,13 @@
               </span>
             </button>
           </template>
+
           <button v-else class="register-btn event-ended" disabled>
             Event Ended
           </button>
         </div>
 
         <div v-if="activeTab === 'reviews' && isPastEvent" id="reviews-content" class="fade-in">
-          
           <div class="reviews-summary">
             <div class="rating-score">
               <span class="score">{{ event.rating || 0 }}</span>
@@ -94,18 +94,18 @@
               </div>
               <span class="count" v-if="isAdmin">Based on {{ reviewsList.length }} reviews</span>
             </div>
-            
+
             <div class="summary-actions">
               <div v-if="!event.registered" style="text-align: right;">
-                  <span style="font-size: 14px; color: #999; display: flex; align-items: center; gap: 5px;">
-                      <i class="fas fa-info-circle"></i> 
-                      <span>Only participants can review.</span>
-                  </span>
+                <span style="font-size: 14px; color: #999; display: flex; align-items: center; gap: 5px;">
+                  <i class="fas fa-info-circle"></i>
+                  <span>Only participants can review.</span>
+                </span>
               </div>
 
-              <button 
-                v-else 
-                class="write-review-btn" 
+              <button
+                v-else
+                class="write-review-btn"
                 @click="openRatingPopup"
               >
                 <i v-if="event.is_rated" class="fas fa-edit" style="margin-right:5px;"></i>
@@ -116,7 +116,7 @@
 
           <div v-if="isAdmin" class="reviews-list">
             <div v-if="reviewsList.length === 0" class="empty-state" style="text-align:center; padding:20px; color:#6b7c74;">
-                No reviews yet.
+              No reviews yet.
             </div>
             <div v-for="review in reviewsList" :key="review.id" class="review-card">
               <div class="review-header">
@@ -139,14 +139,14 @@
             <i class="fas fa-lock" style="font-size: 24px; margin-bottom: 10px; display:block;"></i>
             Detailed reviews are only visible to administrators.
           </div>
-
         </div>
 
         <div v-if="activeTab === 'participants' && isAdmin" class="fade-in">
           <div class="participants-panel">
             <h3>Registered Users</h3>
             <div v-if="loadingParticipants" class="loading-state">Loading list...</div>
-            <div v-else-if="participantsList.length === 0" class="empty-state">No registrations yet.</div>
+            <div v-else-if="safeParticipants.length === 0" class="empty-state">No registrations yet.</div>
+
             <table v-else class="participants-table">
               <thead>
                 <tr>
@@ -156,8 +156,10 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="p in participantsList" :key="p.email">
-                  <td><img :src="p.avatar_url || 'https://via.placeholder.com/40'" class="mini-avatar"/></td>
+                <tr v-for="p in safeParticipants" :key="p.email">
+                  <td>
+                    <img :src="p.avatar_url || 'https://via.placeholder.com/40'" class="mini-avatar"/>
+                  </td>
                   <td>{{ p.first_name }} {{ p.last_name }}</td>
                   <td>{{ p.email }}</td>
                 </tr>
@@ -175,9 +177,9 @@
     </div>
 
     <ConfettiOverlay v-if="showCelebration" @close="showCelebration = false" />
-    <RatingPopup 
+    <RatingPopup
       v-if="event"
-      v-model="showRatingPopup" 
+      v-model="showRatingPopup"
       :event="event"
       @submit="handleRatingSubmit"
     />
@@ -190,8 +192,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { store } from '../store.js'
 import ConfettiOverlay from '../components/ConfettiOverlay.vue'
 import RatingPopup from '../components/RatingPopup.vue'
-import { useToast } from "vue-toastification";
-import axios from 'axios'
+import { useToast } from "vue-toastification"
 
 const route = useRoute()
 const router = useRouter()
@@ -212,72 +213,74 @@ const event = computed(() => {
   return store.events.find(e => e.id === eventId)
 })
 
+// ✅ sonsuz satırı engelleyen güvenli getter
+const safeParticipants = computed(() => {
+  return Array.isArray(participantsList.value) ? participantsList.value : []
+})
+
 // --- CANLI MOD (SAAT HASSASİYETİ EKLENDİ) ---
 const isPastEvent = computed(() => {
   if (!event.value?.date) return false
-  
-  // Tarih ve Saati birleştirip kontrol ediyoruz
-  const timeString = event.value.time ? event.value.time : '00:00';
-  const eventDateTime = new Date(`${event.value.date}T${timeString}`);
-  
-  const now = new Date();
-  
-  return now > eventDateTime;
+
+  const timeString = event.value.time ? event.value.time : '00:00'
+  const eventDateTime = new Date(`${event.value.date}T${timeString}`)
+
+  const now = new Date()
+  return now > eventDateTime
 })
 
-// --- GÜNCELLENMİŞ ADMIN KONTROLÜ (user_role İÇİN) ---
+// --- ADMIN KONTROLÜ ---
 const isAdmin = computed(() => {
-    let role = '';
-    
-    if (store.user && store.user.role) {
-        role = store.user.role;
-    } 
-    else {
-        try {
-            const localUser = localStorage.getItem('user'); 
-            if (localUser) {
-                const parsedUser = JSON.parse(localUser);
-                role = parsedUser.role || '';
-            }
-        } catch (e) {
-            // JSON parse hatası olursa geç
-        }
-    }
+  let role = ''
 
-    if (!role) {
-        role = localStorage.getItem('user_role') || '';
-    }
+  if (store.user && store.user.role) {
+    role = store.user.role
+  } else {
+    try {
+      const localUser = localStorage.getItem('user')
+      if (localUser) {
+        const parsedUser = JSON.parse(localUser)
+        role = parsedUser.role || ''
+      }
+    } catch (e) {}
+  }
 
-    const normalizedRole = String(role).toLowerCase().trim();
-    const allowedRoles = ['admin', 'super_admin', 'superadmin', 'super admin'];
-    return allowedRoles.includes(normalizedRole);
+  if (!role) {
+    role = localStorage.getItem('user_role') || ''
+  }
+
+  const normalizedRole = String(role).toLowerCase().trim()
+  const allowedRoles = ['admin', 'super_admin', 'superadmin', 'super admin']
+  return allowedRoles.includes(normalizedRole)
 })
 
 const openRatingPopup = () => {
-    showRatingPopup.value = true;
+  showRatingPopup.value = true
 }
 
 const loadReviews = async () => {
-    if (!isAdmin.value) {
-        reviewsList.value = [];
-        return;
-    }
+  if (!isAdmin.value) {
+    reviewsList.value = []
+    return
+  }
 
-    if(event.value) {
-        try {
-            reviewsList.value = await store.fetchReviews(event.value.id)
-        } catch (e) {
-            console.log("Yorum listesi alınamadı.");
-        }
+  if (event.value) {
+    try {
+      reviewsList.value = await store.fetchReviews(event.value.id)
+    } catch (e) {
+      console.log("Yorum listesi alınamadı.")
     }
+  }
 }
 
 watch(activeTab, (newTab) => {
-    if (newTab === 'reviews') loadReviews()
+  if (newTab === 'reviews') loadReviews()
 })
 
 const toggleRegistration = async () => {
   if (!event.value) return
+
+  // store.js zaten user_token kullanıyor; burada da aynı kontrol
   if (!localStorage.getItem('user_token')) {
     toast.warning('Please sign in to register.')
     router.push('/login')
@@ -306,39 +309,37 @@ const handleRatingSubmit = async (data) => {
   if (!event.value) return
 
   try {
-      await store.addReview({
-        eventId: event.value.id,
-        rating: data.rating,
-        comment: data.feedback,
-        isAnonymous: data.isAnonymous
-      })
-      
-      const actionText = event.value.is_rated ? "updated" : "submitted";
-      toast.success(`Review ${actionText} successfully!`)
-      
-      showRatingPopup.value = false
-      if (isAdmin.value) loadReviews() 
+    await store.addReview({
+      eventId: event.value.id,
+      rating: data.rating,
+      comment: data.feedback,
+      isAnonymous: data.isAnonymous
+    })
+
+    const actionText = event.value.is_rated ? "updated" : "submitted"
+    toast.success(`Review ${actionText} successfully!`)
+
+    showRatingPopup.value = false
+    if (isAdmin.value) loadReviews()
   } catch (error) {
-      const errMsg = error.response?.data?.error || error.message || "Failed to submit review";
-      toast.error(errMsg)
+    const errMsg = error.response?.data?.error || error.message || "Failed to submit review"
+    toast.error(errMsg)
   }
 }
 
+// ✅ Participants artık store üzerinden çekiliyor
 const fetchParticipants = async () => {
-    activeTab.value = 'participants';
-    loadingParticipants.value = true;
-    try {
-        const token = localStorage.getItem("user_token")
-        const res = await axios.get(`${import.meta.env.VITE_API_URL || ''}/api/general/events/${eventId}/participants`, {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        participantsList.value = res.data;
-    } catch (error) {
-        console.error(error);
-        toast.error("Failed to load list. Are you authorized?");
-    } finally {
-        loadingParticipants.value = false;
-    }
+  activeTab.value = 'participants'
+  loadingParticipants.value = true
+
+  try {
+    participantsList.value = await store.fetchParticipants(eventId)
+  } catch (error) {
+    toast.error(error.message || "Failed to load list.")
+    participantsList.value = []
+  } finally {
+    loadingParticipants.value = false
+  }
 }
 </script>
 
@@ -403,3 +404,5 @@ const fetchParticipants = async () => {
   .event-image { height: 200px; }
 }
 </style>
+
+
