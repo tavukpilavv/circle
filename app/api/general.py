@@ -18,6 +18,7 @@ from sqlalchemy import func
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.header import Header
 import os
 
 bp = Blueprint("general", __name__)
@@ -931,8 +932,16 @@ def update_community(id):
 # =========================
 # SUPPORT EMAIL ROUTE
 # =========================
-@bp.route("/send-support", methods=["POST"])
+@bp.route("/send-support", methods=["POST", "OPTIONS"])
 def send_support_mail():
+    # CORS Handling for OPTIONS
+    if request.method == "OPTIONS":
+        return jsonify({"status": "ok"}), 200, {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization",
+            "Access-Control-Allow-Methods": "POST, OPTIONS"
+        }
+
     try:
         # Get data from request
         data = request.get_json() or {}
@@ -946,13 +955,18 @@ def send_support_mail():
         sender_password = os.environ.get('MAIL_PASS') # Google App Password
 
         if not sender_email or not sender_password:
+            print("Error: Mail credentials missing.")
             return jsonify({"error": "Server email configuration is missing (Check Environment Variables)"}), 500
 
         # Create the Email
         msg = MIMEMultipart()
         msg['From'] = sender_email
         msg['To'] = sender_email  # Send to yourself (help@circleevent.app)
-        msg['Subject'] = f"Support Request: {name}"
+        
+        # Use Header for UTF-8 Subject
+        subject_text = f"Support Request: {name}"
+        msg['Subject'] = Header(subject_text, 'utf-8')
+        
         msg['Reply-To'] = user_email # Replies go to the user
 
         body = f"""
@@ -964,7 +978,9 @@ def send_support_mail():
         Issue Description:
         {issue}
         """
-        msg.attach(MIMEText(body, 'plain'))
+        
+        # UTF-8 Encoding for Body
+        msg.attach(MIMEText(body, 'plain', 'utf-8'))
 
         # Send via Gmail SMTP
         server = smtplib.SMTP('smtp.gmail.com', 587)
