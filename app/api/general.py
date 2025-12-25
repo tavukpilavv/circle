@@ -261,22 +261,28 @@ def rate_event(id):
             return jsonify({"error": "Hata: Etkinlik veya kullanıcı bulunamadı."}), 404
 
         # --- 1. SIKI KATILIM KONTROLÜ ---
-        # SQLAlchemy ilişkisi üzerinden doğrudan kontrol
+        # Kullanıcı kayıtlı değilse yorum yapamaz
         if event not in user.registered_events:
              return jsonify({"error": "Sadece etkinliğe kayıtlı katılımcılar yorum yapabilir."}), 403
 
-        # --- 2. TARİH KONTROLÜ (AKTİF EDİLDİ) ---
+        # --- 2. TARİH VE SAAT KONTROLÜ (GÜNCELLENDİ) ---
+        # Dakikası dakikasına kontrol eder
         if event.date:
             try:
-                # Veritabanında String 'YYYY-MM-DD' ise parse et
-                event_date_obj = datetime.strptime(event.date, "%Y-%m-%d")
+                # Varsayılan saat yoksa gün sonunu veya başını baz alabilirsin
+                event_time = event.time if event.time else "00:00"
                 
-                # Etkinlik tarihi bugünden (şimdi) ileri bir tarihse yorum yapılamaz
-                # Not: Saat kontrolü hassas değilse sadece gün bazlı çalışır.
-                if datetime.now() < event_date_obj:
+                # Tarih ve saati birleştir: "2025-12-25 15:20"
+                event_dt_str = f"{event.date} {event_time}"
+                
+                # Python tarih objesine çevir (Format: YYYY-MM-DD HH:MM)
+                event_dt_obj = datetime.strptime(event_dt_str, "%Y-%m-%d %H:%M")
+                
+                # Şu anki zaman, etkinlik saatinden gerideyse hata ver
+                if datetime.now() < event_dt_obj:
                      return jsonify({"error": "Etkinlik henüz bitmediği için yorum yapamazsınız."}), 400
             except ValueError:
-                # Tarih formatı uymazsa veya parse edilemezse es geç
+                # Tarih formatı uymazsa pas geç
                 pass
 
         # --- 3. GÜNCELLEME MANTIĞI ---
