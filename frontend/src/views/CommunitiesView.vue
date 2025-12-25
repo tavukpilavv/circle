@@ -65,6 +65,15 @@
             <i class="fas fa-arrow-up-right-from-square"></i>
             Visit Website
           </a>
+          <button
+          v-if="isSuperAdmin"
+          class="status-pill outline edit-btn"
+          type="button"
+          @click="openEditModal(community)"
+         title="Edit this club"
+         >
+         <i class="fas fa-pen"></i>
+        </button>
 
           <button
             v-if="isSuperAdmin"
@@ -91,7 +100,10 @@
         <span>&times;</span>
       </button>
 
-      <h2 class="modal-title">Create Club</h2>
+      <h2 class="modal-title">
+        {{ isEditMode ? 'Edit Club' : 'Create Club' }}
+      </h2>
+
 
       <form @submit.prevent="submitClub" class="modal-form">
         <div class="form-field">
@@ -142,7 +154,12 @@
             Cancel
           </button>
           <button type="submit" class="btn-primary" :disabled="isSubmitting">
-            {{ isSubmitting ? "Creating..." : "Create Club" }}
+            <span v-if="isSubmitting">
+              {{ isEditMode ? 'Saving...' : 'Creating...' }}
+            </span>
+            <span v-else>
+              {{ isEditMode ? 'Save Changes' : 'Create Club' }}
+            </span>
           </button>
         </div>
       </form>
@@ -159,12 +176,14 @@ import { apiFetch } from '../api'
 const route = useRoute()
 
 const searchQuery = ref('')
-const activeFilter = ref('all')
-
 const isSuperAdmin = ref(false)
 
 const isModalOpen = ref(false)
 const isSubmitting = ref(false)
+
+const isEditMode = ref(false)
+const editingCommunityId = ref(null)
+
 
 const fileInput = ref(null)
 const selectedFile = ref(null)
@@ -175,14 +194,6 @@ const formData = reactive({
   description: '',
   website_url: ''
 })
-
-const applyFilters = () => {
-  if (route.query.filter === 'joined') {
-    activeFilter.value = 'joined'
-  } else {
-    activeFilter.value = 'all'
-  }
-}
 
 const loadCommunities = async () => {
   try {
@@ -204,17 +215,12 @@ const loadCommunities = async () => {
 }
 
 onMounted(() => {
-  applyFilters()
   loadCommunities()
 
-  // ✅ support both spellings
   const role = (localStorage.getItem('user_role') || '').toLowerCase()
   isSuperAdmin.value = role === 'super_admin' || role === 'superadmin'
 })
 
-watch(() => route.query.filter, () => {
-  applyFilters()
-})
 
 const filteredCommunities = computed(() => {
   const q = searchQuery.value.trim().toLowerCase()
@@ -259,22 +265,43 @@ function removeFile() {
   previewUrl.value = null
   if (fileInput.value) fileInput.value.value = ""
 }
+const openEditModal = (community) => {
+  isEditMode.value = true
+  editingCommunityId.value = community.id
+
+  formData.name = community.name
+  formData.description = community.description
+  formData.website_url = community.website_url || ""
+
+  previewUrl.value = community.image || null
+  selectedFile.value = null
+
+  isModalOpen.value = true
+  document.body.style.overflow = 'hidden'
+}
 
 // Modal Methods
 const openModal = () => {
+  isEditMode.value = false
+  editingCommunityId.value = null
+
   formData.name = ''
   formData.description = ''
   formData.website_url = ''
   selectedFile.value = null
   previewUrl.value = null
+
   isModalOpen.value = true
-  document.body.style.overflow = 'hidden'
 }
+
 
 const closeModal = () => {
   isModalOpen.value = false
+  isEditMode.value = false
+  editingCommunityId.value = null
   document.body.style.overflow = ''
 }
+
 
 const submitClub = async () => {
   const token = localStorage.getItem("user_token")
@@ -289,24 +316,32 @@ const submitClub = async () => {
     fd.append("name", formData.name)
     fd.append("description", formData.description)
     fd.append("website_url", formData.website_url)
-    if (selectedFile.value) {
+    
+    if (selectedFile.value instanceof File) {
       fd.append("image", selectedFile.value)
     }
+
 
     // Log for verification
     for (let [key, value] of fd.entries()) {
       console.log(`FormData: ${key} =`, value)
     }
-
-    // ✅ multipart POST /communities requires JWT
+    if (isEditMode.value && editingCommunityId.value) {
+      await apiFetch(`/api/general/communities/${editingCommunityId.value}`, {
+         method: "DELETE",
+         headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+    }
     const res = await apiFetch("/api/general/communities", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`
-        // ❗ no Content-Type (browser will set boundary)
       },
-      body: fd
-    })
+       body: fd
+      })
+
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({}))
