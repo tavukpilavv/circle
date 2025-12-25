@@ -1004,3 +1004,146 @@ def send_support_mail():
         return jsonify({"success": False, "error": str(e)}), 500, {
             "Access-Control-Allow-Origin": "*"
         }
+
+        # =========================
+# GELİŞMİŞ OTOMATİK HATIRLATMA (TR / EN - 24s ve 48s)
+# =========================
+@bp.route("/cron/check-reminders", methods=["GET"])
+def check_event_reminders():
+    # Güvenlik Kontrolü
+    secret_key = request.args.get("key")
+    if secret_key != "GIZLI_SIFRE_123":
+        return jsonify({"error": "Unauthorized"}), 401
+
+    try:
+        now_tr = get_turkey_time()
+        mails_sent_count = 0
+        
+        # Kontrol edilecek zaman dilimleri
+        check_points = [
+            (24, "tomorrow"), 
+            (48, "2days")
+        ]
+
+        # Sonraki 3 günün etkinliklerini al
+        # (Veritabanı büyükse tarih filtresi eklenebilir, şimdilik .all() yeterli)
+        events = Event.query.all() 
+
+        for event in events:
+            if not event.date or not event.time: continue
+
+            try:
+                # Etkinlik Tarih-Saat Birleştirme
+                event_full_str = f"{event.date} {event.time}"
+                event_dt = datetime.strptime(event_full_str, "%Y-%m-%d %H:%M")
+                
+                for hours, type_code in check_points:
+                    target_time = now_tr + timedelta(hours=hours)
+                    
+                    # Tolerans Aralığı (+/- 30 dakika)
+                    start_range = target_time - timedelta(minutes=30)
+                    end_range = target_time + timedelta(minutes=30)
+                    
+                    if start_range <= event_dt <= end_range:
+                        # Zamanı gelen etkinliğin katılımcılarına mail at
+                        for user in event.participants:
+                            if user.email:
+                                send_bilingual_reminder(user, event, type_code)
+                                mails_sent_count += 1
+                                
+            except ValueError:
+                continue
+
+        return jsonify({
+            "success": True, 
+            "message": f"Checked reminders (TR/EN). Sent {mails_sent_count} emails."
+        }), 200
+
+    except Exception as e:
+        print(f"Cron Error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+# --- ÇİFT DİLLİ YARDIMCI MAİL FONKSİYONU ---
+def send_bilingual_reminder(user, event, type_code):
+    try:
+        sender_email = os.environ.get('MAIL_USER')
+        sender_password = os.environ.get('MAIL_PASS')
+        
+        if not sender_email or not sender_password: return
+
+        msg = MIMEMultipart()
+        msg['From'] = sender_email
+        msg['To'] = user.email
+        
+        # 1. METİNLERİ HAZIRLA (TR & EN)
+        if type_code == "tomorrow":
+            # Konu Başlığı
+            subject_str = f"Hatırlatma / Reminder: {event.title} (1 Gün Kaldı / 1 Day Left)"
+            
+            # Türkçe Mesaj
+            tr_intro = "Yarın harika bir etkinlik seni bekliyor, sakın kaçırma!"
+            
+            # İngilizce Mesaj
+            en_intro = "A great event is waiting for you tomorrow, don't miss it!"
+            
+        elif type_code == "2days":
+            subject_str = f"Hey! {event.title} - 2 Gün Kaldı / 2 Days Left"
+            tr_intro = "Etkinliğe sadece 2 gün kaldı, hazırlıklara başla!"
+            en_intro = "Only 2 days left until the event, get ready!"
+            
+        else:
+            subject_str = f"Hatırlatma / Reminder: {event.title}"
+            tr_intro = "Etkinlik yaklaşıyor!"
+            en_intro = "The event is approaching!"
+
+        # UTF-8 Başlık Koruması (Header şart!)
+        msg['Subject'] = Header(subject_str, 'utf-8')
+
+        # 2. GÖVDEYİ OLUŞTUR (BILINGUAL BODY)
+        # Türkçe üstte, İngilizce altta
+        user_name = user.first_name or 'Friend'
+        
+        body = f"""
+        Merhaba / Hello {user_name},
+        
+        🇹🇷 [TÜRKÇE]
+        {tr_intro}
+        
+        📅 Tarih: {event.date}
+        ⏰ Saat: {event.time}
+        📍 Yer: {event.location}
+        
+        Detaylar:
+        {event.description}
+        
+        --------------------------------------------------
+        
+        🇬🇧 [ENGLISH]
+        {en_intro}
+        
+        📅 Date: {event.date}
+        ⏰ Time: {event.time}
+        📍 Location: {event.location}
+        
+        Details:
+        {event.description}
+        
+        --------------------------------------------------
+        Circle Team
+        """
+        
+        # UTF-8 İçerik Koruması
+        msg.attach(MIMEText(body, 'plain', 'utf-8'))
+
+        # 3. GÖNDER (Modern Yöntem)
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login(sender_email, sender_password)
+        server.send_message(msg) 
+        server.quit()
+        
+        print(f"Bilingual Reminder ({type_code}) sent to {user.email}")
+        
+    except Exception as e:
+        print(f"Failed to send reminder to {user.email}: {e}")
