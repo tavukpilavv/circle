@@ -5,6 +5,8 @@ export const store = reactive({
   communities: [],
   events: [],
   notifications: [],
+  // Kullanıcı bilgisi (Admin kontrolü ve hoşgeldin mesajı için)
+  user: JSON.parse(localStorage.getItem('user_info') || '{}'),
 
   async loadCommunitiesFromBackend() {
     try {
@@ -17,9 +19,7 @@ export const store = reactive({
         name: c.name,
         description: c.description || "",
         members: c.members_count ?? 0,
-        image:
-          c.image_url ||
-          "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=800&q=80",
+        image: c.image_url || "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=800&q=80",
         website_url: c.website_url || c.external_link || ""
       }))
     } catch (e) {
@@ -27,64 +27,89 @@ export const store = reactive({
     }
   },
 
-
-  async createCommunityMultipart({ name, description, website_url, imageFile }) {
+  // --- KAYIT OLMA (REGISTER) ---
+  async registerEvent(event) {
     try {
       const token = localStorage.getItem("user_token")
       if (!token) {
-        alert("Please login first.")
-        return false
+        alert("Lütfen önce giriş yapın.")
+        return false 
       }
 
-      const fd = new FormData()
-      fd.append("name", name || "")
-      fd.append("description", description || "")
-      fd.append("website_url", website_url || "")
+      // ID Kontrolü: Bazen tüm obje, bazen sadece ID gelebilir
+      const eventId = event.id ? event.id : event
 
-      if (imageFile) {
-        fd.append("image", imageFile)
-      }
-
-      const res = await apiFetch("/api/general/communities", {
+      const res = await apiFetch(`/api/general/events/${eventId}/register`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
-        body: fd
+        headers: { Authorization: `Bearer ${token}` }
       })
 
-      const data = await res.json().catch(() => ({}))
-      if (!res.ok || data.error) {
-        alert(data.error || "Failed to create community")
-        return false
+      const data = await res.json()
+
+      // Eğer kullanıcı zaten kayıtlıysa backend 400 dönebilir, bunu başarı sayıp devam ediyoruz
+      if (!res.ok) {
+        if(res.status === 400 && (data.message === "Zaten kayıtlısınız" || data.message.includes("registered"))) {
+             if (typeof event === 'object') event.registered = true
+             return true
+        }
+        throw new Error(data.message || data.error || "Kayıt başarısız oldu")
       }
 
-      await this.loadCommunitiesFromBackend()
+      // Başarılı olduysa UI'ı güncelle
+      if (typeof event === 'object') {
+        event.registered = true
+      }
+      
       return true
     } catch (e) {
-      console.error("createCommunityMultipart failed:", e)
-      alert("Failed to create community")
+      console.error("Register error:", e)
+      alert(e.message || "Bir hata oluştu")
+      throw e
+    }
+  },
+
+  // --- KAYIT İPTALİ (UNREGISTER) ---
+  async unregisterEvent(event) {
+    try {
+      const token = localStorage.getItem("user_token")
+      if (!token) throw new Error("Giriş yapmalısınız")
+
+      const eventId = event.id ? event.id : event
+
+      // Arkadaşının backend'e eklediği endpoint
+      const res = await apiFetch(`/api/general/events/${eventId}/unregister`, {
+        method: "POST", 
+        headers: { Authorization: `Bearer ${token}` }
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || "Kayıt iptali başarısız")
+      }
+      
+      if (typeof event === 'object') {
+        event.registered = false
+      }
+      return true
+    } catch (e) {
+      console.error("Unregister error:", e)
       return false
     }
   },
 
-  async createCommunityLegacyJson({ name, description, image_url, website_url }) {
+  // --- RATING (PUANLAMA) ---
+  async addReview({ eventId, rating, comment, isAnonymous }) {
     try {
       const token = localStorage.getItem("user_token")
-      if (!token) {
-        alert("Please login first.")
-        return false
-      }
+      if (!token) throw new Error("Giriş yapmalısınız")
 
       const payload = {
-        clubName: name,
-        description: description,
-        shortDescription: description,
-        clubImage: image_url || null,
-        website_url: website_url || ""
+        rating: rating,
+        feedback: comment,
+        is_anonymous: isAnonymous
       }
 
-      const res = await apiFetch("/api/general/communities/create", {
+      const res = await apiFetch(`/api/general/events/${eventId}/rate`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -93,114 +118,78 @@ export const store = reactive({
         body: JSON.stringify(payload)
       })
 
-      const data = await res.json().catch(() => ({}))
-      if (!res.ok || data.error) {
-        alert(data.error || "Failed to create community")
-        return false
-      }
-
-      await this.loadCommunitiesFromBackend()
-      return true
-    } catch (e) {
-      console.error("createCommunityLegacyJson failed:", e)
-      alert("Failed to create community")
-      return false
-    }
-  },
-
-  async deleteEvent(eventId) {
-    try {
-      const { deleteEvent } = await import("./api")
-      await deleteEvent(eventId)
-
-      // Update local state
-      this.events = this.events.filter(e => e.id !== eventId)
-      return true
-    } catch (e) {
-      console.error("Failed to delete event:", e)
-      alert(e.message || "Failed to delete event")
-      return false
-    }
-  },
-
-  async deleteCommunity(id) {
-    try {
-      const { deleteCommunity } = await import("./api")
-      await deleteCommunity(id)
-
-      this.communities = this.communities.filter(c => c.id !== id)
-      return true
-    } catch (e) {
-      console.error("Failed to delete community:", e)
-      alert(e.message || "Failed to delete community")
-      return false
-    }
-  },
-
-  async updateEvent(eventId, formData) {
-    try {
-      const { updateEvent } = await import("./api")
-      await updateEvent(eventId, formData)
-
-      // Refresh events list
-      const res = await apiFetch("/api/general/events")
       const data = await res.json()
-      this.events = data
+      if (!res.ok) throw new Error(data.error || "Hata oluştu")
 
+      // Yeni puanı ekrana anlık yansıt
+      const eventToUpdate = this.events.find(e => e.id === eventId)
+      if (eventToUpdate && data.new_rating !== undefined) {
+         eventToUpdate.rating = data.new_rating
+      }
       return true
     } catch (e) {
-      console.error("Failed to update event:", e)
-      alert(e.message || "Failed to update event")
-      return false
+      console.error("addReview failed:", e)
+      throw e
     }
-  }
-  ,
- async registerEvent(eventId) {
-  try {
-    const res = await apiFetch(`/api/general/events/${eventId}/register`, {
-      method: "POST"
-    })
+  },
 
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}))
-      throw new Error(data.error || "Register failed")
-    }
+  // --- YORUMLARI GETİR ---
+  async fetchReviews(eventId) {
+      try {
+        const res = await apiFetch(`/api/general/events/${eventId}/reviews`)
+        if (res.ok) return await res.json()
+      } catch (e) { console.error(e) }
+      return []
+  },
 
-    // Refresh events from backend
-    const eventsRes = await apiFetch("/api/general/events")
-    this.events = await eventsRes.json()
+  // --- DİĞER STANDART FONKSİYONLAR ---
+  async createCommunityMultipart(payload) { return this._genericPost("/api/general/communities", payload, true) },
+  async createCommunityLegacyJson(payload) { return this._genericPost("/api/general/communities/create", payload, false) },
+  
+  async _genericPost(url, body, isFormData) {
+      try {
+          const token = localStorage.getItem("user_token")
+          if (!token) { alert("Please login"); return false; }
+          const options = {
+              method: "POST",
+              headers: { Authorization: `Bearer ${token}` },
+              body: isFormData ? body : JSON.stringify(body)
+          }
+          if (!isFormData) options.headers["Content-Type"] = "application/json"
+          
+          const res = await apiFetch(url, options)
+          if (!res.ok) { 
+              const data = await res.json().catch(()=>({}))
+              alert(data.error || "İşlem başarısız"); 
+              return false; 
+          }
+          await this.loadCommunitiesFromBackend()
+          return true
+      } catch(e) { console.error(e); return false; }
+  },
 
-    return true
-  } catch (e) {
-    console.error("Register error:", e)
-    alert(e.message || "Failed to register")
-    return false
-  }
-},
-
-async unregisterEvent(eventId) {
-  try {
-    const res = await apiFetch(`/api/general/events/${eventId}/unregister`, {
-      method: "POST"
-    })
-
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}))
-      throw new Error(data.error || "Unregister failed")
-    }
-
-    // Refresh events from backend
-    const eventsRes = await apiFetch("/api/general/events")
-    this.events = await eventsRes.json()
-
-    return true
-  } catch (e) {
-    console.error("Unregister error:", e)
-    alert(e.message || "Failed to unregister")
-    return false
-  }
-},
-
+  async deleteEvent(id) { 
+      try {
+        const { deleteEvent } = await import("./api"); await deleteEvent(id);
+        this.events = this.events.filter(e => e.id !== id); return true;
+      } catch(e) { console.error(e); return false; }
+  },
+  async deleteCommunity(id) { 
+       try {
+        const { deleteCommunity } = await import("./api"); await deleteCommunity(id);
+        this.communities = this.communities.filter(c => c.id !== id); return true;
+      } catch(e) { console.error(e); return false; }
+  },
+  async updateEvent(id, fd) { 
+       try {
+        const { updateEvent } = await import("./api"); await updateEvent(id, fd);
+        // Listeyi yenilemek için
+        const res = await apiFetch("/api/general/events"); 
+        if(res.ok) this.events = await res.json(); 
+        return true;
+      } catch(e) { console.error(e); return false; }
+  },
+  getReviewsByEventId(id) { return [] }
 });
 
 
