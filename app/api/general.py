@@ -923,3 +923,50 @@ def delete_community(id):
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
+@bp.route("/communities/<int:id>", methods=["PUT"])
+@jwt_required()
+def update_community(id):
+    try:
+        user_id = get_jwt_identity()
+        user = User.query.get(user_id)
+        comm = Community.query.get(id)
+
+        if not user or not comm:
+            return jsonify({"error": "Community or user not found"}), 404
+
+        # AUTH
+        if not (is_super_admin(user) or comm.admin_id == user.id):
+            return jsonify({"error": "Unauthorized"}), 403
+
+        name = request.form.get("name")
+        description = request.form.get("description")
+        website_url = request.form.get("website_url")
+
+        # NAME CHECK
+        if name and name.strip():
+            existing = Community.query.filter(
+                Community.name == name.strip(),
+                Community.id != comm.id
+            ).first()
+            if existing:
+                return jsonify({"error": "Community name already exists"}), 409
+            comm.name = name.strip()
+
+        if description is not None:
+            comm.description = description.strip()
+
+        if website_url is not None:
+            comm.external_link = website_url.strip()
+
+        image_file = request.files.get("image")
+        if image_file and image_file.filename:
+            new_image_url = upload_image(image_file, folder="communities")
+            comm.image_url = new_image_url
+
+        db.session.commit()
+        return jsonify({"message": "Community updated successfully"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(str(e))
+        return jsonify({"error": "Failed to update community"}), 500
