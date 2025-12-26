@@ -467,7 +467,8 @@ def get_communities():
                 "description": c.description,
                 "image_url": c.image_url,
                 "website_url": c.external_link,
-                "members_count": c.members.count()
+                "members_count": c.members.count(),
+                "admin_id": c.admin_id
             })
         return jsonify(output), 200
 
