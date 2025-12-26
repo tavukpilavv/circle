@@ -205,6 +205,7 @@ const loadCommunities = async () => {
       name: c.name,
       description: c.description || "",
       members: c.members_count ?? 0,
+      admin_id: c.admin_id ?? null,
       // ✅ accept either backend field
       website_url: c.website_url || c.external_link || "",
       image: c.image_url || "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=800&q=80"
