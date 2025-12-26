@@ -25,7 +25,7 @@
         <div class="filters-pills">
 
 
-          <button v-if="store.canEditCommunity(community)" class="add-club-btn" @click="openModal">
+          <button v-if="isAdmin" class="add-club-btn" @click="openModal">
             + Add Club
           </button>
         </div>
@@ -66,7 +66,7 @@
             Visit Website
           </a>
           <button
-          v-if="store.canEditCommunity(community)"
+          v-if="isAdmin"
           class="status-pill outline edit-btn"
           type="button"
           @click="openEditModal(community)"
@@ -76,7 +76,7 @@
         </button>
 
           <button
-            v-if="store.canEditCommunity(community)"
+            v-if="isAdmin"
             class="status-pill outline delete-btn"
             type="button"
             @click="deleteClub(community)"
@@ -177,7 +177,7 @@ const route = useRoute()
 
 const searchQuery = ref('')
 const isSuperAdmin = ref(false)
-
+const isAdmin = ref(false)
 const isModalOpen = ref(false)
 const isSubmitting = ref(false)
 
@@ -220,6 +220,7 @@ onMounted(() => {
 
   const role = (localStorage.getItem('user_role') || '').toLowerCase()
   isSuperAdmin.value = role === 'super_admin' || role === 'superadmin'
+  isAdmin.value = role === 'admin' || role === 'super_admin'
 })
 
 
