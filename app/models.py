@@ -62,7 +62,7 @@ class Community(db.Model):
     admin_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     admin = db.relationship('User', backref=db.backref('managed_community', uselist=False))
 
-    events = db.relationship('Event', backref='host_community', lazy='dynamic')
+    events = db.relationship('Event', backref='host_community',lazy=True, cascade="all, delete")
 
 class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)

@@ -6,6 +6,7 @@ class Config:
     # Güvenlik Anahtarı
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'cok-gizli-anahtar-123'
     JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY') or SECRET_KEY
+    SECURITY_PASSWORD_SALT = os.environ.get('SECURITY_PASSWORD_SALT') or 'my-very-serious-salt'
     
     # --- VERİTABANI AYARLARI ---
     # Render'da DATABASE_URL ortam değişkeni kullanılır, localde SQLite
@@ -25,3 +26,12 @@ class Config:
 
     # --- DOSYA YÜKLEME AYARLARI ---
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024
+
+    # --- EMAIL AYARLARI ---
+    MAIL_SERVER = os.environ.get('MAIL_SERVER') or 'smtp.gmail.com'
+    MAIL_PORT = int(os.environ.get('MAIL_PORT') or 587)
+    MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS') is not None
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+    MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER')
+    FRONTEND_URL = os.environ.get('FRONTEND_URL') or 'http://localhost:5173'
