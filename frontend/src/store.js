@@ -186,7 +186,17 @@ export const store = reactive({
       return true
     } catch (e) { console.error(e); return false }
   },
+async loadEvents() {
+  try {
+    const res = await apiFetch("/api/general/events");
+    if (!res.ok) return;
 
+    const data = await res.json().catch(() => []);
+    this.events = Array.isArray(data) ? data : [];
+  } catch (err) {
+    console.error("loadEvents failed:", err);
+  }
+},
   async deleteEvent(id) {
     try {
       const { deleteEvent } = await import("./api")

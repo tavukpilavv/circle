@@ -13,6 +13,20 @@ import "vue-toastification/dist/index.css";
 // Initialize Vercel Analytics
 inject()
 
+/* ======================
+   PRELOAD DATA BEFORE APP MOUNTS
+   ====================== */
+async function preload() {
+  try {
+    await store.loadCommunitiesFromBackend();
+    if (store.loadEvents) {
+      await store.loadEvents();        // ✅ This prevents carousel disappearing
+    }
+  } catch (err) {
+    console.error("Preload failed:", err);
+  }
+}
+
 const app = createApp(App)
 
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
