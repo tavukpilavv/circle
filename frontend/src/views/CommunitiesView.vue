@@ -316,47 +316,49 @@ const submitClub = async () => {
     fd.append("name", formData.name)
     fd.append("description", formData.description)
     fd.append("website_url", formData.website_url)
-    
+
     if (selectedFile.value instanceof File) {
       fd.append("image", selectedFile.value)
     }
 
+    let res;
 
-    // Log for verification
-    for (let [key, value] of fd.entries()) {
-      console.log(`FormData: ${key} =`, value)
-    }
     if (isEditMode.value && editingCommunityId.value) {
-      await apiFetch(`/api/general/communities/${editingCommunityId.value}`, {
-         method: "DELETE",
-         headers: {
+      // ⭐ REAL EDIT — DO NOT DELETE ANYTHING
+      res = await apiFetch(`/api/general/communities/${editingCommunityId.value}`, {
+        method: "PUT",
+        headers: {
           Authorization: `Bearer ${token}`
-        }
-      })
+        },
+        body: fd
+      });
+    } else {
+      // CREATE
+      res = await apiFetch("/api/general/communities", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        body: fd
+      });
     }
-    const res = await apiFetch("/api/general/communities", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`
-      },
-       body: fd
-      })
-
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({}))
-      throw new Error(err.error || "Community creation failed")
+      throw new Error(err.error || "Operation failed")
     }
 
     await loadCommunities()
     closeModal()
+
   } catch (err) {
     console.error(err)
-    alert(err.message || "Failed to create community")
+    alert(err.message || "Failed to save community")
   } finally {
     isSubmitting.value = false
   }
 }
+
 </script>
 
 <style scoped>
