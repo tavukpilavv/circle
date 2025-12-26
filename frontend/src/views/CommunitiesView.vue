@@ -76,7 +76,7 @@
         </button>
 
           <button
-            v-if="isAdmin"
+            v-if="isSuperAdmin"
             class="status-pill outline delete-btn"
             type="button"
             @click="deleteClub(community)"
