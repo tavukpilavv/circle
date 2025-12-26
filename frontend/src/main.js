@@ -56,4 +56,9 @@ const options = {
 
 app.use(Toast, options);
 
-app.mount('#app')
+/* ======================
+   MOUNT ONLY AFTER DATA LOADED
+   ====================== */
+preload().then(() => {
+  app.mount('#app');
+});
