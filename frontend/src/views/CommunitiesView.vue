@@ -25,7 +25,7 @@
         <div class="filters-pills">
 
 
-          <button v-if="isAdmin" class="add-club-btn" @click="openModal">
+          <button v-if="isSuperAdmin" class="add-club-btn" @click="openModal">
             + Add Club
           </button>
         </div>
