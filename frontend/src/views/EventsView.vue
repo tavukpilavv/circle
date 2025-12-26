@@ -241,6 +241,14 @@ const communitySelectLocked = ref(false)      // admin gets only one option
 const selectedFile = ref(null)               // actual File
 const selectedFileName = ref("")
 
+// 🔥 Instantly update the event locally without reload
+const updateLocalEvent = (id, registeredState) => {
+  const target = store.events.find(e => e.id === id);
+  if (target) {
+    target.registered = registeredState; // Vue triggers re-render
+  }
+};
+
 async function loadCommunityOptions() {
   const role = localStorage.getItem('user_role')
   const isSuper = (role === 'super_admin' || role === 'superadmin')
@@ -501,24 +509,27 @@ const deleteEvent = (event) => {
 
 const register = async (event) => {
   if (!localStorage.getItem('user_token')) {
-    toast.warning('Please sign in to register.')
-    router.push('/login')
-    return
+    toast.warning('Please sign in to register.');
+    router.push('/login');
+    return;
   }
-
-  let ok = false
 
   if (event.registered) {
-    ok = await store.unregisterEvent(event.id)
-    if (ok) toast.info("You have unregistered from the event.")
-  } else {
-    ok = await store.registerEvent(event.id)
+    const ok = await store.unregisterEvent(event.id);
     if (ok) {
-      toast.success("Successfully registered! 🎉")
-      showCelebration.value = true
+      updateLocalEvent(event.id, false); // 🔥 instant unregistered
+      toast.info("You have unregistered from the event.");
+    }
+  } else {
+    const ok = await store.registerEvent(event.id);
+    if (ok) {
+      updateLocalEvent(event.id, true); // 🔥 instant registered
+      toast.success("Successfully registered! 🎉");
+      showCelebration.value = true;
     }
   }
-}
+};
+
 </script>
 
 <style scoped>
