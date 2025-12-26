@@ -25,7 +25,7 @@
         <div class="filters-pills">
 
 
-          <button v-if="isSuperAdmin" class="add-club-btn" @click="openModal">
+          <button v-if="store.canEditCommunity(community)" class="add-club-btn" @click="openModal">
             + Add Club
           </button>
         </div>
@@ -66,7 +66,7 @@
             Visit Website
           </a>
           <button
-          v-if="isSuperAdmin"
+          v-if="store.canEditCommunity(community)"
           class="status-pill outline edit-btn"
           type="button"
           @click="openEditModal(community)"
@@ -76,7 +76,7 @@
         </button>
 
           <button
-            v-if="isSuperAdmin"
+            v-if="store.canEditCommunity(community)"
             class="status-pill outline delete-btn"
             type="button"
             @click="deleteClub(community)"

@@ -7,6 +7,8 @@ export const store = reactive({
   notifications: [],
   // Kullanıcı bilgisi (Admin kontrolü ve hoşgeldin mesajı için)
   user: JSON.parse(localStorage.getItem('user_info') || '{}'),
+  userRole: (localStorage.getItem("user_role") || "").toLowerCase(),
+  userId: Number(localStorage.getItem("user_id") || 0),
 
   async loadCommunitiesFromBackend() {
     try {
@@ -20,7 +22,9 @@ export const store = reactive({
         description: c.description || "",
         members: c.members_count ?? 0,
         image: c.image_url || "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=800&q=80",
-        website_url: c.website_url || c.external_link || ""
+        website_url: c.website_url || c.external_link || "",
+        admin_id: c.admin_id ?? null
+        
       }))
     } catch (e) {
       console.error("loadCommunitiesFromBackend failed:", e)
@@ -226,5 +230,16 @@ async loadEvents() {
     } catch (e) { console.error(e); return false }
   },
 
-  getReviewsByEventId(id) { return [] }
+  getReviewsByEventId(id) { return [] },
+  canEditCommunity(community) {
+  if (!community) return false
+
+  if (this.userRole === "super_admin" || this.userRole === "superadmin")
+    return true
+
+  if (this.userRole === "admin" && community.admin_id === this.userId)
+    return true
+
+  return false
+}
 })
