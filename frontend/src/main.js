@@ -12,7 +12,7 @@ import "vue-toastification/dist/index.css";
 
 // Initialize Vercel Analytics
 inject()
-
+import { store } from './store.js';
 /* ======================
    PRELOAD DATA BEFORE APP MOUNTS
    ====================== */
