@@ -1,27 +1,34 @@
+import os
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart  # <--- BU EKSİKTİ, EKLENDİ!
+from email.header import Header
+from datetime import timedelta
 from flask import Blueprint, jsonify, request, current_app
-from app import db, mail
+from app import db
 from app.models import User
-from flask import Blueprint, jsonify, request, current_app
-from app import db, mail
-from app.models import User
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
-from flask_mail import Message
-from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, decode_token
+from dotenv import load_dotenv
+from sqlalchemy import or_
+
+load_dotenv()
 
 bp = Blueprint('auth', __name__)
 
+# ===========================
+# 1. REGISTER
+# ===========================
 @bp.route('/register', methods=['POST'])
 def register():
     try:
         data = request.get_json()
         
         if User.query.filter_by(email=data.get('email')).first():
-            return jsonify({'error': 'Bu email zaten kullanılıyor.'}), 400
+            return jsonify({'error': 'Email is already in use.'}), 400
         
         if data.get('username') and User.query.filter_by(username=data.get('username')).first():
-            return jsonify({'error': 'Bu kullanıcı adı zaten alınmış.'}), 400
+            return jsonify({'error': 'Username is already taken.'}), 400
         
-        # Yeni Kullanıcı (Username ve Major eklendi)
         user = User(
             first_name=data.get('firstName'),
             last_name=data.get('lastName'),
@@ -34,32 +41,31 @@ def register():
         db.session.add(user)
         db.session.commit()
         
-        return jsonify({'message': 'Kayıt Başarılı!'}), 201
+        return jsonify({'message': 'Registration successful!'}), 201
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+# ===========================
+# 2. LOGIN (Smart Login)
+# ===========================
 @bp.route('/login', methods=['POST'])
 def login():
     try:
         data = request.get_json()
-        
-        email = data.get('email')
-        username = data.get('username')
+        login_input = data.get('username') or data.get('email')
         password = data.get('password')
 
-        if not password:
-            return jsonify({'error': 'Email/Kullanıcı adı ve şifre gereklidir'}), 400
+        if not login_input or not password:
+            return jsonify({'error': 'Username/Email and password are required.'}), 400
 
-        user = None
-        if email:
-            user = User.query.filter_by(email=email).first()
-        elif username:
-            user = User.query.filter_by(username=username).first()
+        user = User.query.filter(
+            or_(User.username == login_input, User.email == login_input)
+        ).first()
         
         if user and user.check_password(password):
             access_token = create_access_token(identity=str(user.id))
             return jsonify({
-                'message': 'Giriş Başarılı',
+                'message': 'Login successful.',
                 'access_token': access_token,
                 'user': {
                     'id': user.id,
@@ -74,10 +80,13 @@ def login():
                 }
             }), 200
             
-        return jsonify({'error': 'Email veya şifre hatalı'}), 401
+        return jsonify({'error': 'Invalid username/email or password.'}), 401
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+# ===========================
+# 3. FORGOT PASSWORD (HELP KODUYLA GÜNCELLENDİ ✅)
+# ===========================
 @bp.route('/forgot-password', methods=['POST'])
 def forgot_password():
     try:
@@ -85,47 +94,83 @@ def forgot_password():
         email = data.get('email')
         
         if not email:
-            return jsonify({'error': 'Email adresi gereklidir.'}), 400
+            return jsonify({'error': 'Email address is required.'}), 400
 
         user = User.query.filter_by(email=email).first()
         
-        # Güvenlik: Kullanıcı bulunamasa bile 200 dönüyoruz (User Enumeration Attack önlemi)
-        # Amaç: Kötü niyetli kişilerin hangi emaillerin kayıtlı olduğunu öğrenmesini engellemek
         if not user:
-            print(f"DEBUG: Forgot password request for non-existent email: {email}")
-            return jsonify({'message': 'Şifre sıfırlama bağlantısı gönderildi.'}), 200
+            # Güvenlik için kullanıcı yoksa bile başarılı gibi dönüyoruz
+            return jsonify({'message': 'If your email is registered, you will receive a reset link.'}), 200
 
         # Token Oluşturma
-        s = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
-        token = s.dumps(user.email, salt=current_app.config['SECURITY_PASSWORD_SALT'])
+        reset_token = create_access_token(
+            identity=str(user.id),
+            expires_delta=timedelta(minutes=15),
+            additional_claims={"type": "reset"}
+        )
         
         # Link Oluşturma
-        # Frontend URL'i config'den alıyoruz (yoksa varsayılan localhost:5173)
-        frontend_url = current_app.config.get('FRONTEND_URL', 'http://localhost:5173')
-        reset_link = f"{frontend_url}/#/reset-password?token={token}"
+        frontend_url = os.environ.get('FRONTEND_URL', 'http://localhost:5173')
+        reset_link = f"{frontend_url}/#/reset-password?token={reset_token}"
         
         print(f"\n=== PASSWORD RESET LINK ({email}) ===\n{reset_link}\n=====================================\n")
 
-        # Email Gönderme
+        # --- BURASI GENERAL.PY'DEN ALINAN ÇALIŞAN KOD YAPISI ---
         try:
-            msg = Message(
-                subject='Circle App - Şifre Sıfırlama İsteği',
-                recipients=[user.email],
-                body=f"Şifrenizi sıfırlamak için aşağıdaki bağlantıya tıklayın:\n\n{reset_link}\n\nBu bağlantı 1 saat süreyle geçerlidir.",
-                sender=current_app.config.get('MAIL_DEFAULT_SENDER', 'noreply@circle.app')
-            )
-            mail.send(msg)
+            sender_email = os.environ.get('MAIL_USER')
+            sender_password = os.environ.get('MAIL_PASS')
+
+            if not sender_email or not sender_password:
+                print("MAIL CONFIG ERROR: MAIL_USER or MAIL_PASS eksik.")
+                # Hata dönmüyoruz ki frontend akışı bozulmasın
+                return jsonify({'message': 'If your email is registered, you will receive a reset link.'}), 200
+
+            # 1. MIMEMultipart kullanımı (Daha güvenli)
+            msg = MIMEMultipart()
+            msg['From'] = sender_email
+            msg['To'] = user.email
+            
+            subject = "Circle App - Password Reset Request"
+            msg['Subject'] = Header(subject, 'utf-8')
+
+            body = f"""
+Hello {user.first_name},
+
+You requested to reset your password. Click the link below (valid for 15 minutes):
+
+{reset_link}
+
+If you did not request this, please ignore this email.
+
+Best,
+Circle App Team
+            """
+            
+            # 2. UTF-8 Kodlamasıyla Ekleme
+            msg.attach(MIMEText(body, 'plain', 'utf-8'))
+
+            # 3. Bağlantı ve Gönderim (General.py ile aynı)
+            server = smtplib.SMTP('smtp.gmail.com', 587)
+            server.starttls()
+            server.login(sender_email, sender_password)
+            server.send_message(msg) # Modern yöntem
+            server.quit()
+            
+            print(f"✅ Mail başarıyla gönderildi: {user.email}")
+            
         except Exception as mail_error:
-            print(f"MAIL ERROR: {str(mail_error)}")
-            # Email hatası olsa bile kullanıcıya başarılı döndük (security reasons + user experience)
-            # Loglardan linki görebilirsiniz.
+            print(f"❌ MAIL HATASI: {str(mail_error)}")
+            # Mail hatası olsa bile kullanıcıya başarılı diyoruz (Güvenlik standardı)
         
-        return jsonify({'message': 'Şifre sıfırlama bağlantısı gönderildi.'}), 200
+        return jsonify({'message': 'If your email is registered, you will receive a reset link.'}), 200
 
     except Exception as e:
         print(f"ERROR in forgot_password: {str(e)}")
-        return jsonify({'error': 'Bir hata oluştu.'}), 500
+        return jsonify({'error': 'An error occurred.'}), 500
 
+# ===========================
+# 4. RESET PASSWORD
+# ===========================
 @bp.route('/reset-password', methods=['POST'])
 def reset_password():
     try:
@@ -134,31 +179,36 @@ def reset_password():
         new_password = data.get('new_password')
         
         if not token or not new_password:
-            return jsonify({'error': 'Token ve yeni şifre gereklidir.'}), 400
+            return jsonify({'error': 'Token and new password are required.'}), 400
             
-        s = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
-        
         try:
-            # Token geçerlilik süresi: 3600 saniye (1 saat)
-            email = s.loads(token, salt=current_app.config['SECURITY_PASSWORD_SALT'], max_age=3600)
-        except SignatureExpired:
-            return jsonify({'error': 'Sıfırlama bağlantısının süresi dolmuş.'}), 400
-        except BadSignature:
-            return jsonify({'error': 'Geçersiz sıfırlama bağlantısı.'}), 400
+            decoded_token = decode_token(token)
             
-        user = User.query.filter_by(email=email).first()
-        if not user:
-            return jsonify({'error': 'Kullanıcı bulunamadı.'}), 404
+            if decoded_token.get("type") != "reset":
+                return jsonify({'error': 'Invalid token type.'}), 400
+                
+            user_id = decoded_token.get("sub")
+            user = User.query.get(user_id)
             
-        user.set_password(new_password)
-        db.session.commit()
-        
-        return jsonify({'message': 'Şifreniz başarıyla güncellendi.'}), 200
+            if not user:
+                return jsonify({'error': 'User not found.'}), 404
+                
+            user.set_password(new_password)
+            db.session.commit()
+            
+            return jsonify({'message': 'Password has been reset successfully. You can login now.'}), 200
+            
+        except Exception as token_error:
+            print(f"TOKEN ERROR: {str(token_error)}")
+            return jsonify({'error': 'Invalid or expired link.'}), 400
         
     except Exception as e:
         print(f"ERROR in reset_password: {str(e)}")
-        return jsonify({'error': 'Bir hata oluştu.'}), 500
+        return jsonify({'error': 'An error occurred.'}), 500
 
+# ===========================
+# 5. PROFILE & CHANGE PASSWORD
+# ===========================
 @bp.route('/profile', methods=['PUT'])
 @jwt_required()
 def update_profile():
@@ -167,15 +217,13 @@ def update_profile():
         user = User.query.get(current_user_id)
         
         if not user:
-            return jsonify({'error': 'Kullanıcı bulunamadı.'}), 404
+            return jsonify({'error': 'User not found.'}), 404
             
         data = request.get_json()
         
-        # Avatar güncelleme
         if 'avatar' in data:
             user.avatar_url = data['avatar']
             
-        # İsim güncelleme (Ad Soyad ayrıştırma)
         if 'name' in data:
             full_name = data['name'].strip()
             if full_name:
@@ -186,7 +234,7 @@ def update_profile():
         db.session.commit()
         
         return jsonify({
-            'message': 'Profil başarıyla güncellendi',
+            'message': 'Profile updated successfully.',
             'user': {
                 'id': user.id,
                 'first_name': user.first_name,
@@ -201,8 +249,7 @@ def update_profile():
         }), 200
         
     except Exception as e:
-        print(f"ERROR in update_profile: {str(e)}")
-        return jsonify({'error': 'Profil güncellenirken bir hata oluştu.'}), 500
+        return jsonify({'error': 'An error occurred while updating profile.'}), 500
 
 @bp.route('/change-password', methods=['POST'])
 @jwt_required()
@@ -212,23 +259,22 @@ def change_password():
         user = User.query.get(current_user_id)
         
         if not user:
-            return jsonify({'error': 'Kullanıcı bulunamadı.'}), 404
+            return jsonify({'error': 'User not found.'}), 404
             
         data = request.get_json()
         current_password = data.get('current_password')
         new_password = data.get('new_password')
         
         if not current_password or not new_password:
-            return jsonify({'error': 'Mevcut şifre ve yeni şifre gereklidir.'}), 400
+            return jsonify({'error': 'Current password and new password are required.'}), 400
             
         if not user.check_password(current_password):
-            return jsonify({'error': 'Mevcut şifreniz hatalı.'}), 401
+            return jsonify({'error': 'Incorrect current password.'}), 401
             
         user.set_password(new_password)
         db.session.commit()
         
-        return jsonify({'message': 'Şifreniz başarıyla değiştirildi.'}), 200
+        return jsonify({'message': 'Password changed successfully.'}), 200
         
     except Exception as e:
-        print(f"ERROR in change_password: {str(e)}")
-        return jsonify({'error': 'Şifre değiştirilirken bir hata oluştu.'}), 500
+        return jsonify({'error': 'An error occurred while changing password.'}), 500
