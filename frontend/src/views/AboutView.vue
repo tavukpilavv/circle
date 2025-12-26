@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, nextTick } from 'vue';
-import axios from 'axios';
+
 
 // 1. REAKTİF VERİLER
 const stats = ref({
@@ -41,14 +41,15 @@ function startStatsAnimation() {
 // 3. VERİ ÇEKME
 onMounted(async () => {
   try {
-    const response = await axios.get('/api/general/stats');
+    const response = await fetch('/api/general/stats');
+    const data = await response.json();
 
-    if (response.data) {
+    if (data) {
       stats.value = {
-        universities: response.data.universities,
-        clubs: response.data.clubs,
-        users: response.data.students,
-        events: response.data.events
+        universities: data.universities,
+        clubs: data.clubs,
+        users: data.students,
+        events: data.events
       };
     }
   } catch (error) {
