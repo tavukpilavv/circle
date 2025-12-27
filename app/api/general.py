@@ -369,8 +369,8 @@ def get_event_reviews(id):
         current_user_id = get_jwt_identity()
         user = User.query.get(current_user_id) 
 
-        if not (is_admin(user) or is_super_admin(user)):
-             return jsonify({"error": "Yorumları görüntüleme yetkiniz yok."}), 403
+        # if not (is_admin(user) or is_super_admin(user)):
+        #      return jsonify({"error": "Yorumları görüntüleme yetkiniz yok."}), 403
         
         event = Event.query.get(id)
         if not event:
