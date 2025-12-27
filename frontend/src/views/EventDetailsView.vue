@@ -92,7 +92,7 @@
               <div class="stars">
                 <i v-for="n in 5" :key="n" class="fas fa-star" :class="{ filled: n <= (event.rating || 0) }"></i>
               </div>
-              <span class="count">Based on {{ reviewsList.length }} reviews</span>
+              <span class="count" v-if="isAdmin">Based on {{ reviewsList.length }} reviews</span>
             </div>
 
             <div class="summary-actions">
@@ -114,7 +114,7 @@
             </div>
           </div>
 
-          <div v-if="isAdmin" class="reviews-list">
+          <div class="reviews-list">
             <div v-if="reviewsList.length === 0" class="empty-state" style="text-align:center; padding:20px; color:#6b7c74;">
               No reviews yet.
             </div>
@@ -135,10 +135,10 @@
             </div>
           </div>
 
-          <div v-else class="empty-state" style="text-align:center; padding:40px; color:#6b7c74; background:#f8fcf9; border-radius:12px; margin-top:20px;">
+          <!-- <div v-else class="empty-state" style="text-align:center; padding:40px; color:#6b7c74; background:#f8fcf9; border-radius:12px; margin-top:20px;">
             <i class="fas fa-lock" style="font-size: 24px; margin-bottom: 10px; display:block;"></i>
             Detailed reviews are only visible to administrators.
-          </div>
+          </div> -->
         </div>
 
         <div v-if="activeTab === 'participants' && isAdmin" class="fade-in">
@@ -259,17 +259,12 @@ const openRatingPopup = () => {
 }
 
 const loadReviews = async () => {
-  if (!isAdmin.value) {
-    reviewsList.value = []
-    return
-  }
+  if (!event.value) return
 
-  if (event.value) {
-    try {
-      reviewsList.value = await store.fetchReviews(event.value.id)
-    } catch (e) {
-      console.log("Yorum listesi alınamadı.")
-    }
+  try {
+    reviewsList.value = await store.fetchReviews(event.value.id)
+  } catch (e) {
+    reviewsList.value = []
   }
 }
 
