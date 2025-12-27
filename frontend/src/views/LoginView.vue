@@ -85,7 +85,8 @@ const handleLogin = async () => {
         // Store auth data
         localStorage.setItem('user_token', data.access_token);
         localStorage.setItem('user_name', user);
-
+        // ⭐ ADD THIS HERE
+        localStorage.setItem("user_id", data.id || data.user_id || decoded.sub);
         // --- FIXED LOGIC (ENGLISH) ---
         // We strictly use the role from the backend response.
         // If the backend doesn't send a role, we default to 'user'.
