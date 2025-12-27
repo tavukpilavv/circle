@@ -11,7 +11,7 @@
 
       <!-- Create button for admin + super_admin -->
       <button
-        v-if="isAdmin"
+        v-if="canCreateEvent"
         id="openCreateEventModal"
         class="primary-btn"
         @click="openModal('create')"
@@ -84,7 +84,7 @@
           </button>
 
           <button
-            v-if="isAdmin"
+            v-if="store.canEditEvent(event)"
             class="event-edit-btn"
             type="button"
             @click="openModal('edit', event)"
@@ -93,7 +93,7 @@
           </button>
 
           <button
-            v-if="isAdmin"
+            v-if="store.canEditEvent(event)"
             class="event-delete-btn"
             type="button"
             @click="deleteEvent(event)"
@@ -241,6 +241,10 @@ const communitySelectLocked = ref(false)      // admin gets only one option
 const selectedFile = ref(null)               // actual File
 const selectedFileName = ref("")
 
+const canCreateEvent = computed(() => {
+  const role = store.userRole;
+  return role === "super_admin" || role === "superadmin" || role === "admin";
+});
 // 🔥 Instantly update the event locally without reload
 const updateLocalEvent = (id, registeredState) => {
   const target = store.events.find(e => e.id === id);
@@ -529,6 +533,7 @@ const register = async (event) => {
     }
   }
 };
+
 
 </script>
 

@@ -241,5 +241,19 @@ async loadEvents() {
     return true
 
   return false
+},
+canEditEvent(event) {
+  if (!event) return false;
+
+  // Super admin can edit everything
+  if (this.userRole === "super_admin" || this.userRole === "superadmin")
+    return true;
+
+  // Find the event's community
+  const comm = this.communities.find(c => c.id === event.community_id);
+  if (!comm) return false;
+
+  // Only the admin who owns this community can edit its events
+  return this.userRole === "admin" && comm.admin_id === this.userId;
 }
 })

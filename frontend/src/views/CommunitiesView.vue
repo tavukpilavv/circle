@@ -66,15 +66,12 @@
             Visit Website
           </a>
           <button
-          v-if="isAdmin"
-          class="status-pill outline edit-btn"
-          type="button"
-          @click="openEditModal(community)"
-         title="Edit this club"
-         >
-         <i class="fas fa-pen"></i>
-        </button>
-
+            v-if="store.canEditCommunity(community)"
+            class="status-pill outline edit-btn"
+            @click="openEditModal(community)"
+          >
+            <i class="fas fa-pen"></i>
+          </button>
           <button
             v-if="isSuperAdmin"
             class="status-pill outline delete-btn"
