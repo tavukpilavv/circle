@@ -92,7 +92,7 @@
               <div class="stars">
                 <i v-for="n in 5" :key="n" class="fas fa-star" :class="{ filled: n <= (event.rating || 0) }"></i>
               </div>
-              <span class="count" v-if="isAdmin">Based on {{ reviewsList.length }} reviews</span>
+              <span class="count">Based on {{ reviewsList.length }} reviews</span>
             </div>
 
             <div class="summary-actions">
