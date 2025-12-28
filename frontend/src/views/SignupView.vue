@@ -75,6 +75,20 @@ const form = ref({
     confirmPassword: ''
 })
 
+const validatePasswordStrength = (rule, value, callback) => {
+    if (!value) {
+        callback(new Error('Password is required'))
+    } else if (value.length < 8) {
+        callback(new Error('Password must be at least 8 characters'))
+    } else if (!/[A-Z]/.test(value)) {
+        callback(new Error('Password must contain at least one uppercase letter'))
+    } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(value)) {
+        callback(new Error('Password must contain at least one special character'))
+    } else {
+        callback()
+    }
+}
+
 const validateConfirmPassword = (rule, value, callback) => {
     if (!value) {
         callback(new Error('Please confirm your password'))
@@ -103,8 +117,7 @@ const rules = {
         { type: 'email', message: 'Enter a valid email', trigger: ['blur', 'change'] }
     ],
     password: [
-        { required: true, message: 'Password is required', trigger: 'blur' },
-        { min: 6, message: 'Password must be at least 6 characters', trigger: 'blur' }
+        { validator: validatePasswordStrength, trigger: 'blur' }
     ],
     confirmPassword: [
         { validator: validateConfirmPassword, trigger: ['blur', 'change'] }
