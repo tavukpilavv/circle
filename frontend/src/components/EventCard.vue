@@ -125,4 +125,16 @@ const props = defineProps({
   color: #666; /* Optional: make it subtle */
   margin-top: 0;
 }
+  /* Mobile Fix: Ensure card content is not clipped */
+  @media (max-width: 768px) {
+    .event-card {
+      height: auto !important;
+      min-height: auto !important;
+    }
+
+    .card-content {
+      padding-bottom: 24px; /* Extra padding for button space */
+      gap: 16px;
+    }
+  }
 </style>
