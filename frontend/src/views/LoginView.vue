@@ -84,7 +84,19 @@ const handleLogin = async () => {
       if (data.access_token) {
         // Store auth data
         localStorage.setItem('user_token', data.access_token);
-        localStorage.setItem('user_name', user);
+
+        
+        // Fix: Use backend name instead of input email
+        let displayName = user;
+        const u = data.user || {}; 
+        if (u.first_name && u.last_name) {
+             displayName = `${u.first_name} ${u.last_name}`;
+        } else if (u.name) {
+             displayName = u.name;
+        } else if (u.username) {
+             displayName = u.username;
+        }
+        localStorage.setItem('user_name', displayName);
         // ⭐ ADD THIS HERE
         localStorage.setItem("user_id", data.id || data.user_id || data.user.id || data.user?.id || 0);
         // --- FIXED LOGIC (ENGLISH) ---
