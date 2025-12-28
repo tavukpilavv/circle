@@ -58,6 +58,7 @@
                 <el-select id="university" v-model="form.university" class="form-select" required>
                   <el-option value="">Select university</el-option>
                   <el-option value="Ankara Yıldırım Beyazıt University">Ankara Yıldırım Beyazıt University</el-option>
+                  <el-option value="Ankara University">Ankara University</el-option>
                   <el-option value="Other">Other</el-option>
                 </el-select>
                 <div v-if="errors.university" class="form-error-inline">
