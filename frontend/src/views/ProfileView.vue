@@ -322,18 +322,31 @@
     >
       <div class="registration-list">
         <div class="registration-summary">
-          <strong>Total Registrations:</strong> {{ mockRegistrations.length }} / {{ registrationEvent?.capacity || 'Not Given' }}
+          <strong>Total Registrations:</strong> {{ registrations.length }} / {{ registrationEvent?.capacity || 'Not Given' }}
         </div>
-        <div class="attendee-list">
-          <div v-for="user in mockRegistrations" :key="user.id" class="attendee-item">
-            <img :src="user.avatar" alt="Avatar" class="attendee-avatar" />
-            <div class="attendee-info">
-              <div class="attendee-name">{{ user.name }}</div>
-              <div class="attendee-email">{{ user.email }}</div>
-            </div>
-          </div>
+
+        <div v-if="loadingRegistrations" class="loading-state">
+         Loading list...
         </div>
-      </div>
+
+        <div v-else-if="registrationsError" class="empty-state">
+         {{ registrationsError }}
+        </div>
+
+        <div v-else-if="registrations.length === 0" class="empty-state">
+          No registrations yet.
+         </div>
+
+         <div v-else class="attendee-list">
+           <div v-for="u in registrations" :key="u.id" class="attendee-item">
+             <img :src="u.avatar_url || 'https://via.placeholder.com/40'" alt="Avatar" class="attendee-avatar" />
+             <div class="attendee-info">
+               <div class="attendee-name">{{ u.first_name }} {{ u.last_name }}</div>
+              <div class="attendee-email">{{ u.email }}</div>
+             </div>
+           </div>
+         </div>
+       </div>
     </el-dialog>
 
   </div>
@@ -364,20 +377,37 @@ const ratedEvents = ref(new Set())
 // Admin Registration Logic
 const showRegistrationPopup = ref(false)
 const registrationEvent = ref(null)
-const mockRegistrations = [
-  { id: 1, name: 'Alice Johnson', email: 'alice@example.com', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Alice' },
-  { id: 2, name: 'Bob Smith', email: 'bob@example.com', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Bob' },
-  { id: 3, name: 'Charlie Brown', email: 'charlie@example.com', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Charlie' },
-  { id: 4, name: 'Diana Prince', email: 'diana@example.com', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Diana' },
-  { id: 5, name: 'Evan Wright', email: 'evan@example.com', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Evan' },
-  { id: 6, name: 'Fiona Gallagher', email: 'fiona@example.com', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Fiona' },
-  { id: 7, name: 'George Michael', email: 'george@example.com', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=George' },
-]
 
-const openRegistrations = (event) => {
+const registrations = ref([])
+const loadingRegistrations = ref(false)
+const registrationsError = ref("")
+
+const openRegistrations = async (event) => {
   registrationEvent.value = event
   showRegistrationPopup.value = true
+
+  registrations.value = []
+  registrationsError.value = ""
+  loadingRegistrations.value = true
+
+  try {
+    const data = await store.fetchParticipants(event.id)
+
+    registrations.value = (Array.isArray(data) ? data : []).map((u) => ({
+      id: u.id ?? u.user_id ?? u.email ?? Math.random(),
+      first_name: u.first_name ?? (u.name ? String(u.name).split(" ")[0] : ""),
+      last_name: u.last_name ?? (u.name ? String(u.name).split(" ").slice(1).join(" ") : ""),
+      email: u.email ?? "",
+      avatar_url: u.avatar_url ?? u.avatar ?? ""
+    }))
+  } catch (e) {
+    registrationsError.value = e?.message || "Failed to load registrations."
+    registrations.value = []
+  } finally {
+    loadingRegistrations.value = false
+  }
 }
+
 
 // Reactive source for avatar
 const storedAvatar = ref('')
@@ -465,34 +495,47 @@ const getEventRating = (eventId) => {
   return userReview ? userReview.rating : 0
 }
 
+const toEventDateTime = (e) => {
+  if (!e || !e.date) return null
+  const time = e.time && String(e.time).trim() ? String(e.time).trim() : "00:00"
+  const dt = new Date(`${e.date}T${time}`)
+  return isNaN(dt.getTime()) ? null : dt
+}
 
 
 const registeredEvents = computed(() => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return store.events.filter(e => {
-    const eventDate = new Date(e.date);
-    return e.registered && eventDate >= today;
-  }).sort((a, b) => new Date(a.date) - new Date(b.date));
+  const now = new Date()
+  return store.events
+    .filter(e => e.registered && toEventDateTime(e) >= now)
+    .sort((a, b) => toEventDateTime(a) - toEventDateTime(b))
 })
 
 const pastEvents = computed(() => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return store.events.filter(e => {
-    const eventDate = new Date(e.date);
-    return e.registered && eventDate < today;
-  }).sort((a, b) => new Date(b.date) - new Date(a.date)); // Newest past event first
+  const now = new Date()
+
+  return store.events
+    .filter(e => {
+      const isPast = toEventDateTime(e) < now
+
+      // Super admin: tüm past eventler
+      if (isSuperAdmin.value) return isPast
+
+      // Admin: sadece kendi eventleri
+      if (isAdmin.value) return store.canEditEvent(e) && isPast
+
+      // User: sadece kayıt oldukları
+      return e.registered && isPast
+    })
+    .sort((a, b) => toEventDateTime(b) - toEventDateTime(a))
 })
 
 const upcomingEvents = computed(() => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return store.events.filter(e => {
-    const eventDate = new Date(e.date);
-    return eventDate >= today;
-  }).sort((a, b) => new Date(a.date) - new Date(b.date));
+  const now = new Date()
+  return store.events
+    .filter(e => toEventDateTime(e) >= now)
+    .sort((a, b) => toEventDateTime(a) - toEventDateTime(b))
 })
+
 
 // Computed property for User Avatar
 const userAvatar = computed(() => {

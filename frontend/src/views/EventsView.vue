@@ -66,7 +66,7 @@
 
             <span
               class="rating-meta"
-              v-if="event.rating && new Date(event.date) < new Date().setHours(0,0,0,0)"
+              v-if="event.rating && isPast(event)"
             >
               <i class="fas fa-star" style="color: #fcc419;"></i>
               {{ event.rating }} ({{ event.ratingCount }})
@@ -78,7 +78,7 @@
           <button
             class="event-primary-btn"
             @click="register(event)"
-            v-if="!isPast(event.date)"
+            v-if="!isPast(event)"
           >
             {{ event.registered ? 'Registered' : 'Register' }}
           </button>
@@ -320,25 +320,27 @@ const filteredEvents = computed(() => {
   }
 
   return events.filter(event => {
-    const eventDate = new Date(event.date)
-    const past = eventDate < today
+  const dt = toEventDateTime(event)
+  const past = dt ? dt < new Date() : false
 
-    if (activeFilter.value === 'upcoming') return !past
-    if (activeFilter.value === 'past') return past
-    return true
-  }).sort((a, b) => {
-    const dateA = new Date(a.date)
-    const dateB = new Date(b.date)
-    const isPastA = dateA < today
-    const isPastB = dateB < today
+  if (activeFilter.value === 'upcoming') return !past
+  if (activeFilter.value === 'past') return past
+  return true
+}).sort((a, b) => {
+  const dtA = toEventDateTime(a)
+  const dtB = toEventDateTime(b)
+  const now = new Date()
 
-    if (!isPastA && isPastB) return -1
-    if (isPastA && !isPastB) return 1
+  const isPastA = dtA ? dtA < now : false
+  const isPastB = dtB ? dtB < now : false
 
-    if (!isPastA && !isPastB) return dateA - dateB
-    if (isPastA && isPastB) return dateB - dateA
-    return 0
-  })
+  if (!isPastA && isPastB) return -1
+  if (isPastA && !isPastB) return 1
+
+  if (!isPastA && !isPastB) return dtA - dtB
+  if (isPastA && isPastB) return dtB - dtA
+  return 0
+})
 })
 
 /* =========================
@@ -374,6 +376,13 @@ watch(() => route.query.search, (newVal) => {
   if (newVal) activeFilter.value = 'all'
 })
 
+const toEventDateTime = (event) => {
+  if (!event || !event.date) return null
+  const t = event.time && String(event.time).trim() ? String(event.time).trim() : "00:00"
+  const dt = new Date(`${event.date}T${t}`)
+  return isNaN(dt.getTime()) ? null : dt
+}
+
 /* =========================
    DATE HELPERS
    ========================= */
@@ -387,11 +396,10 @@ const getMonth = (dateStr) => {
   return date.toLocaleString('default', { month: 'short' }).toUpperCase()
 }
 
-const isPast = (dateStr) => {
-  const date = new Date(dateStr)
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  return date < today
+const isPast = (event) => {
+  const dt = toEventDateTime(event)
+  if (!dt) return false
+  return dt < new Date()
 }
 
 /* =========================
