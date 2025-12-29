@@ -215,9 +215,13 @@
               <p style="margin: 5px 0 0; font-size: 13px; color: var(--muted);">Description: {{ app.short_description }}</p>
             </div>
             <div class="app-actions" style="display: flex; align-items: center; gap: 15px;">
-              <a :href="app.proof_document" target="_blank" style="font-size: 13px; color: var(--brand); font-weight: 600; text-decoration: none;">
-                View Proof
-              </a>
+              <button
+                class="document-link"
+                @click="openApplicationDetails(app)"
+                style="background:none; border:none; cursor:pointer; color:#409eff;"
+              >
+                <el-icon><Document /></el-icon> View Details
+              </button>
               <el-button type="success" size="small" @click="approveApp(app.id)" :loading="approvingId === app.id">
                 Approve & Promote
               </el-button>
@@ -348,6 +352,31 @@
          </div>
        </div>
     </el-dialog>
+<el-dialog
+  v-model="showApplicationDialog"
+  width="500px"
+  title="Application Details"
+>
+  <div v-if="selectedApplication">
+
+    <p><strong>Name:</strong> {{ selectedApplication.name }}</p>
+    <p><strong>University:</strong> {{ selectedApplication.university }}</p>
+    <p><strong>Description:</strong> {{ selectedApplication.description }}</p>
+
+    <p v-if="selectedApplication.short_description">
+      <strong>Short Description:</strong> {{ selectedApplication.short_description }}
+    </p>
+
+    <div v-if="selectedApplication.image" style="margin-top:15px;">
+      <strong>Image:</strong>
+      <img 
+        :src="selectedApplication.image" 
+        style="width:100%; border-radius:8px; margin-top:10px;"
+      />
+    </div>
+
+  </div>
+</el-dialog>
 
   </div>
 </template>
@@ -366,6 +395,9 @@ const router = useRouter()
 const activePanel = ref('events')
 const toast = useToast();
 
+const selectedApplication = ref(null)
+const showApplicationDialog = ref(false)
+
 const seeAllTarget = ref(null)
 const upcomingTrack = ref(null)
 const activitiesTrack = ref(null)
@@ -381,7 +413,10 @@ const registrationEvent = ref(null)
 const registrations = ref([])
 const loadingRegistrations = ref(false)
 const registrationsError = ref("")
-
+const openApplicationDetails = (app) => {
+  selectedApplication.value = app
+  showApplicationDialog.value = true
+}
 const openRegistrations = async (event) => {
   registrationEvent.value = event
   showRegistrationPopup.value = true
