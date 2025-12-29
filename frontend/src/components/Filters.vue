@@ -65,7 +65,14 @@ const props = defineProps({
   }
 })
 
-const schools = ['All', 'AYBU', 'ODTÜ', 'Hacettepe', 'Bilkent', 'Gazi Üni']
+const universityMap = {
+  "Ankara Yıldırım Beyazıt University": "AYBU",
+  "Middle East Technical University": "ODTÜ",
+  "Hacettepe University": "Hacettepe",
+  "Bilkent University": "Bilkent",
+  "Gazi University": "Gazi Üni"
+}
+
 
 const emit = defineEmits(['update:activeType', 'update:sortOrder'])
 

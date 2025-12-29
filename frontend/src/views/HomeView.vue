@@ -107,7 +107,10 @@ const filteredEvents = computed(() => {
 
   // Filter by School (activeType)
   if (activeType.value !== 'All') {
-    result = result.filter(e => e.organizer === activeType.value);
+    result = result.filter(e => {
+      const uni = universityMap[e.organizer] || e.organizer;
+      return uni === activeType.value;
+    });
   }
 
   // Filter by Date
