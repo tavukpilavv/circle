@@ -94,6 +94,15 @@ import { store } from '../store.js'
 import Announcements from '../components/Announcements.vue'
 import Filters from '../components/Filters.vue'
 import EventGrid from '../components/EventGrid.vue'
+const universityMap = {
+  "AYBU": "Ankara Yıldırım Beyazıt University",
+  "AU": "Ankara University",
+  "ODTÜ": "Orta doğu teknik Üniversitesi",
+  "Hacettepe": "Hacettepe Üniversitesi",
+  "Bilkent": "Bilkent Üniversitesi",
+  "Gazi Üni": "Gazi Üniversitesi",
+  "Other": "Other"
+};
 
 // Reactive state for selected event and dialog visibility
 const selectedEvent = ref(null)
