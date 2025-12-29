@@ -10,6 +10,12 @@ export const store = reactive({
   userRole: (localStorage.getItem("user_role") || "").toLowerCase(),
   userId: Number(localStorage.getItem("user_id") || 0),
 
+  refreshAuth() {
+    this.userRole = (localStorage.getItem("user_role") || "").toLowerCase()
+    this.userId = Number(localStorage.getItem("user_id") || 0)
+    this.user = JSON.parse(localStorage.getItem("user_info") || "{}")
+  },
+
   async loadCommunitiesFromBackend() {
     try {
       const res = await apiFetch("/api/general/communities", { method: "GET" })
@@ -243,17 +249,17 @@ async loadEvents() {
   return false
 },
 canEditEvent(event) {
-  if (!event) return false;
+  if (!event) return false
 
   // Super admin can edit everything
   if (this.userRole === "super_admin" || this.userRole === "superadmin")
-    return true;
+    return true
 
-  // Find the event's community
-  const comm = this.communities.find(c => c.id === event.community_id);
-  if (!comm) return false;
+  // If communities not loaded yet, we can't know ownership safely.
+  // communities App.vue’de admin ise preload ediliyor
+  const comm = this.communities.find(c => c.id === event.community_id)
+  if (!comm) return false
 
-  // Only the admin who owns this community can edit its events
-  return this.userRole === "admin" && comm.admin_id === this.userId;
+  return this.userRole === "admin" && comm.admin_id === this.userId
 }
 })

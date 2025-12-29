@@ -5,7 +5,36 @@
 </template>
 
 <script setup>
-import MainLayout from './layouts/MainLayout.vue'
+import { onMounted, watch } from "vue"
+import { useRoute } from "vue-router"
+import MainLayout from "./layouts/MainLayout.vue"
+import { store } from "./store.js"
+
+const route = useRoute()
+
+const syncAuth = async () => {
+  store.refreshAuth()
+
+
+  if (
+    store.userRole === "admin" ||
+    store.userRole === "super_admin" ||
+    store.userRole === "superadmin"
+  ) {
+    await store.loadCommunitiesFromBackend()
+  }
+}
+
+// İlk yüklemede
+onMounted(syncAuth)
+
+// Login/logout sonrası yönlendirmelerde / sayfa geçişlerinde
+watch(
+  () => route.fullPath,
+  () => {
+    syncAuth()
+  }
+)
 </script>
 
 <style>

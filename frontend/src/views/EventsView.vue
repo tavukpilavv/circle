@@ -242,9 +242,10 @@ const selectedFile = ref(null)               // actual File
 const selectedFileName = ref("")
 
 const canCreateEvent = computed(() => {
-  const role = store.userRole;
-  return role === "super_admin" || role === "superadmin" || role === "admin";
-});
+  const role = String(store.userRole || localStorage.getItem("user_role") || "").toLowerCase()
+  return role === "admin" || role === "super_admin" || role === "superadmin"
+})
+
 // 🔥 Instantly update the event locally without reload
 const updateLocalEvent = (id, registeredState) => {
   const target = store.events.find(e => e.id === id);
@@ -347,16 +348,22 @@ const filteredEvents = computed(() => {
    INITIAL LOAD
    ========================= */
 onMounted(async () => {
-  // 1) Events list
+  // 0) auth sync (login -> route geçişlerinde role stale kalmasın)
+  store.refreshAuth()
+
+  // 1 communities load (edit/delete butonları için ŞART)
+  
+
+  // 2 Events list
   const res = await apiFetch("/api/general/events")
   const data = await res.json()
   store.events = data
 
-  // 2) Admin check
-  const role = localStorage.getItem('user_role')
-  isAdmin.value = role === 'admin' || role === 'super_admin'
+  // 3 Admin check (istersen kalsın, ama bu ref’i aslında artık kullanmıyorsun)
+  const role = String(localStorage.getItem('user_role') || "").toLowerCase()
+  isAdmin.value = role === 'admin' || role === 'super_admin' || role === 'superadmin'
 
-  // 3) route filters
+  // 4 route filters
   if (route.query.filter === 'upcoming') activeFilter.value = 'upcoming'
   else if (route.query.filter === 'registered') activeFilter.value = 'all'
 
