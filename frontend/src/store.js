@@ -36,7 +36,21 @@ export const store = reactive({
       console.error("loadCommunitiesFromBackend failed:", e)
     }
   },
+async rejectApplication(id) {
+  try {
+    const res = await apiFetch(`/api/general/communities/${id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("user_token")}`
+      }
+    });
 
+    const data = await res.json().catch(() => ({}));
+    return { success: res.ok, ...data };
+  } catch (e) {
+    return { success: false, message: e.message };
+  }
+},
   // --- KAYIT OLMA (REGISTER) ---
   async registerEvent(event) {
     try {

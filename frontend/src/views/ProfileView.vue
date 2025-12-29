@@ -225,6 +225,14 @@
               <el-button type="success" size="small" @click="approveApp(app.id)" :loading="approvingId === app.id">
                 Approve & Promote
               </el-button>
+              <el-button
+                type="danger"
+                size="small"
+                @click="rejectApp(app.id)"
+                :loading="rejectingId === app.id"
+              >
+                Reject
+              </el-button>
             </div>
           </article>
         </div>
@@ -459,6 +467,23 @@ const isSuperAdmin = computed(() => user.role === 'super_admin')
 const pendingApplications = ref([])
 //const pendingApplications = computed(() => store.pendingApplications)
 const approvingId = ref(null)
+
+const rejectingId = ref(null);
+
+const rejectApp = async (id) => {
+  rejectingId.value = id;
+
+  const result = await store.rejectApplication(id);
+
+  if (result.success) {
+    toast.success("Application rejected.");
+    pendingApplications.value = pendingApplications.value.filter(app => app.id !== id);
+  } else {
+    toast.error("Failed to reject: " + (result.message || "Unknown error"));
+  }
+
+  rejectingId.value = null;
+};
 
 const approveApp = async (id) => {
   /*approvingId.value = id
