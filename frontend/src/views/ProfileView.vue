@@ -360,31 +360,45 @@
          </div>
        </div>
     </el-dialog>
+<!-- VIEW DETAILS MODAL -->
 <el-dialog
-  v-model="showApplicationDialog"
+  v-model="showDetailsModal"
+  title="Community Application Details"
   width="500px"
-  title="Application Details"
+  class="details-modal"
 >
   <div v-if="selectedApplication">
 
+    <img 
+      v-if="selectedApplication.image"
+      :src="selectedApplication.image"
+      alt="Application Image"
+      style="width:100%; border-radius:10px; margin-bottom:15px;"
+    />
+
     <p><strong>Name:</strong> {{ selectedApplication.name }}</p>
     <p><strong>University:</strong> {{ selectedApplication.university }}</p>
-    <p><strong>Description:</strong> {{ selectedApplication.description }}</p>
 
     <p v-if="selectedApplication.short_description">
       <strong>Short Description:</strong> {{ selectedApplication.short_description }}
     </p>
 
-    <div v-if="selectedApplication.image" style="margin-top:15px;">
-      <strong>Image:</strong>
-      <img 
-        :src="selectedApplication.image" 
-        style="width:100%; border-radius:8px; margin-top:10px;"
-      />
-    </div>
+    <p><strong>Description:</strong> {{ selectedApplication.description }}</p>
+
+    <p><strong>Contact Person:</strong> {{ selectedApplication.contact_person }}</p>
+    <p><strong>Contact Email:</strong> {{ selectedApplication.contact_email }}</p>
+
+    <p v-if="selectedApplication.student_number">
+      <strong>Student Number:</strong> {{ selectedApplication.student_number }}
+    </p>
 
   </div>
+
+  <template #footer>
+    <el-button @click="showDetailsModal = false">Close</el-button>
+  </template>
 </el-dialog>
+
 
   </div>
 </template>
