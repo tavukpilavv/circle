@@ -64,14 +64,18 @@ const props = defineProps({
     default: 'nearest'
   }
 })
+const schools = ['All', 'AYBU', 'AU', 'ODTÜ', 'Hacettepe', 'Bilkent', 'Gazi Üni', 'Other']
 
 const universityMap = {
-  "Ankara Yıldırım Beyazıt University": "AYBU",
-  "Middle East Technical University": "ODTÜ",
-  "Hacettepe University": "Hacettepe",
-  "Bilkent University": "Bilkent",
-  "Gazi University": "Gazi Üni"
-}
+  "AYBU": "Ankara Yıldırım Beyazıt University",
+  "AU": "Ankara University",
+  "ODTÜ": "Orta doğu teknik Üniversitesi",
+  "Hacettepe": "Hacettepe Üniversitesi",
+  "Bilkent": "Bilkent Üniversitesi",
+  "Gazi Üni": "Gazi Üniversitesi",
+  "Other": "Other"
+};
+
 
 
 const emit = defineEmits(['update:activeType', 'update:sortOrder'])

@@ -59,6 +59,10 @@
                   <el-option value="">Select university</el-option>
                   <el-option value="Ankara Yıldırım Beyazıt University">Ankara Yıldırım Beyazıt University</el-option>
                   <el-option value="Ankara University">Ankara University</el-option>
+                  <el-option value="Orta doğu teknik Üniversitesi">Orta doğu teknik Üniversitesi</el-option>
+                  <el-option value="Hacettepe Üniversitesi">Hacettepe Üniversitesi</el-option>
+                  <el-option value="Bilkent Üniversitesi ">Bilkent Üniversitesi </el-option>
+                  <el-option value="Gazi Üniversitesi">Gazi Üniversitesi</el-option>
                   <el-option value="Other">Other</el-option>
                 </el-select>
                 <div v-if="errors.university" class="form-error-inline">

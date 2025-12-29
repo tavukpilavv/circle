@@ -105,13 +105,16 @@ const sortOrder = ref('nearest')
 const filteredEvents = computed(() => {
   let result = [...store.events];
 
-  // Filter by School (activeType)
+  // Convert acronym → full name
+  const selectedFullName = universityMap[activeType.value] || activeType.value;
+
   if (activeType.value !== 'All') {
-    result = result.filter(e => {
-      const uni = universityMap[e.organizer] || e.organizer;
-      return uni === activeType.value;
-    });
+    result = result.filter(e =>
+      String(e.organizer).toLowerCase().trim() ===
+      String(selectedFullName).toLowerCase().trim()
+    );
   }
+
 
   // Filter by Date
   if (dateFilter.value) {
