@@ -51,6 +51,8 @@ class Community(db.Model):
 
     contact_email = db.Column(db.String(120))
     contact_person = db.Column(db.String(100))
+    student_number = db.Column(db.String(50), nullable=True)
+
     instagram_link = db.Column(db.String(255))
     external_link = db.Column(db.String(255))
 

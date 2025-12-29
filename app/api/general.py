@@ -579,6 +579,9 @@ def get_pending_communities():
                 "description": c.description,
                 "short_description": c.short_description,
                 "image": c.image_url,
+                "contact_person": c.contact_person,
+                "contact_email": c.contact_email,
+                "student_number": c.student_number,
                 "joined": False,
                 "member_count": c.members.count()
             })
@@ -726,7 +729,7 @@ def apply_community():
         category = (request.form.get("category") or "").strip()
         contact_name = (request.form.get("contactName") or "").strip()
         email = (request.form.get("email") or "").strip()
-
+        student_number = (request.form.get("studentNumber") or "").strip()
         if not club_name:
             return jsonify({"error": "Club name is required"}), 400
 
@@ -754,7 +757,8 @@ def apply_community():
             image_url=image_url,
             proof_document_url=image_url, 
             is_approved=False,            
-            admin_id=user.id
+            admin_id=user.id,
+            student_number=student_number
         )
 
         db.session.add(new_c)
