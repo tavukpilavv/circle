@@ -13,7 +13,7 @@ from app import db
 from app.models import Community, Event, User, Rating
 from app.utils import upload_file
 from app.services.image_service import upload_image
-from sqlalchemy import func
+from sqlalchemy import func, text
 
 import smtplib
 from email.mime.text import MIMEText
@@ -842,24 +842,56 @@ def update_event(id):
 @bp.route("/stats", methods=["GET"])
 def get_home_stats():
     try:
+        # 1. Genel Sayılar (Kutular için)
+        # Üniversite sayısını güvenli şekilde al
         uni_count = db.session.query(func.count(func.distinct(Community.university)))\
             .filter(Community.university != None)\
             .filter(Community.university != "")\
             .filter(Community.is_approved == True)\
             .scalar() or 0
-
-        if uni_count == 0:
-            uni_count = 1
-
+        
+        # 2. Diğer Sayılar
         club_count = Community.query.filter_by(is_approved=True).count()
         student_count = User.query.count()
         event_count = Event.query.count()
 
+        # 3. LİDERLİK TABLOSU VERİSİ (User tablosuna bakmadan, direkt Contact Person'ı alır)
+        # Frontend'in beklediği anahtarlar: name, university, president, email, count
+        sql = """
+        SELECT 
+            c.name as community_name,
+            c.university,
+            c.contact_person,
+            c.contact_email,
+            COUNT(e.id) as event_count
+        FROM community c
+        LEFT JOIN event e ON c.id = e.community_id
+        WHERE c.is_approved = true
+        GROUP BY c.id, c.name, c.university, c.contact_person, c.contact_email
+        ORDER BY event_count DESC;
+        """
+        
+        # Sorguyu çalıştır
+        results = db.session.execute(text(sql)).fetchall()
+
+        # Listeyi hazırla
+        top_communities_clean = []
+        for row in results:
+            top_communities_clean.append({
+                "name": row[0],                                 # Community Name
+                "university": row[1] if row[1] else "-",        # University
+                "president": row[2] if row[2] else "Unknown",   # Contact Person (President)
+                "email": row[3] if row[3] else "-",             # Email
+                "count": row[4]                                 # Event Count
+            })
+
+        # 4. JSON'I GÖNDER (top_communities anahtarı ARTIK VAR)
         return jsonify({
             "universities": uni_count,
             "clubs": club_count,
             "students": student_count,
-            "events": event_count
+            "events": event_count,
+            "top_communities": top_communities_clean  # <--- İşte eksik olan parça bu!
         }), 200
 
     except Exception as e:
