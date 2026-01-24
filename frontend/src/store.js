@@ -30,27 +30,27 @@ export const store = reactive({
         image: c.image_url || "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=800&q=80",
         website_url: c.website_url || c.external_link || "",
         admin_id: c.admin_id ?? null
-        
+
       }))
     } catch (e) {
       console.error("loadCommunitiesFromBackend failed:", e)
     }
   },
-async rejectApplication(id) {
-  try {
-    const res = await apiFetch(`/api/general/communities/${id}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("user_token")}`
-      }
-    });
+  async rejectApplication(id) {
+    try {
+      const res = await apiFetch(`/api/general/communities/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("user_token")}`
+        }
+      });
 
-    const data = await res.json().catch(() => ({}));
-    return { success: res.ok, ...data };
-  } catch (e) {
-    return { success: false, message: e.message };
-  }
-},
+      const data = await res.json().catch(() => ({}));
+      return { success: res.ok, ...data };
+    } catch (e) {
+      return { success: false, message: e.message };
+    }
+  },
   // --- KAYIT OLMA (REGISTER) ---
   async registerEvent(event) {
     try {
@@ -210,17 +210,17 @@ async rejectApplication(id) {
       return true
     } catch (e) { console.error(e); return false }
   },
-async loadEvents() {
-  try {
-    const res = await apiFetch("/api/general/events");
-    if (!res.ok) return;
+  async loadEvents() {
+    try {
+      const res = await apiFetch("/api/general/events");
+      if (!res.ok) return;
 
-    const data = await res.json().catch(() => []);
-    this.events = Array.isArray(data) ? data : [];
-  } catch (err) {
-    console.error("loadEvents failed:", err);
-  }
-},
+      const data = await res.json().catch(() => []);
+      this.events = Array.isArray(data) ? data : [];
+    } catch (err) {
+      console.error("loadEvents failed:", err);
+    }
+  },
   async deleteEvent(id) {
     try {
       const { deleteEvent } = await import("./api")
@@ -252,28 +252,28 @@ async loadEvents() {
 
   getReviewsByEventId(id) { return [] },
   canEditCommunity(community) {
-  if (!community) return false
+    if (!community) return false
 
-  if (this.userRole === "super_admin" || this.userRole === "superadmin")
-    return true
+    if (this.userRole === "super_admin" || this.userRole === "superadmin")
+      return true
 
-  if (this.userRole === "admin" && community.admin_id === this.userId)
-    return true
+    if (this.userRole === "admin" && community.admin_id === this.userId)
+      return true
 
-  return false
-},
-canEditEvent(event) {
-  if (!event) return false
+    return false
+  },
+  canEditEvent(event) {
+    if (!event) return false
 
-  // Super admin can edit everything
-  if (this.userRole === "super_admin" || this.userRole === "superadmin")
-    return true
+    // Super admin can edit everything
+    if (this.userRole === "super_admin" || this.userRole === "superadmin")
+      return true
 
-  // If communities not loaded yet, we can't know ownership safely.
-  // communities App.vue’de admin ise preload ediliyor
-  const comm = this.communities.find(c => c.id === event.community_id)
-  if (!comm) return false
+    // If communities not loaded yet, we can't know ownership safely.
+    // communities App.vue’de admin ise preload ediliyor
+    const comm = this.communities.find(c => c.id === event.community_id)
+    if (!comm) return false
 
-  return this.userRole === "admin" && comm.admin_id === this.userId
-}
+    return this.userRole === "admin" && comm.admin_id === this.userId
+  }
 })

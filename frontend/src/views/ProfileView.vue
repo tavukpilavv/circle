@@ -50,6 +50,93 @@
       </div>
     </section>
 
+    <!-- ADMIN DASHBOARD (SUPER ADMIN ONLY) -->
+    <div v-if="isSuperAdmin" class="admin-dashboard-section">
+      <!-- KPI CARDS -->
+      <section class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-icon"><i class="fas fa-university"></i></div>
+          <div class="kpi-content">
+            <h3>{{ stats.universities || 0 }}</h3>
+            <p>Universities</p>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon"><i class="fas fa-users"></i></div>
+          <div class="kpi-content">
+            <h3>{{ stats.clubs || 0 }}</h3>
+            <p>Communities</p>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon"><i class="fas fa-calendar-alt"></i></div>
+          <div class="kpi-content">
+            <h3>{{ stats.events || 0 }}</h3>
+            <p>Events</p>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon"><i class="fas fa-user-graduate"></i></div>
+          <div class="kpi-content">
+            <h3>{{ stats.students || 0 }}</h3>
+            <p>Students</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- LEADERBOARD TABLE -->
+      <section class="leaderboard-section">
+        <div class="leaderboard-header">
+          <h2>Community Leaderboard</h2>
+          <div class="search-box">
+            <i class="fas fa-search search-icon"></i>
+            <input 
+              type="text" 
+              v-model="searchQuery" 
+              placeholder="Search community, president..." 
+              class="search-input"
+            />
+          </div>
+        </div>
+        
+        <div class="table-scroll-container">
+          <table class="leaderboard-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Community Details</th>
+                <th>Contact Info</th>
+                <th>Events</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(comm, index) in filteredCommunities" :key="comm.name">
+                <td>#{{ index + 1 }}</td>
+                <td>
+                  <div class="comm-details-cell">
+                    <span class="comm-name">{{ comm.name }}</span>
+                    <span class="comm-uni">{{ comm.university || 'N/A' }}</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="contact-info-cell">
+                    <span class="contact-name">{{ comm.president || 'Unknown' }}</span>
+                    <a v-if="comm.email" :href="'mailto:' + comm.email" class="contact-email">{{ comm.email }}</a>
+                  </div>
+                </td>
+                <td>
+                  <span class="event-count-badge">{{ comm.count }}</span>
+                </td>
+              </tr>
+              <tr v-if="filteredCommunities.length === 0">
+                <td colspan="4" class="no-data">No matching results found</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
     <!-- TABS UNDER PROFILE -->
     <section class="dual-tabs" :style="{ gridTemplateColumns: isSuperAdmin ? '1fr 1fr' : '1fr' }">
       <button 
@@ -426,10 +513,12 @@ const registrationEvent = ref(null)
 const registrations = ref([])
 const loadingRegistrations = ref(false)
 const registrationsError = ref("")
+
 const openApplicationDetails = (app) => {
   selectedApplication.value = app
   showApplicationDialog.value = true
 }
+
 const openRegistrations = async (event) => {
   registrationEvent.value = event
   showRegistrationPopup.value = true
@@ -456,6 +545,42 @@ const openRegistrations = async (event) => {
   }
 }
 
+// Admin logic
+const stats = ref({
+  universities: 0,
+  clubs: 0,
+  events: 0,
+  students: 0,
+  top_communities: [] // IMPORTANT: Must be 'top_communities', not 'top_universities'
+})
+
+const searchQuery = ref("")
+
+const filteredCommunities = computed(() => {
+  const query = searchQuery.value.toLowerCase().trim()
+  const list = stats.value.top_communities || []
+  
+  if (!query) return list
+  
+  return list.filter(c => {
+    return (c.name && c.name.toLowerCase().includes(query)) ||
+           (c.university && c.university.toLowerCase().includes(query)) ||
+           (c.president && c.president.toLowerCase().includes(query)) ||
+           (c.email && c.email.toLowerCase().includes(query))
+  })
+})
+
+// Fetch Stats
+const fetchStats = async () => {
+  try {
+    const response = await apiFetch('/api/general/stats')
+    const data = await response.json()
+    console.log('Stats loaded:', data)
+    stats.value = data
+  } catch (error) {
+    console.error('Failed to fetch stats:', error)
+  }
+}
 
 // Reactive source for avatar
 const storedAvatar = ref('')
@@ -632,10 +757,10 @@ onMounted(() => {
   loadUserData()
   loadAvatar()
   if (isSuperAdmin.value) {
-  loadPenginds()
-}
+    loadPenginds()
+    fetchStats() // Fetch stats if super admin
+  }
 
-  // loadRatedEvents() // No longer needed with store
   window.addEventListener('avatar-changed', loadAvatar)
 })
 
@@ -1505,11 +1630,239 @@ const handleRatingSubmit = (payload) => {
   background-color: #f56c6c;
   color: white;
   padding: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #f56c6c;
+  color: white;
+  padding: 0;
   display: flex;
   justify-content: center;
   align-items: center;
   font-size: 10px;
   font-weight: 700;
   border: 2px solid #fff;
+}
+
+/* ==================
+   ADMIN DASHBOARD STYLES
+   ================== */
+.admin-dashboard-section {
+  margin-bottom: 30px;
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* KPI Cards */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.kpi-card {
+  background: var(--card);
+  padding: 20px;
+  border-radius: var(--r-lg);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  box-shadow: var(--shadow);
+  border: 1px solid #f0f0f0;
+  transition: transform 0.2s;
+}
+
+.kpi-card:hover {
+  transform: translateY(-2px);
+}
+
+.kpi-icon {
+  width: 50px;
+  height: 50px;
+  background: #e6f6e6; /* Light green bg */
+  color: var(--brand); /* Brand green */
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+
+.kpi-content h3 {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--brand);
+}
+
+.kpi-content p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Leaderboard */
+.leaderboard-section {
+  background: var(--card);
+  padding: 25px;
+  border-radius: var(--r-lg);
+  margin-bottom: 30px;
+  box-shadow: var(--shadow);
+}
+
+
+.leaderboard-section h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.leaderboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.search-box {
+  position: relative;
+  width: 250px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px 10px 10px 36px;
+  border: 1px solid var(--outline);
+  border-radius: 999px;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.search-input:focus {
+  border-color: var(--brand);
+}
+
+.table-scroll-container {
+  overflow-y: auto;
+  max-height: 400px;
+  border-radius: 8px;
+  border: 1px solid #f5f5f5;
+}
+
+.table-scroll-container::-webkit-scrollbar {
+  width: 6px;
+}
+.table-scroll-container::-webkit-scrollbar-thumb {
+  background-color: #ddd;
+  border-radius: 3px;
+}
+
+.leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.leaderboard-table th {
+  position: sticky;
+  top: 0;
+  background: #ffffff;
+  z-index: 2;
+  padding: 14px 15px;
+  text-align: left;
+  border-bottom: 2px solid #f0f0f0;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.leaderboard-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #f7f7f7;
+  color: var(--ink);
+  font-size: 0.95rem;
+}
+
+.leaderboard-table tr:hover td {
+  background-color: #fafafa;
+}
+
+.comm-details-cell {
+  display: flex;
+  flex-direction: column;
+}
+
+.comm-name {
+  font-weight: 700;
+  color: var(--ink);
+  font-size: 0.95rem;
+}
+
+.comm-uni {
+  font-size: 0.75rem; /* text-xs */
+  color: #6b7280; /* text-gray-500 equivalent */
+  margin-top: 2px;
+}
+
+.contact-info-cell {
+  display: flex;
+  flex-direction: column;
+}
+
+.contact-name {
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: var(--ink);
+}
+
+.contact-email {
+  font-size: 0.8rem;
+  color: var(--brand);
+  text-decoration: none;
+}
+
+.contact-email:hover {
+  text-decoration: underline;
+}
+
+.event-count-badge {
+  background: var(--brand-200);
+  color: var(--brand-600);
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.leaderboard-table tr:last-child td {
+  border-bottom: none;
+}
+
+.no-data {
+  text-align: center;
+  color: var(--muted);
+  padding: 30px;
+  font-style: italic;
 }
 </style>

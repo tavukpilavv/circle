@@ -77,7 +77,8 @@ const routes = [
         path: '/community-applications',
         name: 'CommunityApplications',
         component: () => import('../views/CommunityApplications.vue')
-    }
+    },
+
 ]
 
 const router = createRouter({

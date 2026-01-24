@@ -1,5 +1,5 @@
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/+$/, "");
+const API_BASE_URL = "https://circle-9srg.onrender.com";
 
 const TOKEN_KEY = "user_token";
 
@@ -120,7 +120,7 @@ export async function createEvent(formData) {
   return postForm("/api/general/events/create", formData);
 }
 
-export async function updateEvent(eventId, formData){
+export async function updateEvent(eventId, formData) {
   return putForm(`/api/general/events/${eventId}`, formData);
 }
 
