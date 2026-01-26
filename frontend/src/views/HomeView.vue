@@ -13,6 +13,9 @@
           :seeAll="seeAll" 
         />
     </div>
+    
+    <CTABanner />
+    <UserGuidanceModal />
   </div>
   <!-- Global event detail dialog -->
   <el-dialog 
@@ -94,6 +97,8 @@ import { store } from '../store.js'
 import Announcements from '../components/Announcements.vue'
 import Filters from '../components/Filters.vue'
 import EventGrid from '../components/EventGrid.vue'
+import CTABanner from '../components/CTABanner.vue'
+import UserGuidanceModal from '../components/UserGuidanceModal.vue'
 const universityMap = {
   "AYBU": "Ankara Yıldırım Beyazıt University",
   "AU": "Ankara University",
