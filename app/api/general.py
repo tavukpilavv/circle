@@ -1101,7 +1101,7 @@ def check_event_reminders():
         return jsonify({"error": str(e)}), 500
 
 
-# --- ÇİFT DİLLİ YARDIMCI MAİL FONKSİYONU ---
+#mail content
 def send_bilingual_reminder(user, event, type_code):
     try:
         sender_email = os.environ.get('MAIL_USER')
@@ -1113,74 +1113,43 @@ def send_bilingual_reminder(user, event, type_code):
         msg['From'] = sender_email
         msg['To'] = user.email
         
-        # 1. METİNLERİ HAZIRLA (TR & EN)
         if type_code == "tomorrow":
-            # Konu Başlığı
-            subject_str = f"Hatırlatma / Reminder: {event.title} (1 Gün Kaldı / 1 Day Left)"
-            
-            # Türkçe Mesaj
-            tr_intro = "Yarın harika bir etkinlik seni bekliyor, sakın kaçırma!"
-            
-            # İngilizce Mesaj
-            en_intro = "A great event is waiting for you tomorrow, don't miss it!"
-            
+            subject_str = f"Reminder: {event.title} is tomorrow!"
+            intro = "You have an exciting event tomorrow, don't miss it!"
         elif type_code == "2days":
-            subject_str = f"Hey! {event.title} - 2 Gün Kaldı / 2 Days Left"
-            tr_intro = "Etkinliğe sadece 2 gün kaldı, hazırlıklara başla!"
-            en_intro = "Only 2 days left until the event, get ready!"
-            
+            subject_str = f"Reminder: {event.title} is in 2 days!"
+            intro = "Only 2 days left until the event, get ready!"
         else:
-            subject_str = f"Hatırlatma / Reminder: {event.title}"
-            tr_intro = "Etkinlik yaklaşıyor!"
-            en_intro = "The event is approaching!"
+            subject_str = f"Reminder: {event.title}"
+            intro = "Your event is coming up!"
 
-        # UTF-8 Başlık Koruması (Header şart!)
         msg['Subject'] = Header(subject_str, 'utf-8')
 
-        # 2. GÖVDEYİ OLUŞTUR (BILINGUAL BODY)
-        # Türkçe üstte, İngilizce altta
         user_name = user.first_name or 'Friend'
         
         body = f"""
-        Merhaba / Hello {user_name},
-        
-        🇹🇷 [TÜRKÇE]
-        {tr_intro}
-        
-        📅 Tarih: {event.date}
-        ⏰ Saat: {event.time}
-        📍 Yer: {event.location}
-        
-        Detaylar:
-        {event.description}
-        
-        --------------------------------------------------
-        
-        🇬🇧 [ENGLISH]
-        {en_intro}
-        
-        📅 Date: {event.date}
-        ⏰ Time: {event.time}
-        📍 Location: {event.location}
-        
-        Details:
-        {event.description}
-        
-        --------------------------------------------------
-        Circle Team
+Hi {user_name},
+
+{intro}
+
+📅 Date: {event.date}
+⏰ Time: {event.time}
+📍 Location: {event.location}
+
+{event.description or ''}
+
+Circle Team
         """
         
-        # UTF-8 İçerik Koruması
         msg.attach(MIMEText(body, 'plain', 'utf-8'))
 
-        # 3. GÖNDER (Modern Yöntem)
         server = smtplib.SMTP('smtp.gmail.com', 587)
         server.starttls()
         server.login(sender_email, sender_password)
         server.send_message(msg) 
         server.quit()
         
-        print(f"Bilingual Reminder ({type_code}) sent to {user.email}")
+        print(f"Reminder ({type_code}) sent to {user.email}")
         
     except Exception as e:
         print(f"Failed to send reminder to {user.email}: {e}")
