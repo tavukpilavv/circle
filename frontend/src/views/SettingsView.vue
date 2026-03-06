@@ -326,7 +326,7 @@ const savePassword = async () => {
   --brand: #1b8f48;
   --brand-600: #167a3d;
   --brand-200: #e6f3e9;
-  --page: #fefbea;
+  --page: #ffffff;
   --card: #ffffff;
   --ink: #153226;
   --muted: #6b7c74;

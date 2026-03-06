@@ -57,17 +57,17 @@ html, body {
 
 /* Element Plus Dialog - Yellow background with green dashed border */
 .el-dialog {
-  background-color: #fefbea !important;
+  background-color: #ffffff !important;
   border: 3px dashed #1b8f48 !important;
   box-shadow: none !important;
 }
 
 .el-dialog__header {
-  background-color: #fefbea !important;
+  background-color: #ffffff !important;
 }
 
 .el-dialog__body {
-  background-color: #fefbea !important;
+  background-color: #ffffff !important;
 }
 
 /* Global Layout Container - Single Source of Truth */

@@ -278,7 +278,7 @@ onMounted(() => {
   --brand-600: #167a3d;
   --brand-200: #e6f3e9;
 
-  --page: #fefbea;
+  --page: #ffffff;
   --card: #ffffff;
 
   --ink: #153226;
@@ -296,7 +296,7 @@ onMounted(() => {
 
 .about-us-container {
   font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
-  background: #fefbea; /* var(--page) */
+  background: #ffffff; /* var(--page) */
   color: #153226; /* var(--ink) */
   min-height: 100vh;
 }
@@ -310,7 +310,7 @@ onMounted(() => {
 }
 
 .navbar {
-  background: #fefbea; /* var(--page) */
+  background: #ffffff; /* var(--page) */
 }
 
 .nav-inner {

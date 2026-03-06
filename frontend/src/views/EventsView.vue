@@ -826,7 +826,7 @@ const register = async (event) => {
 .modal-card {
   width: 420px;
   max-width: 95%;
-  background: #fefbea;
+  background: #ffffff;
   border-radius: 18px;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2);
   padding: 20px 22px 18px;

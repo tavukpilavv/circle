@@ -367,7 +367,7 @@ const submitClub = async () => {
   --brand: #1b8f48;
   --brand-600: #167a3d;
   --brand-200: #e6f3e9;
-  --page: #fefbea;
+  --page: #ffffff;
   --panel: #e6f6e6;
   --card: #ffffff;
   --card-soft: #e1f0e3;
@@ -618,7 +618,7 @@ const submitClub = async () => {
 .modal-card {
   width: 420px;
   max-width: 95%;
-  background: #fefbea;
+  background: #ffffff;
   border-radius: 18px;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2);
   padding: 20px 22px 18px;

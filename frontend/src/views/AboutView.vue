@@ -168,8 +168,8 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-:root { --brand: #1b8f48; --page: #fefbea; --ink: #153226; }
-.about-us-container { font-family: "Inter", sans-serif; background: #fefbea; color: #153226; min-height: 100vh; }
+:root { --brand: #1b8f48; --page: #ffffff; --ink: #153226; }
+.about-us-container { font-family: "Inter", sans-serif; background: #ffffff; color: #153226; min-height: 100vh; }
 
 .page-wrap { max-width: 1180px; margin: 0 auto 56px; padding: 0 20px 40px; }
 .about-hero { margin-top: 24px; margin-bottom: 26px; }

@@ -233,7 +233,7 @@ const toggleAuth = () => {
   --brand-600: #167a3d;
   --brand-200: #e6f3e9;
 
-  --page: #fefbea;
+  --page: #ffffff;
   --card: #ffffff;
 
   --ink: #153226;

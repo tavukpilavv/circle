@@ -870,7 +870,7 @@ const handleRatingSubmit = (payload) => {
   --brand-600: #167a3d;
   --brand-200: #e6f3e9;
 
-  --page: #fefbea;
+  --page: #ffffff;
   --panel: #e6f6e6;
   --card: #ffffff;
   --card-soft: #e1f0e3;

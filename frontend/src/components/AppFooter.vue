@@ -38,7 +38,7 @@
 
 <style scoped>
 .app-footer {
-  background-color: #fefbea;
+  background-color: #ffffff;
   border-top: 1px solid #e6f3e9;
   padding: 20px 20px 12px; /* Ultra compact padding */
   margin-top: auto;

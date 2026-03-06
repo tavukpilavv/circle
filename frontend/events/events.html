@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -7,10 +8,12 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet" />
 </head>
 
-<body style="margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#fefbea;color:#153226;">
+<body
+  style="margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#ffffff;color:#153226;">
 
   <div style="height:14px;background:#1b8f48;"></div>
 
@@ -20,7 +23,8 @@
 
       <div style="display:flex;gap:10px;align-items:center;">
         <a href="../communities/communities.html" style="text-decoration:none;color:#333;">Communities</a>
-        <a href="events.html" style="text-decoration:none;color:#333;border-bottom:2px solid #1b8f48;padding-bottom:6px;">Events</a>
+        <a href="events.html"
+          style="text-decoration:none;color:#333;border-bottom:2px solid #1b8f48;padding-bottom:6px;">Events</a>
       </div>
 
       <button id="openCreateEventModal"
@@ -36,46 +40,48 @@
   </main>
 
   <!-- MODAL -->
-  <div id="eventModal"
-       aria-hidden="true"
-       style="position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;padding:18px;z-index:9999;">
-    <div style="width:min(680px,100%);background:#fff;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.15);overflow:hidden;">
-      <div style="padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e5efe7;">
+  <div id="eventModal" aria-hidden="true"
+    style="position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;padding:18px;z-index:9999;">
+    <div
+      style="width:min(680px,100%);background:#fff;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.15);overflow:hidden;">
+      <div
+        style="padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e5efe7;">
         <h3 id="eventModalTitle" style="margin:0;font-size:16px;">Create Event</h3>
-        <button id="closeEventModal" style="border:none;background:transparent;font-size:18px;cursor:pointer;">✕</button>
+        <button id="closeEventModal"
+          style="border:none;background:transparent;font-size:18px;cursor:pointer;">✕</button>
       </div>
 
       <form id="eventForm" style="padding:16px;display:grid;gap:12px;">
         <div style="display:grid;gap:6px;">
           <label for="eventNameField" style="font-weight:700;">Event name</label>
           <input id="eventNameField" required
-                 style="height:42px;border:1px solid #d8eadb;border-radius:10px;padding:0 12px;outline:none;">
+            style="height:42px;border:1px solid #d8eadb;border-radius:10px;padding:0 12px;outline:none;">
         </div>
 
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
           <div style="display:grid;gap:6px;">
             <label for="eventDateField" style="font-weight:700;">Date</label>
             <input id="eventDateField" type="date" required
-                   style="height:42px;border:1px solid #d8eadb;border-radius:10px;padding:0 12px;outline:none;">
+              style="height:42px;border:1px solid #d8eadb;border-radius:10px;padding:0 12px;outline:none;">
           </div>
           <div style="display:grid;gap:6px;">
             <label for="eventCapacityField" style="font-weight:700;">Capacity</label>
             <input id="eventCapacityField" type="number" min="0"
-                   style="height:42px;border:1px solid #d8eadb;border-radius:10px;padding:0 12px;outline:none;">
+              style="height:42px;border:1px solid #d8eadb;border-radius:10px;padding:0 12px;outline:none;">
           </div>
         </div>
 
         <div style="display:grid;gap:6px;">
           <label for="eventLocationField" style="font-weight:700;">Location</label>
           <input id="eventLocationField"
-                 style="height:42px;border:1px solid #d8eadb;border-radius:10px;padding:0 12px;outline:none;">
+            style="height:42px;border:1px solid #d8eadb;border-radius:10px;padding:0 12px;outline:none;">
         </div>
 
         <!-- ✅ IMPORTANT: community dropdown comes from backend -->
         <div style="display:grid;gap:6px;">
           <label for="eventCommunityField" style="font-weight:700;">Community</label>
           <select id="eventCommunityField" name="community_id" required
-                  style="height:42px;border:1px solid #d8eadb;border-radius:10px;padding:0 12px;outline:none;background:#fff;">
+            style="height:42px;border:1px solid #d8eadb;border-radius:10px;padding:0 12px;outline:none;background:#fff;">
           </select>
           <small style="color:#6b7c74;">Admin will see only their club. Super admin will see all clubs.</small>
         </div>
@@ -83,23 +89,23 @@
         <div style="display:grid;gap:6px;">
           <label for="eventDescriptionField" style="font-weight:700;">Description</label>
           <textarea id="eventDescriptionField" rows="4"
-                    style="border:1px solid #d8eadb;border-radius:10px;padding:10px 12px;outline:none;resize:vertical;"></textarea>
+            style="border:1px solid #d8eadb;border-radius:10px;padding:10px 12px;outline:none;resize:vertical;"></textarea>
         </div>
 
         <!-- optional event image -->
         <div style="display:grid;gap:6px;">
           <label for="eventImageInput" style="font-weight:700;">Event image (optional)</label>
           <input id="eventImageInput" type="file" accept="image/*"
-                 style="height:42px;border:1px solid #d8eadb;border-radius:10px;padding:7px 12px;outline:none;background:#fff;">
+            style="height:42px;border:1px solid #d8eadb;border-radius:10px;padding:7px 12px;outline:none;background:#fff;">
         </div>
 
         <div style="display:flex;gap:10px;justify-content:flex-end;padding-top:6px;">
           <button id="cancelEventBtn" type="button"
-                  style="border:1px solid #d8eadb;background:#fff;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:700;">
+            style="border:1px solid #d8eadb;background:#fff;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:700;">
             Cancel
           </button>
           <button id="submitEventBtn" type="submit"
-                  style="border:none;background:#1b8f48;color:#fff;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:800;">
+            style="border:none;background:#1b8f48;color:#fff;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:800;">
             Submit
           </button>
         </div>
@@ -109,4 +115,5 @@
 
   <script src="events.js"></script>
 </body>
+
 </html>

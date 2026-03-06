@@ -12,7 +12,7 @@ body {
 
 body {
     font-family: 'Roboto', sans-serif;
-    background-color: #FDFDEE;
+    background-color: #ffffff;
     /* sarı arka plan */
     color: #333;
 }
@@ -41,7 +41,7 @@ body {
 /* 1. ÜST MENÜ (NAVBAR)                */
 /* ---------------------------------- */
 .navbar {
-    background-color: #FDFDEE;
+    background-color: #ffffff;
 
     padding: 0;
     width: 100%;
@@ -487,9 +487,10 @@ body {
     }
 
     .filters h3 {
-        display: none; /* Optional: hide title to save space or keep it */
+        display: none;
+        /* Optional: hide title to save space or keep it */
     }
-    
+
     /* Make filter items horizontal scrollable or wrapped */
     .filters {
         display: flex;
@@ -505,7 +506,7 @@ body {
         margin-right: 0;
         background: #f9f9f9;
     }
-    
+
     .filter-item:last-child {
         border-bottom: 1px solid #e0e0e0;
     }
@@ -520,55 +521,59 @@ body {
     .event-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .event-card {
-        height: auto; /* Allow height to grow */
-        flex-direction: column; /* Stack image and content */
+        height: auto;
+        /* Allow height to grow */
+        flex-direction: column;
+        /* Stack image and content */
         align-items: flex-start;
     }
-    
+
     .card-image-wrapper {
         width: 100%;
         height: 180px;
         margin-bottom: 12px;
     }
-    
+
     .card-content {
         padding-left: 0;
         width: 100%;
     }
-    
+
     .navbar-content {
         flex-direction: column;
         gap: 15px;
         padding-bottom: 10px;
     }
-    
+
     .navbar-center {
         position: static;
         transform: none;
         width: 100%;
-        order: 3; /* Move search bar to bottom */
+        order: 3;
+        /* Move search bar to bottom */
     }
-    
+
     .navbar-center .search-bar {
         width: 100%;
     }
-    
+
     .logo {
         margin-right: 0;
         font-size: 32px;
     }
-    
+
     .navbar-left {
         width: 100%;
         justify-content: space-between;
     }
-    
+
     .navbar nav {
-        display: none; /* Hide nav links on mobile for now or move to hamburger */
+        display: none;
+        /* Hide nav links on mobile for now or move to hamburger */
     }
-    
+
     .navbar-right {
         position: absolute;
         top: 15px;
