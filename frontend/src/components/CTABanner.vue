@@ -16,7 +16,7 @@
 
 <style scoped>
 .cta-banner {
-  background: linear-gradient(135deg, #153226 0%, #2E8540 100%);
+  background: linear-gradient(135deg, var(--brand-600) 0%, var(--brand) 100%);
   border-radius: 16px;
   padding: 60px 40px;
   margin: 40px 0;
@@ -24,7 +24,7 @@
   color: white;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(21, 50, 38, 0.15);
+  box-shadow: 0 10px 30px rgba(36, 29, 29, 0.15);
 }
 
 /* Optional: Subtle pattern overlay or accent element */

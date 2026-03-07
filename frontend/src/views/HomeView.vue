@@ -30,7 +30,7 @@
   >
     <template #header="{ close, titleId, titleClass }">
       <div class="my-header" style="display: flex; justify-content: space-between; align-items: center;">
-        <h4 :id="titleId" :class="titleClass" style="margin: 0; font-size: 20px; font-weight: 700; color: #153226;">{{ selectedEvent?.name }}</h4>
+        <h4 :id="titleId" :class="titleClass" style="margin: 0; font-size: 20px; font-weight: 700; color: var(--brand-600);">{{ selectedEvent?.name }}</h4>
       </div>
     </template>
     <div class="dialog-content-wrapper">
@@ -60,7 +60,7 @@
           <strong>Community:</strong> {{ selectedEvent.community_name }}
         </div>
 
-        <p style="color: #6b7c74; line-height: 1.6; margin: 20px 0; font-size: 15px;">
+        <p style="color: #555; line-height: 1.6; margin: 20px 0; font-size: 15px;">
           Join us for this exciting event! Don't miss out on this opportunity to connect with the community and participate in engaging activities.
         </p>
 
@@ -68,7 +68,7 @@
           <button 
             @click="toggleRegistration"
             :style="{
-              background: selectedEvent.registered ? '#e0e0e0' : '#1b8f48',
+              background: selectedEvent.registered ? '#e0e0e0' : 'var(--brand)',
               color: selectedEvent.registered ? '#333' : 'white',
               flex: 1
             }"
@@ -228,7 +228,7 @@ const onFilterChange = (val) => {
 }
 
 .detail-row i {
-  color: #1b8f48;
+  color: var(--brand);
   width: 20px;
 }
 
@@ -258,7 +258,7 @@ const onFilterChange = (val) => {
 
 :deep(.el-carousel__indicator.is-active .el-carousel__button) {
   opacity: 1 !important;
-  background-color: #1b8f48 !important;
+  background-color: var(--brand) !important;
 }
 
 /* Responsive: smaller indicators on mobile */

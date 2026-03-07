@@ -613,13 +613,13 @@ const register = async (event) => {
   padding: 5px 14px;
   font-size: 12px;
   font-weight: 500;
-  color: #345243;
+  color: #555;
   cursor: pointer;
 }
 
 .filter-pill.is-active {
   border-color: var(--brand);
-  background: #e1f3e3;
+  background: var(--brand-200);
 }
 
 /* ========= EVENT CARDS ========= */
@@ -654,13 +654,13 @@ const register = async (event) => {
   width: 64px;
   height: 64px;
   border-radius: 14px;
-  background: #f0fdf4;
-  border: 1px solid #dcfce7;
+  background: var(--brand-200);
+  border: 1px solid var(--brand-200);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: #15803d;
+  color: var(--brand);
   flex-shrink: 0;
 }
 
@@ -668,7 +668,7 @@ const register = async (event) => {
   font-size: 20px;
   line-height: 1;
   font-weight: 800;
-  color: #166534;
+  color: var(--brand-600);
   margin-bottom: 2px;
 }
 
@@ -678,7 +678,7 @@ const register = async (event) => {
   line-height: 1;
   text-transform: uppercase;
   font-weight: 700;
-  color: #15803d;
+  color: var(--brand);
 }
 
 /* middle */
@@ -746,7 +746,7 @@ const register = async (event) => {
 .event-primary-btn {
   border-radius: 999px;
   border: none;
-  background: #16a34a;
+  background: var(--brand);
   color: #ffffff;
   font-size: 13px;
   font-weight: 700;
@@ -758,7 +758,7 @@ const register = async (event) => {
 }
 
 .event-primary-btn:hover {
-  background: #15803d;
+  background: var(--brand);
   transform: translateY(-1px);
 }
 
@@ -766,7 +766,7 @@ const register = async (event) => {
   opacity: 0.8;
   cursor: default;
   transform: none;
-  background: #16a34a;
+  background: var(--brand);
 }
 
 .event-edit-btn {

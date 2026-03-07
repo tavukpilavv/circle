@@ -76,7 +76,7 @@ const close = () => {
   max-width: 500px;
   padding: 30px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(46, 133, 64, 0.1); /* Subtle green border hint */
+  border: 1px solid rgba(36, 29, 29, 0.1); /* Subtle green border hint */
 }
 
 .modal-header {
@@ -89,7 +89,7 @@ const close = () => {
 .modal-header h3 {
   font-size: 24px;
   font-weight: 700;
-  color: #153226; /* Dark green/black theme color */
+  color: var(--brand-600); /* Dark green/black theme color */
   margin: 0;
 }
 
@@ -135,11 +135,11 @@ const close = () => {
   width: 16px;
   height: 16px;
   cursor: pointer;
-  accent-color: #2E8540; /* Theme green */
+  accent-color: var(--brand); /* Theme green */
 }
 
 .got-it-btn {
-  background-color: #2E8540;
+  background-color: var(--brand);
   color: white;
   border: none;
   padding: 10px 24px;
@@ -151,7 +151,7 @@ const close = () => {
 }
 
 .got-it-btn:hover {
-  background-color: #1f6b30;
+  background-color: var(--brand-600);
 }
 
 /* Transitions */

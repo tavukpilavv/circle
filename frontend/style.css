@@ -1,6 +1,13 @@
 /* ---------------------------------- */
 /* GENEL STİLLER ve TEMEL AYARLAR     */
 /* ---------------------------------- */
+
+:root {
+    --brand: #372D2D;
+    --brand-600: #241D1D;
+    --brand-200: #EBE8E8;
+}
+
 * {
     box-sizing: border-box
 }
@@ -32,7 +39,7 @@ body {
     width: 100%;
     height: 12px;
     /* Kalınlığını buradan ayarlayabilirsiniz */
-    background-color: #372D2D;
+    background-color: var(--brand);
     /* Logodaki koyu yeşil */
 }
 
@@ -58,7 +65,7 @@ body {
     position: relative;
 
     /* YENİ EKLENEN SATIRLAR: */
-    border-bottom: 2px solid #372D2D;
+    border-bottom: 2px solid var(--brand);
     /* Çizgiyi buraya taşıdık */
     padding-bottom: 15px;
     /* Çizgi ile içerik arasına boşluk */
@@ -81,7 +88,7 @@ body {
 .logo {
     font-size: 48px;
     font-weight: 900;
-    color: #372D2D;
+    color: var(--brand);
     /* Koyu yeşil */
     text-decoration: none;
     margin-right: 160px;
@@ -100,7 +107,7 @@ body {
 .navbar nav a.active {
     color: #000;
     font-weight: 600;
-    border-bottom: 2px solid #372D2D;
+    border-bottom: 2px solid var(--brand);
     /* Altındaki yeşil çizgi */
 }
 
@@ -113,7 +120,7 @@ body {
 .navbar-center .search-bar {
     display: flex;
     align-items: center;
-    background-color: #E3F6DB;
+    background-color: var(--brand-200);
     padding: 10px 15px;
     border-radius: 32px;
     width: 500px;
@@ -148,8 +155,8 @@ body {
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    background-color: #E3F6DB;
-    color: #372D2D;
+    background-color: var(--brand-200);
+    color: var(--brand);
     align-items: center;
     justify-content: center;
     font-size: 18px;
@@ -158,7 +165,7 @@ body {
 }
 
 .navbar-right .profile-button:hover {
-    background-color: #372D2D;
+    background-color: var(--brand);
     color: #ffffff;
 }
 
@@ -311,7 +318,7 @@ body {
 
 /* Tek bir etkinlik kartı */
 .event-card {
-    background-color: #E9F5E6;
+    background-color: var(--brand-200);
     /* Light green background from reference */
     border-radius: 16px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
@@ -384,7 +391,7 @@ body {
     font-weight: 700;
     margin-bottom: 12px;
     line-height: 1.3;
-    color: #153226;
+    color: var(--brand-600);
     /* Dark green text */
 }
 
@@ -459,7 +466,7 @@ body {
 }
 
 .date-filter-container input[type="date"]:focus {
-    border-color: #372D2D;
+    border-color: var(--brand);
     /* Odaklanınca yeşil çerçeve */
     background-color: #fff;
 }

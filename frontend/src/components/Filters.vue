@@ -111,7 +111,7 @@ watch(dateRange, (nv) => {
   margin-top: 0;
   margin-bottom: 16px;
   font-size: 18px;
-  color: #153226;
+  color: var(--brand-600);
 }
 
 .filter-group {
@@ -123,7 +123,7 @@ watch(dateRange, (nv) => {
   margin-bottom: 8px;
   font-size: 14px;
   font-weight: 600;
-  color: #153226;
+  color: var(--brand-600);
 }
 
 .filter-item {

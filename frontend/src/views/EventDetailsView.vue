@@ -115,7 +115,7 @@
           </div>
 
           <div class="reviews-list">
-            <div v-if="reviewsList.length === 0" class="empty-state" style="text-align:center; padding:20px; color:#6b7c74;">
+            <div v-if="reviewsList.length === 0" class="empty-state" style="text-align:center; padding:20px; color:#555;">
               No reviews yet.
             </div>
             <div v-for="review in reviewsList" :key="review.id" class="review-card">
@@ -135,7 +135,7 @@
             </div>
           </div>
 
-          <!-- <div v-else class="empty-state" style="text-align:center; padding:40px; color:#6b7c74; background:#f8fcf9; border-radius:12px; margin-top:20px;">
+          <!-- <div v-else class="empty-state" style="text-align:center; padding:40px; color:#555; background:var(--brand-200); border-radius:12px; margin-top:20px;">
             <i class="fas fa-lock" style="font-size: 24px; margin-bottom: 10px; display:block;"></i>
             Detailed reviews are only visible to administrators.
           </div> -->
@@ -340,59 +340,59 @@ const fetchParticipants = async () => {
 
 <style scoped>
 /* CSS Stilleri Aynen Korundu */
-.page-wrap { max-width: 800px; margin: 40px auto; padding: 0 20px; font-family: 'Inter', sans-serif; color: #153226; }
-.back-btn { background: none; border: none; color: #6b7c74; font-size: 16px; cursor: pointer; display: flex; align-items: center; gap: 8px; margin-bottom: 20px; padding: 0; }
-.back-btn:hover { color: #1b8f48; }
+.page-wrap { max-width: 800px; margin: 40px auto; padding: 0 20px; font-family: 'Inter', sans-serif; color: var(--brand-600); }
+.back-btn { background: none; border: none; color: #555; font-size: 16px; cursor: pointer; display: flex; align-items: center; gap: 8px; margin-bottom: 20px; padding: 0; }
+.back-btn:hover { color: var(--brand); }
 .event-header { margin-bottom: 24px; text-align: center; }
-.event-header h1 { font-size: 32px; margin: 0 0 12px 0; color: #153226; }
-.community-badge { background: #e6f3e9; color: #1b8f48; padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; display: inline-block; }
+.event-header h1 { font-size: 32px; margin: 0 0 12px 0; color: var(--brand-600); }
+.community-badge { background: var(--brand-200); color: var(--brand); padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; display: inline-block; }
 .image-container { margin-bottom: 32px; }
 .event-image { width: 100%; height: 300px; object-fit: cover; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
-.tab-controls { display: flex; justify-content: center; gap: 40px; border-bottom: 2px solid #eef2f0; margin-bottom: 32px; }
-.tab-btn { background: none; border: none; padding: 16px 8px; font-size: 16px; font-weight: 600; color: #6b7c74; cursor: pointer; position: relative; transition: color 0.3s; }
-.tab-btn:hover { color: #153226; }
-.tab-btn.active { color: #1b8f48; }
-.tab-btn.active::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 100%; height: 2px; background: #1b8f48; border-radius: 2px; }
+.tab-controls { display: flex; justify-content: center; gap: 40px; border-bottom: 2px solid var(--brand-200); margin-bottom: 32px; }
+.tab-btn { background: none; border: none; padding: 16px 8px; font-size: 16px; font-weight: 600; color: #555; cursor: pointer; position: relative; transition: color 0.3s; }
+.tab-btn:hover { color: var(--brand-600); }
+.tab-btn.active { color: var(--brand); }
+.tab-btn.active::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 100%; height: 2px; background: var(--brand); border-radius: 2px; }
 .content-area { min-height: 300px; }
 .fade-in { animation: fadeIn 0.3s ease-in-out; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-.info-card { background: #ffffff; border: 1px solid #d8eadb; border-radius: 16px; padding: 24px; margin-bottom: 32px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.info-card { background: #ffffff; border: 1px solid var(--brand-200); border-radius: 16px; padding: 24px; margin-bottom: 32px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
 .info-row { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px; margin-bottom: 0; }
-.info-row i { font-size: 24px; color: #1b8f48; background: #e6f3e9; padding: 12px; border-radius: 50%; }
-.info-row strong { display: block; font-size: 14px; color: #6b7c74; margin-bottom: 4px; }
+.info-row i { font-size: 24px; color: var(--brand); background: var(--brand-200); padding: 12px; border-radius: 50%; }
+.info-row strong { display: block; font-size: 14px; color: #555; margin-bottom: 4px; }
 .info-row p { margin: 0; font-weight: 600; font-size: 16px; }
-.description-section h3 { font-size: 22px; margin-bottom: 16px; color: #153226; }
-.description-section p { line-height: 1.8; color: #4a5e53; font-size: 16px; }
-.register-btn { width: 100%; padding: 18px; background: #1b8f48; color: white; border: none; border-radius: 12px; font-size: 18px; font-weight: 600; cursor: pointer; margin-top: 40px; transition: all 0.2s; box-shadow: 0 4px 12px rgba(27, 143, 72, 0.2); }
-.register-btn:hover { background: #167a3d; transform: translateY(-2px); }
-.register-btn.registered { background: #d8eadb; color: #1b8f48; box-shadow: none; cursor: default; }
+.description-section h3 { font-size: 22px; margin-bottom: 16px; color: var(--brand-600); }
+.description-section p { line-height: 1.8; color: #555; font-size: 16px; }
+.register-btn { width: 100%; padding: 18px; background: var(--brand); color: white; border: none; border-radius: 12px; font-size: 18px; font-weight: 600; cursor: pointer; margin-top: 40px; transition: all 0.2s; box-shadow: 0 4px 12px rgba(36, 29, 29, 0.2); }
+.register-btn:hover { background: var(--brand-600); transform: translateY(-2px); }
+.register-btn.registered { background: var(--brand-200); color: var(--brand); box-shadow: none; cursor: default; }
 .register-btn.event-ended { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; box-shadow: none; }
-.reviews-summary { background: #f8fcf9; padding: 24px; border-radius: 16px; margin-bottom: 32px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #eef2f0; }
+.reviews-summary { background: var(--brand-200); padding: 24px; border-radius: 16px; margin-bottom: 32px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--brand-200); }
 .rating-score { display: flex; flex-direction: column; gap: 4px; }
-.rating-score .score { font-size: 36px; font-weight: 800; color: #153226; line-height: 1; }
+.rating-score .score { font-size: 36px; font-weight: 800; color: var(--brand-600); line-height: 1; }
 .rating-score .stars { color: #fbbf24; font-size: 14px; }
-.rating-score .count { font-size: 14px; color: #6b7c74; }
+.rating-score .count { font-size: 14px; color: #555; }
 .summary-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
-.write-review-btn { background: #1b8f48; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
-.write-review-btn:hover { background: #167a3d; }
+.write-review-btn { background: var(--brand); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+.write-review-btn:hover { background: var(--brand-600); }
 .reviews-list { display: flex; flex-direction: column; gap: 20px; }
-.review-card { background: white; border: 1px solid #eef2f0; border-radius: 12px; padding: 20px; transition: transform 0.2s; }
-.review-card:hover { border-color: #d8eadb; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
+.review-card { background: white; border: 1px solid var(--brand-200); border-radius: 12px; padding: 20px; transition: transform 0.2s; }
+.review-card:hover { border-color: var(--brand-200); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
 .review-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
 .reviewer-info { display: flex; align-items: center; gap: 12px; }
-.avatar { width: 40px; height: 40px; background: #e6f3e9; color: #1b8f48; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; }
-.reviewer-info .name { display: block; font-weight: 600; color: #153226; }
+.avatar { width: 40px; height: 40px; background: var(--brand-200); color: var(--brand); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+.reviewer-info .name { display: block; font-weight: 600; color: var(--brand-600); }
 .reviewer-info .date { font-size: 12px; color: #9ca3af; }
 .review-stars { color: #e5e7eb; font-size: 14px; }
 .review-stars .filled { color: #fbbf24; }
-.review-text { color: #4a5e53; line-height: 1.6; margin: 0; }
+.review-text { color: #555; line-height: 1.6; margin: 0; }
 .not-found { text-align: center; padding: 60px; }
-.participants-panel { background: white; padding: 24px; border-radius: 16px; border: 1px solid #d8eadb; }
+.participants-panel { background: white; padding: 24px; border-radius: 16px; border: 1px solid var(--brand-200); }
 .participants-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
-.participants-table th { text-align: left; padding: 12px; background: #f8fcf9; color: #153226; font-weight: 600; }
-.participants-table td { padding: 12px; border-bottom: 1px solid #eef2f0; color: #4a5e53; }
+.participants-table th { text-align: left; padding: 12px; background: var(--brand-200); color: var(--brand-600); font-weight: 600; }
+.participants-table td { padding: 12px; border-bottom: 1px solid var(--brand-200); color: #555; }
 .mini-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
-.loading-state, .empty-state { text-align: center; padding: 40px; color: #6b7c74; }
+.loading-state, .empty-state { text-align: center; padding: 40px; color: #555; }
 @media (max-width: 768px) {
   .info-card { grid-template-columns: 1fr; gap: 20px; }
   .info-row { flex-direction: row; text-align: left; }

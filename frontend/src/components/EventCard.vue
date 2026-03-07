@@ -87,7 +87,7 @@ const props = defineProps({
 .event-name {
   font-size: 16px;
   font-weight: 700;
-  color: #153226; /* Darker color */
+  color: var(--brand-600); /* Darker color */
   margin: 0;
   line-height: 1.4;
   
@@ -105,13 +105,13 @@ const props = defineProps({
   align-items: center;
   gap: 8px;
   font-size: 13px; /* Smaller size */
-  color: #6b7c74;
+  color: #555;
 }
 
 .event-detail i {
   width: 16px;
   text-align: center;
-  color: #1b8f48;
+  color: var(--brand);
 }
 
 .card-actions {
