@@ -32,7 +32,7 @@ body {
     width: 100%;
     height: 12px;
     /* Kalınlığını buradan ayarlayabilirsiniz */
-    background-color: #2E8540;
+    background-color: #372D2D;
     /* Logodaki koyu yeşil */
 }
 
@@ -58,7 +58,7 @@ body {
     position: relative;
 
     /* YENİ EKLENEN SATIRLAR: */
-    border-bottom: 2px solid #2E8540;
+    border-bottom: 2px solid #372D2D;
     /* Çizgiyi buraya taşıdık */
     padding-bottom: 15px;
     /* Çizgi ile içerik arasına boşluk */
@@ -81,7 +81,7 @@ body {
 .logo {
     font-size: 48px;
     font-weight: 900;
-    color: #2E8540;
+    color: #372D2D;
     /* Koyu yeşil */
     text-decoration: none;
     margin-right: 160px;
@@ -100,7 +100,7 @@ body {
 .navbar nav a.active {
     color: #000;
     font-weight: 600;
-    border-bottom: 2px solid #2E8540;
+    border-bottom: 2px solid #372D2D;
     /* Altındaki yeşil çizgi */
 }
 
@@ -149,7 +149,7 @@ body {
     height: 44px;
     border-radius: 50%;
     background-color: #E3F6DB;
-    color: #2E8540;
+    color: #372D2D;
     align-items: center;
     justify-content: center;
     font-size: 18px;
@@ -158,7 +158,7 @@ body {
 }
 
 .navbar-right .profile-button:hover {
-    background-color: #2E8540;
+    background-color: #372D2D;
     color: #ffffff;
 }
 
@@ -459,7 +459,7 @@ body {
 }
 
 .date-filter-container input[type="date"]:focus {
-    border-color: #2E8540;
+    border-color: #372D2D;
     /* Odaklanınca yeşil çerçeve */
     background-color: #fff;
 }

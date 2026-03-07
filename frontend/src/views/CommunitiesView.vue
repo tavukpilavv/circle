@@ -364,9 +364,9 @@ const submitClub = async () => {
 /* Your CSS is mostly fine; I added ONLY website styles */
 
 .page-wrap {
-  --brand: #1b8f48;
-  --brand-600: #167a3d;
-  --brand-200: #e6f3e9;
+ --brand: #372D2D;    
+  --brand-600: #241D1D;   
+  --brand-200: #EBE8E8;
   --page: #ffffff;
   --panel: #e6f6e6;
   --card: #ffffff;
