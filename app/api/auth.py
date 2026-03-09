@@ -34,14 +34,63 @@ def register():
             last_name=data.get('lastName'),
             email=data.get('email'),
             username=data.get('username'),
-            major=data.get('major')
+            major=data.get('major'),
+            is_verified=False
         )
         user.set_password(data.get('password'))
         
         db.session.add(user)
         db.session.commit()
-        
-        return jsonify({'message': 'Registration successful!'}), 201
+
+        # Doğrulama Tokeni Oluştur
+        verify_token = create_access_token(
+            identity=str(user.id),
+            expires_delta=timedelta(hours=24),
+            additional_claims={"type": "verify"}
+        )
+
+        # Doğrulama Linki
+        frontend_url = os.environ.get('FRONTEND_URL', 'http://localhost:5173')
+        verify_link = f"{frontend_url}/#/verify-email?token={verify_token}"
+
+        # Mail Gönder
+        try:
+            sender_email = os.environ.get('MAIL_USER')
+            sender_password = os.environ.get('MAIL_PASS')
+
+            if sender_email and sender_password:
+                msg = MIMEMultipart()
+                msg['From'] = sender_email
+                msg['To'] = user.email
+                msg['Subject'] = Header("Circle - Verify Your Email", 'utf-8')
+
+                body = f"""
+Hi {user.first_name},
+
+Welcome to Circle! Please verify your email address by clicking the link below (valid for 24 hours):
+
+{verify_link}
+
+If you did not create an account, please ignore this email.
+
+Circle Team
+                """
+
+                msg.attach(MIMEText(body, 'plain', 'utf-8'))
+
+                server = smtplib.SMTP('smtp.gmail.com', 587)
+                server.starttls()
+                server.login(sender_email, sender_password)
+                server.send_message(msg)
+                server.quit()
+
+                print(f"✅ Verification mail sent: {user.email}")
+
+        except Exception as mail_error:
+            print(f" Verification mail error: {str(mail_error)}")
+
+        return jsonify({'message': 'Registration successful! Please check your email to verify your account.'}), 201
+
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -63,8 +112,10 @@ def login():
         ).first()
         
         if user and user.check_password(password):
-            access_token = create_access_token(identity=str(user.id))
-            return jsonify({
+              if not user.is_verified:
+                return jsonify({'error': 'Please verify your email address before logging in.'}), 403
+              access_token = create_access_token(identity=str(user.id))
+              return jsonify({
                 'message': 'Login successful.',
                 'access_token': access_token,
                 'user': {
@@ -205,7 +256,44 @@ def reset_password():
     except Exception as e:
         print(f"ERROR in reset_password: {str(e)}")
         return jsonify({'error': 'An error occurred.'}), 500
+# ===========================
+# 5. VERIFY EMAIL
+# ===========================
+@bp.route('/verify-email', methods=['POST'])
+def verify_email():
+    try:
+        data = request.get_json()
+        token = data.get('token')
 
+        if not token:
+            return jsonify({'error': 'Token is required.'}), 400
+
+        try:
+            decoded_token = decode_token(token)
+
+            if decoded_token.get("type") != "verify":
+                return jsonify({'error': 'Invalid token type.'}), 400
+
+            user_id = decoded_token.get("sub")
+            user = User.query.get(user_id)
+
+            if not user:
+                return jsonify({'error': 'User not found.'}), 404
+
+            if user.is_verified:
+                return jsonify({'message': 'Email is already verified.'}), 200
+
+            user.is_verified = True
+            db.session.commit()
+
+            return jsonify({'message': 'Email verified successfully! You can now log in.'}), 200
+
+        except Exception as token_error:
+            print(f"TOKEN ERROR: {str(token_error)}")
+            return jsonify({'error': 'Invalid or expired link.'}), 400
+
+    except Exception as e:
+        return jsonify({'error': 'An error occurred.'}), 500
 # ===========================
 # 5. PROFILE & CHANGE PASSWORD
 # ===========================
