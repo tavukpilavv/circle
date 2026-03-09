@@ -128,9 +128,12 @@ const handleLogin = async () => {
         alert('Login failed: Token missing from response.');
       }
     } else {
-      // 401 Unauthorized or other errors
-      alert('Invalid username or password!');
-    }
+  if (response.status === 403) {
+    alert('Please verify your email address before logging in. Check your inbox for the verification link.');
+  } else {
+    alert('Invalid username or password!');
+  }
+}
   } catch (error) {
     console.error('Login error:', error);
     alert('Unable to connect to the server.');

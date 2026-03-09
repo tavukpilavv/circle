@@ -159,17 +159,16 @@ const submit = () => {
 
                 const data = await response.json();
 
-                if (response.ok) {
-                    // Kayıt Başarılı
-                    ElMessage.success('Registration successful! Redirecting to login...');
-                    
-                    // İsteğe bağlı: Kullanıcı adını login sayfasında otomatik doldurmak için saklayabilirsin
-                    localStorage.setItem('registered_username', form.value.username);
+            if (response.ok) {
+                ElMessage.success({
+                    message: 'Registration successful! Please check your email to verify your account.',
+                    duration: 3000
+                });
 
-                    setTimeout(() => {
-                        router.push('/login');
-                    }, 1500);
-                } else {
+                setTimeout(() => {
+                    router.push('/login');
+                }, 3000);
+            } else {
                     // Backend hata döndürdü (Örn: "Email zaten var")
                     ElMessage.error(data.error || 'Registration failed. Please try again.');
                 }

@@ -44,6 +44,11 @@ const routes = [
         component: () => import('../views/ResetPasswordView.vue')
     },
     {
+    path: '/verify-email',
+    name: 'VerifyEmail',
+    component: () => import('../views/VerifyEmailView.vue')
+   },
+    {
         path: '/signup',
         name: 'Signup',
         component: () => import('../views/SignupView.vue')
