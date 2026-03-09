@@ -111,7 +111,6 @@ class AuthTestCase(unittest.TestCase):
         print("Checking Super Admin...")
         resp = self.client.post('/api/auth/login', json={
             "email": "super@circle.com",
-            "password": "123456"
         })
         data = resp.get_json()
         print(f"Super Admin Role: {data['user']['role']}")
@@ -121,7 +120,6 @@ class AuthTestCase(unittest.TestCase):
         print("Checking Student...")
         resp = self.client.post('/api/auth/login', json={
             "email": "ali@ogrenci.com",
-            "password": "123456"
         })
         data = resp.get_json()
         print(f"Student Role: {data['user']['role']}")

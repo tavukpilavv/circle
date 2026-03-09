@@ -135,18 +135,22 @@ def create_app(config_class=Config):
     def health():
         return {"status": "healthy"}, 200
 
-    # --- SÜPER ADMIN SEEDING ---
+    # --- FIXED SÜPER ADMIN SEEDING ---
     with app.app_context():
-        # Tabloları oluştur (Dev ortamı için)
         db.create_all()
-        
-        # Modeli burada import ediyoruz ki döngüye girmesin
         from app.models import User 
         
         try:
+            # We check by email or username to see if the admin exists
             admin = User.query.filter_by(username='superadmin').first()
+            
             if not admin:
-                print("--- Creating Super Admin... ---")
+                print("--- Initializing Super Admin for the first time... ---")
+                
+                # Pull the password from Render Environment Variables
+                # Default to a temporary string if you haven't set the Render variable yet
+                initial_pw = os.environ.get("INITIAL_ADMIN_PASSWORD", "CircleAdmin2026!")
+                
                 admin = User(
                     username='superadmin',
                     email='admin@circle.app',
@@ -155,13 +159,20 @@ def create_app(config_class=Config):
                     major='Management',
                     role='super_admin'
                 )
-                admin.set_password('123456')
+                
+                # Hash the password only once during creation
+                admin.set_password(initial_pw)
+                
                 db.session.add(admin)
                 db.session.commit()
-                print(f"--- Super Admin Check: {admin.username} is ready ---")
+                print("--- Super Admin created and hashed. ---")
+            else:
+                # If the user is found, we do NOT run set_password. 
+                # This protects your 'Forgot Password' changes from being reset
+                print(f"--- Admin {admin.username} already exists. Persistent password maintained. ---")
+                
         except Exception as e:
             print(f"Seeding Error (Ignored): {e}")
-
     return app
 
 # Modelleri en sonda import ediyoruz ki migrate algılasın

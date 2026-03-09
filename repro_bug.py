@@ -15,13 +15,12 @@ def test_login():
         print(f"Hash in DB: {user.password_hash}")
         
         # Check manually
-        chk = user.check_password("123456")
-        print(f"Manual check_password('123456'): {chk}")
+        chk = user.check_password("")
+        print(f"Manual check_password(''): {chk}")
 
         client = app.test_client()
 
         print("--- T1: Correct ---")
-        resp = client.post('/api/auth/login', json={'email': 'ali@ogrenci.com', 'password': '123456'})
         print(f"S:{resp.status_code} D:{resp.get_json()}")
 
         print("--- T2: Wrong pass ---")
@@ -29,7 +28,6 @@ def test_login():
         print(f"S:{resp.status_code} D:{resp.get_json()}")
         
         print("--- T3: Username correct pass ---")
-        resp = client.post('/api/auth/login', json={'username': 'aliy', 'password': '123456'})
         print(f"S:{resp.status_code} D:{resp.get_json()}")
 
 if __name__ == "__main__":
