@@ -3,9 +3,9 @@
 /* ---------------------------------- */
 
 :root {
-    --brand: #372D2D;
-    --brand-600: #241D1D;
-    --brand-200: #EBE8E8;
+    --brand: #111111;
+    --brand-600: #000000;
+    --brand-200: #f1f5f9;
 }
 
 * {
@@ -18,10 +18,10 @@ body {
 }
 
 body {
-    font-family: 'Roboto', sans-serif;
+    font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
     background-color: #ffffff;
-    /* sarı arka plan */
-    color: #333;
+    color: #111111;
+    -webkit-font-smoothing: antialiased;
 }
 
 /* Sayfa içeriğini ortalayan ana taşıyıcı */
@@ -120,12 +120,17 @@ body {
 .navbar-center .search-bar {
     display: flex;
     align-items: center;
-    background-color: var(--brand-200);
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
     padding: 10px 15px;
     border-radius: 32px;
     width: 500px;
     height: 50px;
+    transition: all 0.2s;
+}
 
+.navbar-center .search-bar:focus-within {
+    border-color: #111111;
 }
 
 .search-bar i {
@@ -318,10 +323,10 @@ body {
 
 /* Tek bir etkinlik kartı */
 .event-card {
-    background-color: var(--brand-200);
-    /* Light green background from reference */
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
     border-radius: 16px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
     position: relative;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     overflow: hidden;
@@ -457,11 +462,11 @@ body {
     font-family: 'Inter', sans-serif;
     /* Diğerleriyle aynı font */
     font-size: 15px;
-    border: 1px solid #ccc;
+    border: 1px solid #e2e8f0;
     border-radius: 8px;
     outline: none;
-    color: #555;
-    background-color: #fafafa;
+    color: #111111;
+    background-color: #ffffff;
     transition: border-color 0.2s;
 }
 
@@ -586,4 +591,21 @@ body {
         top: 15px;
         right: 20px;
     }
+}
+
+/* Toast Overrides to match minimalist brand */
+.Vue-Toastification__toast--success {
+    background-color: #111111 !important;
+    color: #ffffff !important;
+}
+
+.Vue-Toastification__toast--error {
+    background-color: #e55353 !important;
+    color: #ffffff !important;
+}
+
+.Vue-Toastification__toast--info {
+    background-color: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    color: #111111 !important;
 }

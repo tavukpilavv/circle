@@ -397,33 +397,39 @@ const submitClub = async () => {
 
 .community-search-shell {
   width: 100%;
-  height: 46px;
+  height: 48px;
   border-radius: 999px;
-  background: #f7fbf8;
-  border: 1px solid var(--outline);
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 0 16px;
-  margin-bottom: 10px;
+  gap: 12px;
+  padding: 0 20px;
+  margin-bottom: 16px;
+  transition: all 0.2s ease;
+}
+
+.community-search-shell:focus-within {
+  border-color: #111111;
+  box-shadow: 0 0 0 1px #111111;
 }
 
 .community-search-shell i {
-  font-size: 15px;
-  color: #6d8677;
+  font-size: 16px;
+  color: #6b7280;
 }
 
 .community-search-shell input {
   border: none;
   outline: none;
   flex: 1;
-  font-size: 14px;
+  font-size: 15px;
   background: transparent;
-  color: #294033;
+  color: #111111;
 }
 
 .community-search-shell input::placeholder {
-  color: #a5b9ab;
+  color: #9ca3af;
 }
 
 .filters-row {
@@ -745,12 +751,12 @@ const submitClub = async () => {
 
 /* FILE UPLOAD CSS */
 .file-upload-box {
-  border: 2px dashed #dadfd4;
+  border: 2px dashed #e2e8f0;
   border-radius: 8px;
   padding: 20px;
   text-align: center;
   cursor: pointer;
-  background: #fdfdfd;
+  background: #ffffff;
   transition: all 0.2s;
   position: relative;
   min-height: 100px;
@@ -760,8 +766,8 @@ const submitClub = async () => {
 }
 
 .file-upload-box:hover {
-  border-color: var(--brand);
-  background: #f4faf4;
+  border-color: #111111;
+  background: #f8fafc;
 }
 
 .file-upload-box.has-file {
@@ -781,7 +787,7 @@ const submitClub = async () => {
 
 .upload-placeholder i {
   font-size: 24px;
-  color: #a5b9ab;
+  color: #111111;
 }
 
 .preview-container {

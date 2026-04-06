@@ -58,9 +58,14 @@
   font-family: 'Nunito', sans-serif;
   font-weight: 900;
   font-size: 18px; /* Smaller logo */
-  color: #1b8f48;
+  color: #111111;
   text-decoration: none;
   margin: 0;
+  transition: color 0.3s ease-in-out;
+}
+
+.footer-logo:hover {
+  color: #5D4037;
 }
 
 .brand-row {
@@ -70,14 +75,14 @@
 }
 
 .social-link-small {
-  color: #1b8f48;
+  color: #111111;
   display: flex;
   align-items: center;
-  transition: opacity 0.2s;
+  transition: color 0.3s ease-in-out;
 }
 
 .social-link-small:hover {
-  opacity: 0.8;
+  color: #5D4037;
 }
 
 .footer-tagline {
@@ -108,16 +113,16 @@
   margin: 0;
 }
 
-.footer-col a {
+.footer-col ul a {
   text-decoration: none;
-  color: #556b5f;
-  font-size: 12px; /* Smaller font */
+  color: #111111;
+  font-size: 13px; /* Slightly refined size */
   font-weight: 600;
-  transition: color 0.2s;
+  transition: color 0.3s ease-in-out;
 }
 
-.footer-col a:hover {
-  color: #1b8f48;
+.footer-col ul a:hover {
+  color: #5D4037;
 }
 
 

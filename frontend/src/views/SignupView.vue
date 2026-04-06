@@ -80,10 +80,6 @@ const validatePasswordStrength = (rule, value, callback) => {
         callback(new Error('Password is required'))
     } else if (value.length < 8) {
         callback(new Error('Password must be at least 8 characters'))
-    } else if (!/[A-Z]/.test(value)) {
-        callback(new Error('Password must contain at least one uppercase letter'))
-    } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(value)) {
-        callback(new Error('Password must contain at least one special character'))
     } else {
         callback()
     }
@@ -120,7 +116,7 @@ const rules = {
         { validator: validatePasswordStrength, trigger: 'blur' }
     ],
     confirmPassword: [
-        { validator: validateConfirmPassword, trigger: ['blur', 'change'] }
+        { validator: validateConfirmPassword, trigger: 'blur' }
     ]
 }
 
@@ -188,10 +184,10 @@ const submit = () => {
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
 .signup-page {
-    --color-bg-main: #f0f7f0;
+    --color-bg-main: #ffffff;
     --color-text-dark: #000000;
     --color-text-link: #FF9E4A;
-    --color-green-dark: #1A916D;
+    --color-green-dark: #111111;
     
     font-family: 'Roboto', sans-serif;
     color: #333;
@@ -217,14 +213,15 @@ main {
 }
 
 .signup-box {
-    background-color: #E3F6DB;
+    background-color: #ffffff;
     border-radius: 15px;
     padding: 40px 50px;
     width: 100%;
     max-width: 740px; /* Increased width to match Login box */
     text-align: center;
     position: relative;
-    border: 2px dashed #1A916D;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     box-sizing: border-box;
 }
 
@@ -241,7 +238,7 @@ main {
 }
 
 .title {
-    color: #16A34A;     
+    color: #111111;     
     font-size: 36px;   
     font-weight: 800;  
     margin-bottom: 30px; 
@@ -270,14 +267,14 @@ main {
     height: 69px; /* Increased to match Login page */
     border-radius: 8px;
     box-shadow: none;
-    border: 1px solid #FFFFFF;
+    border: 1px solid #e2e8f0;
     background-color: #ffffff;
     padding: 0 20px;
 }
 
 :deep(.el-input__wrapper.is-focus) {
-    border-color: #1A916D;
-    box-shadow: 0 0 0 1px #1A916D;
+    border-color: #111111;
+    box-shadow: 0 0 0 1px #111111;
 }
 
 :deep(.el-input__inner) {
@@ -289,7 +286,7 @@ main {
 :deep(.el-form-item__label) {
     font-size: 16px;
     font-weight: 600;
-    color: #153226;
+    color: #4b5563;
     margin-bottom: 6px;
 }
 
@@ -298,18 +295,19 @@ main {
     width: 100%;
     height: 76.18px;
     border-radius: 16px;
-    background-color: #1A916D;
-    border-color: #1A916D;
+    background-color: #111111;
+    border-color: #111111;
     font-size: 24px;
     font-weight: 800;
     font-family: 'Roboto', sans-serif;
     color: #ffffff;
     margin-top: 10px;
+    transition: background-color 0.3s, border-color 0.3s;
 }
 
 .signup-button:hover {
-    background-color: #157a5c;
-    border-color: #157a5c;
+    background-color: #333333;
+    border-color: #333333;
 }
 
 /* Links */

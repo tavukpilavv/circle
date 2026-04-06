@@ -55,11 +55,12 @@ html, body {
   -ms-overflow-style: none;
 }
 
-/* Element Plus Dialog - Yellow background with green dashed border */
+/* Element Plus Dialog Styling */
 .el-dialog {
   background-color: #ffffff !important;
-  border: 3px dashed #1b8f48 !important;
-  box-shadow: none !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+  border-radius: 16px !important;
 }
 
 .el-dialog__header {

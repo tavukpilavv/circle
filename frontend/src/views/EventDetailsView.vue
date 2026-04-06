@@ -158,10 +158,16 @@
               <tbody>
                 <tr v-for="p in safeParticipants" :key="p.email">
                   <td>
-                    <img :src="p.avatar_url || 'https://via.placeholder.com/40'" class="mini-avatar"/>
+                    <el-avatar
+                      :size="36"
+                      :src="p.avatar_url || ''"
+                      style="background-color: #f1f5f9; color: #111111; font-weight: 700; font-size: 13px;"
+                    >
+                      {{ ((p.first_name?.charAt(0) || '') + (p.last_name?.charAt(0) || '')).toUpperCase() || '?' }}
+                    </el-avatar>
                   </td>
-                  <td>{{ p.first_name }} {{ p.last_name }}</td>
-                  <td>{{ p.email }}</td>
+                  <td style="font-weight: 500;">{{ p.first_name }} {{ p.last_name }}</td>
+                  <td style="color: #64748b;">{{ p.email }}</td>
                 </tr>
               </tbody>
             </table>
@@ -387,11 +393,10 @@ const fetchParticipants = async () => {
 .review-stars .filled { color: #fbbf24; }
 .review-text { color: #555; line-height: 1.6; margin: 0; }
 .not-found { text-align: center; padding: 60px; }
-.participants-panel { background: white; padding: 24px; border-radius: 16px; border: 1px solid var(--brand-200); }
+.participants-panel { background: white; padding: 24px; border-radius: 16px; border: 1px solid #e2e8f0; }
 .participants-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
-.participants-table th { text-align: left; padding: 12px; background: var(--brand-200); color: var(--brand-600); font-weight: 600; }
-.participants-table td { padding: 12px; border-bottom: 1px solid var(--brand-200); color: #555; }
-.mini-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
+.participants-table th { text-align: left; padding: 12px; background: #f8fafc; color: #64748b; font-weight: 600; text-transform: uppercase; font-size: 12px; letter-spacing: 0.05em; }
+.participants-table td { padding: 12px; border-bottom: 1px solid #e2e8f0; color: #111111; }
 .loading-state, .empty-state { text-align: center; padding: 40px; color: #555; }
 @media (max-width: 768px) {
   .info-card { grid-template-columns: 1fr; gap: 20px; }

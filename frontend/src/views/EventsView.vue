@@ -608,18 +608,27 @@ const register = async (event) => {
 
 .filter-pill {
   border-radius: 20px;
-  border: 1px solid var(--outline);
-  background: #f7fbf8;
+  border: 1px solid #EBE8E8;
+  background: #F4F2F2;
   padding: 5px 14px;
   font-size: 12px;
   font-weight: 500;
-  color: #555;
+  color: #372D2D;
   cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.filter-pill:hover {
+  background: #EAE6E6;
+  border-color: #DEDADA;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transform: translateY(-1px);
 }
 
 .filter-pill.is-active {
-  border-color: var(--brand);
-  background: var(--brand-200);
+  border-color: #372D2D;
+  background: #372D2D;
+  color: #ffffff;
 }
 
 /* ========= EVENT CARDS ========= */
@@ -654,13 +663,13 @@ const register = async (event) => {
   width: 64px;
   height: 64px;
   border-radius: 14px;
-  background: var(--brand-200);
-  border: 1px solid var(--brand-200);
+  background: #F4F2F2;
+  border: 1px solid #EBE8E8;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: var(--brand);
+  color: #372D2D;
   flex-shrink: 0;
 }
 
@@ -668,7 +677,7 @@ const register = async (event) => {
   font-size: 20px;
   line-height: 1;
   font-weight: 800;
-  color: var(--brand-600);
+  color: #372D2D;
   margin-bottom: 2px;
 }
 
@@ -678,7 +687,7 @@ const register = async (event) => {
   line-height: 1;
   text-transform: uppercase;
   font-weight: 700;
-  color: var(--brand);
+  color: #372D2D;
 }
 
 /* middle */
@@ -713,7 +722,7 @@ const register = async (event) => {
 .event-meta {
   margin-top: 8px;
   font-size: 13px;
-  color: #475569;
+  color: #4A3C3C;
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
@@ -728,7 +737,7 @@ const register = async (event) => {
 }
 
 .event-meta i {
-  color: #64748b;
+  color: #4A3C3C;
   font-size: 14px;
 }
 
@@ -867,8 +876,8 @@ const register = async (event) => {
 
 .modal-upload-box {
   border-radius: 10px;
-  border: 1px dashed #cfd5c9;
-  background: #f8faef;
+  border: 1px dashed #e2e8f0;
+  background: #ffffff;
   padding: 24px 16px 18px;
   text-align: center;
   margin-bottom: 16px;
@@ -876,7 +885,7 @@ const register = async (event) => {
 
 .upload-icon {
   font-size: 22px;
-  color: #707b82;
+  color: #111111;
   margin-bottom: 8px;
 }
 
@@ -889,7 +898,7 @@ const register = async (event) => {
 .upload-btn {
   display: inline-block;
   border-radius: 20px;
-  background: #3b4450;
+  background: #111111;
   color: white;
   font-size: 12px;
   padding: 7px 22px;
@@ -918,6 +927,7 @@ const register = async (event) => {
   flex-direction: column;
   gap: 3px;
   margin-bottom: 8px;
+  min-width: 0; /* Prevents long select options from pushing the card width */
 }
 
 .form-field label {
@@ -928,6 +938,8 @@ const register = async (event) => {
 .modal-form input,
 .modal-form textarea,
 .modal-form select {
+  width: 100%;
+  max-width: 100%;
   border-radius: 4px;
   border: 1px solid #dadfd4;
   padding: 6px 8px;
@@ -935,6 +947,7 @@ const register = async (event) => {
   font-family: inherit;
   outline: none;
   background: #ffffff;
+  box-sizing: border-box; /* Ensure padding doesn't add to width */
 }
 
 .modal-form input:focus,

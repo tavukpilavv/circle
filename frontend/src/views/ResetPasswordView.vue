@@ -101,19 +101,19 @@ const handleResetConfirm = async () => {
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
 
-.login-page { --color-bg-main: #f0f7f0; --color-text-dark: #000000; --color-text-link: #FF9E4A; --color-green-dark: #1A916D; font-family: 'Roboto', sans-serif; color: #333; min-height: 100vh; }
+.login-page { --color-bg-main: #ffffff; --color-text-dark: #000000; --color-text-link: #FF9E4A; --color-green-dark: #111111; font-family: 'Roboto', sans-serif; color: #333; min-height: 100vh; }
 main { padding-top: 40px; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
 .signin-container { flex-grow: 1; display: flex; align-items: flex-start; justify-content: center; padding: 80px 20px 20px; width: 100%; }
-.signin-box { background-color: #E3F6DB; border-radius: 15px; padding: 40px 50px; width: 100%; max-width: 740px; min-height: 500px; text-align: center; position: relative; border: 2px dashed #1A916D; box-sizing: border-box; }
-.title { color: #16A34A; font-size: 36px; font-weight: 800; margin-bottom: 20px; font-family: 'Roboto', sans-serif; }
+.signin-box { background-color: #ffffff; border-radius: 15px; padding: 40px 50px; width: 100%; max-width: 740px; min-height: 500px; text-align: center; position: relative; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; }
+.title { color: #111111; font-size: 36px; font-weight: 800; margin-bottom: 20px; font-family: 'Roboto', sans-serif; }
 .description { color: #555; font-size: 16px; margin-bottom: 30px; line-height: 1.5; max-width: 500px; margin-left: auto; margin-right: auto; }
 .input-group { margin-bottom: 20px; width: 100%; }
-.input-group input { width: 100%; max-width: 642px; height : 69px; padding: 15px 20px; border: 1px solid #FFFFFF; border-radius: 8px; font-size: 15px; outline: none; transition: border-color 0.3s; box-sizing: border-box; }
+.input-group input { width: 100%; max-width: 642px; height : 69px; padding: 15px 20px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 15px; outline: none; transition: border-color 0.3s; box-sizing: border-box; }
 .input-group input:focus { border-color: var(--color-green-dark); }
 .password-group { position: relative; max-width: 642px; margin: 0 auto 20px; }
-.password-toggle-btn { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #1A916D; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; }
+.password-toggle-btn { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #111111; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; }
 .material-icons { font-size: 24px; }
-.signin-button { width: 100%; max-width: 637px; height: 76.18px; background-color: #1A916D; border-radius: 16px; font-size: 24px; font-weight: 800; display: flex; align-items: center; justify-content: center; padding: 0; color: white; border: none; cursor: pointer; margin: 10px auto 0; transition: background-color 0.3s; }
-.signin-button:hover:not(:disabled) { background-color:#157a5c; }
+.signin-button { width: 100%; max-width: 637px; height: 76.18px; background-color: #111111; border-radius: 16px; font-size: 24px; font-weight: 800; display: flex; align-items: center; justify-content: center; padding: 0; color: white; border: none; cursor: pointer; margin: 10px auto 0; transition: background-color 0.3s; }
+.signin-button:hover:not(:disabled) { background-color:#333333; }
 .signin-button:disabled { opacity: 0.7; cursor: not-allowed; }
 </style>

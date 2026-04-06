@@ -257,7 +257,7 @@
             <button 
               v-else
               class="rate-pill" 
-              style="position: absolute; right: 16px; bottom: 16px; background-color: #1b8f48; color: white; border: none; border-radius: 20px; padding: 4px 12px; font-weight: bold; font-size: 12px;"
+              style="position: absolute; right: 16px; bottom: 16px; background-color: #111111; color: white; border: none; border-radius: 20px; padding: 4px 12px; font-weight: bold; font-size: 12px;"
               :class="{ 'is-rated': isRated(event.id) }"
               @click="openRating(event)"
             >
@@ -294,32 +294,23 @@
         <el-empty description="No pending applications" />
       </div>
 
-      <section class="slider-shell" aria-label="Pending Applications" v-else>
-        <div class="slider-track" style="display: flex; flex-direction: column; gap: 15px; overflow-x: visible;">
-          <article class="card application-card" v-for="app in pendingApplications" :key="app.id" style="width: 100%; flex-direction: row; align-items: center; justify-content: space-between; padding: 15px;">
+      <section class="applications-container" aria-label="Pending Applications" v-else>
+        <div class="app-list">
+          <article class="app-card" v-for="app in pendingApplications" :key="app.id">
             <div class="app-info">
-              <h4 style="margin: 0; color: var(--ink);">{{ app.name }}</h4>
-              <p style="margin: 5px 0 0; font-size: 13px; color: var(--muted);">Description: {{ app.short_description }}</p>
-            </div>
-            <div class="app-actions" style="display: flex; align-items: center; gap: 15px;">
-              <button
-                class="document-link"
-                @click="openApplicationDetails(app)"
-                style="background:none; border:none; cursor:pointer; color:#409eff;"
-              >
-                <el-icon><Document /></el-icon> View Details
+              <h4>{{ app.name }}</h4>
+              <p class="app-desc">{{ app.short_description || app.description }}</p>
+              <button class="view-details-btn" @click="openApplicationDetails(app)">
+                View Details
               </button>
-              <el-button type="success" size="small" @click="approveApp(app.id)" :loading="approvingId === app.id">
-                Approve & Promote
-              </el-button>
-              <el-button
-                type="danger"
-                size="small"
-                @click="rejectApp(app.id)"
-                :loading="rejectingId === app.id"
-              >
-                Reject
-              </el-button>
+            </div>
+            <div class="app-actions">
+              <button class="app-reject-btn" @click="rejectApp(app.id)" :disabled="rejectingId === app.id">
+                {{ rejectingId === app.id ? 'Rejecting...' : 'Reject' }}
+              </button>
+              <button class="app-approve-btn" @click="approveApp(app.id)" :disabled="approvingId === app.id">
+                {{ approvingId === app.id ? 'Approving...' : 'Approve & Promote' }}
+              </button>
             </div>
           </article>
         </div>
@@ -380,7 +371,7 @@
             <button 
               v-else
               class="rate-pill" 
-              style="position: absolute; right: 16px; bottom: 16px; background-color: #1b8f48; color: white; border: none; border-radius: 20px; padding: 4px 12px; font-weight: bold; font-size: 12px;"
+              style="position: absolute; right: 16px; bottom: 16px; background-color: #111111; color: white; border: none; border-radius: 20px; padding: 4px 12px; font-weight: bold; font-size: 12px;"
               :class="{ 'is-rated': isRated(event.id) }"
               @click="openRating(event)"
             >
@@ -438,7 +429,13 @@
 
          <div v-else class="attendee-list">
            <div v-for="u in registrations" :key="u.id" class="attendee-item">
-             <img :src="u.avatar_url || 'https://via.placeholder.com/40'" alt="Avatar" class="attendee-avatar" />
+             <el-avatar 
+               :size="40" 
+               :src="u.avatar_url || ''"
+               style="background-color: #f1f5f9; color: #111111; font-weight: 700; font-size: 14px; margin-right: 12px; flex-shrink: 0;"
+             >
+               {{ ((u.first_name?.charAt(0) || '') + (u.last_name?.charAt(0) || '')).toUpperCase() || '?' }}
+             </el-avatar>
              <div class="attendee-info">
                <div class="attendee-name">{{ u.first_name }} {{ u.last_name }}</div>
               <div class="attendee-email">{{ u.email }}</div>
@@ -451,30 +448,54 @@
   v-model="showApplicationDialog"
   width="500px"
   title="Application Details"
+  class="saas-modal"
+  append-to-body
 >
-  <div v-if="selectedApplication">
-
-    <p><strong>Name:</strong> {{ selectedApplication.name }}</p>
-    <p><strong>University:</strong> {{ selectedApplication.university }}</p>
-    <p><strong>Description:</strong> {{ selectedApplication.description }}</p>
-
-    <p v-if="selectedApplication.short_description">
-      <strong>Short Description:</strong> {{ selectedApplication.short_description }}
-    </p>
-    <p><strong>Contact Person:</strong> {{ selectedApplication.contact_person }}</p>
-    <p><strong>Contact Email:</strong> {{ selectedApplication.contact_email }}</p>
-
-    <p v-if="selectedApplication.student_number">
-      <strong>Student Number:</strong> {{ selectedApplication.student_number }}
-    </p>
-    <div v-if="selectedApplication.image" style="margin-top:15px;">
-      <strong>Image:</strong>
-      <img 
-        :src="selectedApplication.image" 
-        style="width:100%; border-radius:8px; margin-top:10px;"
-      />
+  <div v-if="selectedApplication" class="app-details-content">
+    <div class="detail-row">
+      <span class="detail-label">Name</span>
+      <span class="detail-value">{{ selectedApplication.name }}</span>
     </div>
-
+    <div class="detail-row">
+      <span class="detail-label">University</span>
+      <span class="detail-value">{{ selectedApplication.university }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Description</span>
+      <span class="detail-value">{{ selectedApplication.description }}</span>
+    </div>
+    <div class="detail-row" v-if="selectedApplication.short_description">
+      <span class="detail-label">Short Desc</span>
+      <span class="detail-value">{{ selectedApplication.short_description }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Contact Person</span>
+      <span class="detail-value">{{ selectedApplication.contact_person }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Contact Email</span>
+      <span class="detail-value"><a :href="'mailto:' + selectedApplication.contact_email">{{ selectedApplication.contact_email }}</a></span>
+    </div>
+    <div class="detail-row" v-if="selectedApplication.student_number">
+      <span class="detail-label">Student No</span>
+      <span class="detail-value">{{ selectedApplication.student_number }}</span>
+    </div>
+    <div v-if="selectedApplication.image" class="detail-image-box">
+      <span class="detail-label">Club Image (Click to Expand)</span>
+      <el-image 
+        :src="selectedApplication.image" 
+        :preview-src-list="[selectedApplication.image]"
+        alt="Club Image" 
+        class="detail-image"
+        fit="contain"
+        hide-on-click-modal
+        style="cursor: pointer;"
+      >
+        <template #error>
+          <div class="image-slot">Failed to load image</div>
+        </template>
+      </el-image>
+    </div>
   </div>
 </el-dialog>
 
@@ -733,7 +754,7 @@ const userAvatar = computed(() => {
     return storedAvatar.value
   }
   // Default Letter Avatar using DiceBear Initials
-  return `https://api.dicebear.com/7.x/initials/svg?seed=${user.name}&backgroundColor=1b8f48&textColor=ffffff`
+  return `https://api.dicebear.com/7.x/initials/svg?seed=${user.name}&backgroundColor=111111&textColor=ffffff`
 })
 
 const loadAvatar = () => {
@@ -866,20 +887,20 @@ const handleRatingSubmit = (payload) => {
    DESIGN TOKENS
    ========================= */
 .page-wrap {
- --brand: #372D2D;    
-  --brand-600: #241D1D;   
-  --brand-200: #EBE8E8;
+ --brand: #111111;    
+  --brand-600: #000000;   
+  --brand-200: #f1f5f9;
 
   --page: #ffffff;
-  --panel: #e6f6e6;
+  --panel: #f8fafc;
   --card: #ffffff;
-  --card-soft: #e1f0e3;
+  --card-soft: #f8fafc;
 
-  --ink: #153226;
-  --muted: #6b7c74;
-  --outline: #d8eadb;
+  --ink: #111111;
+  --muted: #6b7280;
+  --outline: #e2e8f0;
 
-  --pill: #bfe7c9;
+  --pill: #e2e8f0;
   --accent-orange: #f08c00;
 
   --r-md: 10px;
@@ -1684,8 +1705,8 @@ const handleRatingSubmit = (payload) => {
 .kpi-icon {
   width: 50px;
   height: 50px;
-  background: #e6f6e6; /* Light green bg */
-  color: var(--brand); /* Brand green */
+  background: #f1f5f9; /* Neutral bg */
+  color: var(--brand); /* Brand match */
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -1865,4 +1886,161 @@ const handleRatingSubmit = (payload) => {
   padding: 30px;
   font-style: italic;
 }
+
+/* SaaS App Card styling */
+.applications-container {
+  width: 100%;
+}
+.app-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.app-card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+.app-card:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+  border-color: #cbd5e1;
+}
+.app-info h4 {
+  margin: 0 0 6px 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #111111;
+}
+.app-info .app-desc {
+  margin: 0 0 10px 0;
+  font-size: 13px;
+  color: #64748b;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.view-details-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #111111;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.app-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.app-reject-btn, .app-approve-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.app-reject-btn {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #ef4444;
+}
+.app-reject-btn:hover {
+  background: #fef2f2;
+  border-color: #fca5a5;
+}
+.app-approve-btn {
+  background: #111111;
+  border: 1px solid #111111;
+  color: #ffffff;
+}
+.app-approve-btn:hover {
+  background: #333333;
+}
+.app-reject-btn:disabled, .app-approve-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+@media (max-width: 640px) {
+  .app-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .app-actions {
+    width: 100%;
+    margin-top: 10px;
+  }
+  .app-reject-btn, .app-approve-btn {
+    flex: 1;
+    text-align: center;
+  }
+}
+
+/* SaaS App Details Dialog */
+.app-details-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.detail-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f1f5f9;
+}
+.detail-row:last-child {
+  border-bottom: none;
+}
+.detail-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.detail-value {
+  font-size: 14px;
+  color: #1e293b;
+  line-height: 1.5;
+}
+.detail-value a {
+  color: #111111;
+  text-decoration: underline;
+  font-weight: 500;
+}
+.detail-image-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+.detail-image {
+  width: 100%;
+  max-width: 400px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+:global(.saas-modal .el-dialog__header) {
+  border-bottom: 1px solid #e2e8f0;
+  margin-right: 0;
+  padding-bottom: 16px;
+}
+:global(.saas-modal .el-dialog__title) {
+  font-weight: 700;
+  color: #111111;
+}
+
 </style>

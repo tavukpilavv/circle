@@ -148,10 +148,10 @@ const handleLogin = async () => {
 
 /* Renk Paleti */
 .login-page {
-    --color-bg-main: #f0f7f0; /* Genel Açık Gri/Beyaz Alan */
+    --color-bg-main: #ffffff; /* Genel Açık Gri/Beyaz Alan */
     --color-text-dark: #000000;
     --color-text-link: #FF9E4A; /* Register ve Şifre Linkleri */
-    --color-green-dark: #1A916D;
+    --color-green-dark: #111111;
     
     font-family: 'Roboto', sans-serif;
     color: #333;
@@ -184,7 +184,7 @@ main {
 }
 
 .signin-box {
-    background-color: #E3F6DB;
+    background-color: #ffffff;
     border-radius: 15px;
     padding: 40px 50px;
     width: 100%;
@@ -193,7 +193,8 @@ main {
     
     text-align: center;
     position: relative;
-    border: 2px dashed #1A916D; /* Kesikli Çizgi Efekti */
+    border: 1px solid #e2e8f0; /* Kesikli Çizgi Efekti KALDIRILDI */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     box-sizing: border-box;
 }
 /* ... (rest of CSS) ... */
@@ -234,7 +235,7 @@ main {
 
 
 .title {
-    color: #16A34A;     
+    color: #111111;     
     font-size: 36px;   
     font-weight: 800;  
     margin-bottom: 30px; 
@@ -252,7 +253,7 @@ main {
     max-width: 642px;
     height : 69px;
     padding: 15px 20px;
-    border: 1px solid #FFFFFF;
+    border: 1px solid #e2e8f0;
     border-radius: 8px;
     font-size: 15px;
     outline: none;
@@ -293,11 +294,11 @@ main {
 }
 
 .password-toggle-btn:hover {
-    color: #1A916D;
+    color: #111111;
 }
 
 .password-toggle-btn:focus-visible {
-    outline: 2px solid #1A916D;
+    outline: 2px solid #111111;
     border-radius: 50%;
 }
 
@@ -305,12 +306,11 @@ main {
     pointer-events: none;
 }
 
-/* Giriş Butonu */
 .signin-button {
     width: 100%; /* Changed from fixed 637px */
     max-width: 637px;
     height: 76.18px;
-    background-color: #1A916D; /* Figma'daki yeni yeşil renk */
+    background-color: #111111; /* Figma'daki yeni yeşil renk */
     border-radius: 16px;       /* Figma'daki border-radius */
     font-size: 24px;           /* Figma'daki font boyutu */
     font-weight: 800;          /* Figma'daki font kalınlığı */
@@ -330,7 +330,7 @@ main {
 }
 
 .signin-button:hover {
-    background-color:#157a5c;
+    background-color:#333333;
 }
 
 /* Seçenekler (Hatırla Beni / Şifremi Unuttum) */
@@ -389,7 +389,7 @@ main {
     
     width: 31px;
     height: 30px; 
-    background-color: #5871EB; /* Figma SVG'den gelen renk */
+    background-color: #111111; /* Figma SVG'den gelen renk */
     
     /* Figma SVG'deki yuvarlak köşelere benzer bir değer */
     border-radius: 6px; 

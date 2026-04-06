@@ -125,6 +125,7 @@ export const store = reactive({
 
       const payload = {
         rating: rating,
+        comment: comment,
         feedback: comment,
         is_anonymous: isAnonymous
       }
@@ -142,8 +143,13 @@ export const store = reactive({
       if (!res.ok) throw new Error(data.error || "Hata oluştu")
 
       const eventToUpdate = this.events.find(e => e.id === eventId)
-      if (eventToUpdate && data.new_rating !== undefined) {
-        eventToUpdate.rating = data.new_rating
+      if (eventToUpdate) {
+        if (data.new_rating !== undefined) {
+          eventToUpdate.rating = data.new_rating
+        }
+        eventToUpdate.is_rated = true
+        eventToUpdate.user_rating = rating
+        eventToUpdate.user_comment = comment
       }
       return true
     } catch (e) {

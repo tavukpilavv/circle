@@ -173,13 +173,13 @@ onMounted(async () => {
 
 .page-wrap { max-width: 1180px; margin: 0 auto 56px; padding: 0 20px 40px; }
 .about-hero { margin-top: 24px; margin-bottom: 26px; }
-.about-hero-card { border-radius: 28px; padding: 26px 28px 22px; background: linear-gradient(135deg, #e6f6e6, #ffe7d8); box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06); }
-.about-hero-pill { display: inline-flex; align-items: center; gap: 8px; padding: 4px 11px; border-radius: 999px; background: #ffffffc8; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #167a3d; margin-bottom: 10px; }
-.pill-dot { width: 8px; height: 8px; border-radius: 999px; border: 2px solid #167a3d; background-color: #ffffff; }
-.about-hero-title { font-size: 30px; font-weight: 800; margin-bottom: 8px; color: #163828; }
-.about-hero-text { font-size: 14px; line-height: 1.7; color: #385445; max-width: 560px; }
-.about-hero-tags { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px; }
-.about-tag { border: none; border-radius: 999px; padding: 6px 14px; font-size: 12px; font-weight: 600; background-color: #ffffff; color: #264535; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04); }
+.about-hero-card { padding: 32px 0 24px; background: #ffffff; }
+.about-hero-pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px; background: #ffffff; border: 1px solid #e5e7eb; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #111111; margin-bottom: 16px; }
+.pill-dot { width: 8px; height: 8px; border-radius: 999px; border: 2px solid #111111; background-color: #ffffff; }
+.about-hero-title { font-size: 36px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 12px; color: #111111; }
+.about-hero-text { font-size: 16px; line-height: 1.6; color: #374151; max-width: 560px; }
+.about-hero-tags { margin-top: 24px; display: flex; flex-wrap: wrap; gap: 10px; }
+.about-tag { border: 1px solid #e5e7eb; border-radius: 999px; padding: 8px 16px; font-size: 13px; font-weight: 600; background-color: #ffffff; color: #111111; cursor: pointer; }
 .about-stats-section { margin-bottom: 30px; }
 .about-stats-header { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
 .about-stats-header h2 { font-size: 18px; font-weight: 750; }

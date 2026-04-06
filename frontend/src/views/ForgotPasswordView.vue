@@ -9,7 +9,7 @@
              <path d="M33.2917 5.875H13.7083C9.3821 5.875 5.875 9.3821 5.875 13.7083V33.2917C5.875 37.6179 9.3821 41.125 13.7083 41.125H33.2917C37.6179 41.125 41.125 37.6179 41.125 33.2917V13.7083C41.125 9.3821 37.6179 5.875 33.2917 5.875Z" stroke="var(--Accents-Orange, #FF8D28)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
           
-          <h2 class="title" style="font-size: 32px;">FORGOT PASSWORD</h2> 
+          <h2 class="title">FORGOT PASSWORD</h2> 
           <p class="description">Enter your email address and we'll send you a link to reset your password.</p>
           
           <form id="forgot-form" @submit.prevent="handleReset">
@@ -20,11 +20,11 @@
             <button type="submit" class="signin-button" :disabled="isSubmitting">
                {{ isSubmitting ? 'Sending...' : 'Send Reset Link' }}
             </button>
-
-            <div class="back-link">
-               <router-link to="/login">Back to Sign In</router-link>
-            </div>
           </form>
+
+          <div class="no-account">
+             Remember your password? <router-link to="/login">Sign In.</router-link>
+          </div>
         </div>
       </div>
     </main>
@@ -78,20 +78,20 @@ const handleReset = async () => {
 <style scoped>
 /* Senin orijinal CSS kodların buraya gelecek, değiştirmedim */
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
-.login-page { --color-bg-main: #f0f7f0; --color-text-dark: #000000; --color-text-link: #FF9E4A; --color-green-dark: #1A916D; font-family: 'Roboto', sans-serif; color: #333; min-height: 100vh; }
+.login-page { --color-bg-main: #ffffff; --color-text-dark: #000000; --color-text-link: #FF9E4A; --color-green-dark: #111111; font-family: 'Roboto', sans-serif; color: #333; min-height: 100vh; }
 main { padding-top: 40px; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
 .signin-container { flex-grow: 1; display: flex; align-items: flex-start; justify-content: center; padding: 80px 20px 20px; width: 100%; }
-.signin-box { background-color: #E3F6DB; border-radius: 15px; padding: 40px 50px; width: 100%; max-width: 740px; min-height: 480px; text-align: center; position: relative; border: 2px dashed #1A916D; box-sizing: border-box; }
+.signin-box { background-color: #ffffff; border-radius: 15px; padding: 40px 50px; width: 100%; max-width: 740px; min-height: 561px; text-align: center; position: relative; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; }
 .close-icon { position: absolute; top: 15px; right: 20px; width: 47px; height: 47px; cursor: pointer; opacity: 0.7; transition: opacity 0.2s, transform 0.2s; color: var(--color-green-dark); }
-.title { color: #16A34A; font-size: 36px; font-weight: 800; margin-bottom: 20px; font-family: 'Roboto', sans-serif; }
-.description { color: #555; font-size: 16px; margin-bottom: 30px; line-height: 1.5; max-width: 500px; margin-left: auto; margin-right: auto; }
-.input-group { margin-bottom: 30px; width: 100%; display: flex; justify-content: center; }
-.input-group input { width: 100%; max-width: 642px; height : 69px; padding: 15px 20px; border: 1px solid #FFFFFF; border-radius: 8px; font-size: 15px; outline: none; transition: border-color 0.3s; box-sizing: border-box; }
-.input-group input:focus { border-color: var(--color-green-dark); }
-.signin-button { width: 100%; max-width: 637px; height: 76.18px; background-color: #1A916D; border-radius: 16px; font-size: 24px; font-weight: 800; display: flex; align-items: center; justify-content: center; padding: 0; color: white; border: none; cursor: pointer; margin: 10px auto 0; transition: background-color 0.3s; }
-.signin-button:hover:not(:disabled) { background-color:#157a5c; }
+.title { color: #111111; font-size: 36px; font-weight: 800; margin-bottom: 30px; font-family: 'Roboto', sans-serif; }
+.description { color: #7F8B9E; font-size: 20px; font-weight: 400; margin-bottom: 40px; line-height: 1.5; max-width: 500px; margin-left: auto; margin-right: auto; }
+.input-group { margin-bottom: 40px; width: 100%; display: flex; justify-content: center; }
+.input-group input { width: 100%; max-width: 642px; height : 69px; padding: 15px 20px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 15px; outline: none; transition: border-color 0.3s; box-sizing: border-box; }
+.input-group input:focus { border-color: var(--color-green-dark); box-shadow: 0 0 0 1px var(--color-green-dark); }
+.signin-button { width: 100%; max-width: 637px; height: 76.18px; background-color: #111111; border-radius: 16px; font-size: 24px; font-weight: 800; display: flex; align-items: center; justify-content: center; padding: 0; color: white; border: none; cursor: pointer; margin: 10px auto 0; transition: background-color 0.3s; }
+.signin-button:hover:not(:disabled) { background-color:#333333; }
 .signin-button:disabled { opacity: 0.7; cursor: not-allowed; }
-.back-link { margin-top: 25px; font-size: 16px; }
-.back-link a { color: #FF9E4A; font-weight: 700; text-decoration: underline; }
-@media (max-width: 768px) { .signin-box { padding: 30px 20px; min-height: auto; } .title { font-size: 26px !important; } .input-group input { height: 55px; font-size: 14px; } .signin-button { height: 60px; font-size: 20px; } }
+.no-account { color: #7F8B9E; font-size: 20px; font-weight: 400; margin-top: 40px; text-align: center; }
+.no-account a { color: #FF9E4A; font-weight: 700; text-decoration: underline; }
+@media (max-width: 768px) { .signin-box { padding: 30px 20px; min-height: auto; } .title { font-size: 26px !important; } .input-group input { height: 55px; font-size: 14px; } .signin-button { height: 60px; font-size: 20px; } .no-account { font-size: 16px; } .no-account a { font-size: 16px; } }
 </style>
