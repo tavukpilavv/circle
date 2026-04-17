@@ -127,8 +127,8 @@ JWT_SECRET=your_jwt_secret
 ## 👥 Team
 
 * **Ezgi İşgüzar** — Full Stack Developer & QA Engineer
-* **[Teammate Name]** — Backend Developer
-* **[Teammate Name]** — Frontend Developer
+* **Hacer Büşra Köse** — Backend Developer
+* **Malak Ali Nagi Nosary** — Frontend Developer & Database Engineer
 
 ---
 
