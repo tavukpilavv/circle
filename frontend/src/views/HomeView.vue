@@ -13,6 +13,9 @@
           :seeAll="seeAll" 
         />
     </div>
+    
+    <CTABanner />
+    <UserGuidanceModal />
   </div>
   <!-- Global event detail dialog -->
   <el-dialog 
@@ -27,7 +30,7 @@
   >
     <template #header="{ close, titleId, titleClass }">
       <div class="my-header" style="display: flex; justify-content: space-between; align-items: center;">
-        <h4 :id="titleId" :class="titleClass" style="margin: 0; font-size: 20px; font-weight: 700; color: #153226;">{{ selectedEvent?.name }}</h4>
+        <h4 :id="titleId" :class="titleClass" style="margin: 0; font-size: 20px; font-weight: 700; color: var(--brand-600);">{{ selectedEvent?.name }}</h4>
       </div>
     </template>
     <div class="dialog-content-wrapper">
@@ -57,7 +60,7 @@
           <strong>Community:</strong> {{ selectedEvent.community_name }}
         </div>
 
-        <p style="color: #6b7c74; line-height: 1.6; margin: 20px 0; font-size: 15px;">
+        <p style="color: #555; line-height: 1.6; margin: 20px 0; font-size: 15px;">
           Join us for this exciting event! Don't miss out on this opportunity to connect with the community and participate in engaging activities.
         </p>
 
@@ -65,7 +68,7 @@
           <button 
             @click="toggleRegistration"
             :style="{
-              background: selectedEvent.registered ? '#e0e0e0' : '#1b8f48',
+              background: selectedEvent.registered ? '#e0e0e0' : 'var(--brand)',
               color: selectedEvent.registered ? '#333' : 'white',
               flex: 1
             }"
@@ -94,6 +97,17 @@ import { store } from '../store.js'
 import Announcements from '../components/Announcements.vue'
 import Filters from '../components/Filters.vue'
 import EventGrid from '../components/EventGrid.vue'
+import CTABanner from '../components/CTABanner.vue'
+import UserGuidanceModal from '../components/UserGuidanceModal.vue'
+const universityMap = {
+  "AYBU": "Ankara Yıldırım Beyazıt University",
+  "AU": "Ankara University",
+  "ODTÜ": "Orta doğu teknik Üniversitesi",
+  "Hacettepe": "Hacettepe Üniversitesi",
+  "Bilkent": "Bilkent Üniversitesi",
+  "Gazi Üni": "Gazi Üniversitesi",
+  "Other": "Other"
+};
 
 // Reactive state for selected event and dialog visibility
 const selectedEvent = ref(null)
@@ -103,51 +117,63 @@ const dateFilter = ref(null)
 const sortOrder = ref('nearest')
 
 const filteredEvents = computed(() => {
+  if (store.events.length === 0) return [];
+
   let result = [...store.events];
+  const now = moment().startOf('day');
+  const fourMonthsAgo = moment().subtract(4, 'months').startOf('day');
 
-  // Filter by School (activeType)
+  // 0. Base Filter: Only show events from the last 4 months onwards
+  result = result.filter(e => {
+    const eventDate = moment(e.date);
+    return eventDate.isSameOrAfter(fourMonthsAgo);
+  });
+
+  // Convert acronym → full name
+  const selectedFullName = universityMap[activeType.value] || activeType.value;
+
+  // 1. Filter by activeType
   if (activeType.value !== 'All') {
-    result = result.filter(e => e.organizer === activeType.value);
+    result = result.filter(e => {
+      const match = 
+        e.university === activeType.value || 
+        e.community_name === activeType.value ||
+        (e.organizer && String(e.organizer).toLowerCase().trim() === String(selectedFullName).toLowerCase().trim());
+      return match;
+    });
   }
 
-  // Filter by Date
-  if (dateFilter.value) {
-    const startDate = moment(dateFilter.value[0]).format("YYYY-MM-DD")
-    const endDate = moment(dateFilter.value[1]).format("YYYY-MM-DD")
+  // 2. Filter by Date Range (Custom Picker)
+  if (dateFilter.value && dateFilter.value.length === 2) {
+    const startDate = moment(dateFilter.value[0]).startOf('day');
+    const endDate = moment(dateFilter.value[1]).endOf('day');
     result = result.filter(item => {
-      return item.date >= startDate && item.date <= endDate
-    })
+      const itemDate = moment(item.date); 
+      return itemDate.isBetween(startDate, endDate, 'day', '[]');
+    });
   }
 
-  // Sort by Date
-  // Sort by Date (Upcoming first, then Past)
+  // 3. Smart Sort: "Nearest"
   return result.sort((a, b) => {
-    const dateA = new Date(a.date);
-    const dateB = new Date(b.date);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const isUpcomingA = dateA >= today;
-    const isUpcomingB = dateB >= today;
-
-    // 1. Prioritize Upcoming over Past
-    if (isUpcomingA && !isUpcomingB) return -1;
-    if (!isUpcomingA && isUpcomingB) return 1;
-
-    // 2. Sort within groups
+    const dateA = moment(a.date);
+    const dateB = moment(b.date);
+    
     if (sortOrder.value === 'nearest') {
-      if (isUpcomingA) {
-        return dateA - dateB; // Upcoming: Ascending (nearest future first)
-      } else {
-        return dateB - dateA; // Past: Descending (nearest past first)
-      }
+      const isPastA = dateA.isBefore(now);
+      const isPastB = dateB.isBefore(now);
+
+      // 1. Upcoming events always come before past events
+      if (!isPastA && isPastB) return -1;
+      if (isPastA && !isPastB) return 1;
+
+      // 2. Both upcoming? Sort ascending (nearest first)
+      if (!isPastA && !isPastB) return dateA - dateB;
+
+      // 3. Both past? Sort descending (nearest past first)
+      return dateB - dateA;
     } else {
-      // Farthest
-      if (isUpcomingA) {
-        return dateB - dateA; // Upcoming: Descending (farthest future first)
-      } else {
-        return dateA - dateB; // Past: Ascending (oldest past first)
-      }
+      // Manual Descending (latest date first)
+      return dateB - dateA; 
     }
   });
 })
@@ -208,7 +234,7 @@ const onFilterChange = (val) => {
 }
 
 .detail-row i {
-  color: #1b8f48;
+  color: var(--brand);
   width: 20px;
 }
 
@@ -238,7 +264,7 @@ const onFilterChange = (val) => {
 
 :deep(.el-carousel__indicator.is-active .el-carousel__button) {
   opacity: 1 !important;
-  background-color: #1b8f48 !important;
+  background-color: var(--brand) !important;
 }
 
 /* Responsive: smaller indicators on mobile */

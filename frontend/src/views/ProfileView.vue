@@ -50,20 +50,101 @@
       </div>
     </section>
 
+    <!-- ADMIN DASHBOARD (SUPER ADMIN ONLY) -->
+    <div v-if="isSuperAdmin" class="admin-dashboard-section">
+      <!-- KPI CARDS -->
+      <section class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-icon"><i class="fas fa-university"></i></div>
+          <div class="kpi-content">
+            <h3>{{ stats.universities || 0 }}</h3>
+            <p>Universities</p>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon"><i class="fas fa-users"></i></div>
+          <div class="kpi-content">
+            <h3>{{ stats.clubs || 0 }}</h3>
+            <p>Communities</p>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon"><i class="fas fa-calendar-alt"></i></div>
+          <div class="kpi-content">
+            <h3>{{ stats.events || 0 }}</h3>
+            <p>Events</p>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon"><i class="fas fa-user-graduate"></i></div>
+          <div class="kpi-content">
+            <h3>{{ stats.students || 0 }}</h3>
+            <p>Students</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- LEADERBOARD TABLE -->
+      <section class="leaderboard-section">
+        <div class="leaderboard-header">
+          <h2>Community Leaderboard</h2>
+          <div class="search-box">
+            <i class="fas fa-search search-icon"></i>
+            <input 
+              type="text" 
+              v-model="searchQuery" 
+              placeholder="Search community, president..." 
+              class="search-input"
+            />
+          </div>
+        </div>
+        
+        <div class="table-scroll-container">
+          <table class="leaderboard-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Community Details</th>
+                <th>Contact Info</th>
+                <th>Events</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(comm, index) in filteredCommunities" :key="comm.name">
+                <td>#{{ index + 1 }}</td>
+                <td>
+                  <div class="comm-details-cell">
+                    <span class="comm-name">{{ comm.name }}</span>
+                    <span class="comm-uni">{{ comm.university || 'N/A' }}</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="contact-info-cell">
+                    <span class="contact-name">{{ comm.president || 'Unknown' }}</span>
+                    <a v-if="comm.email" :href="'mailto:' + comm.email" class="contact-email">{{ comm.email }}</a>
+                  </div>
+                </td>
+                <td>
+                  <span class="event-count-badge">{{ comm.count }}</span>
+                </td>
+              </tr>
+              <tr v-if="filteredCommunities.length === 0">
+                <td colspan="4" class="no-data">No matching results found</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
     <!-- TABS UNDER PROFILE -->
-    <section class="dual-tabs" :style="{ gridTemplateColumns: isSuperAdmin ? '1fr 1fr 1fr' : '1fr 1fr' }">
+    <section class="dual-tabs" :style="{ gridTemplateColumns: isSuperAdmin ? '1fr 1fr' : '1fr' }">
       <button 
         class="tabbtn" 
         :class="activePanel === 'events' ? 'solid' : 'outline'" 
         @click="activePanel = 'events'"
         :aria-pressed="activePanel === 'events'"
       >My Events</button>
-      <button 
-        class="tabbtn" 
-        :class="activePanel === 'communities' ? 'solid' : 'outline'" 
-        @click="activePanel = 'communities'"
-        :aria-pressed="activePanel === 'communities'"
-      >My Communities</button>
       <button 
         v-if="isSuperAdmin"
         class="tabbtn" 
@@ -176,7 +257,7 @@
             <button 
               v-else
               class="rate-pill" 
-              style="position: absolute; right: 16px; bottom: 16px; background-color: #1b8f48; color: white; border: none; border-radius: 20px; padding: 4px 12px; font-weight: bold; font-size: 12px;"
+              style="position: absolute; right: 16px; bottom: 16px; background-color: #111111; color: white; border: none; border-radius: 20px; padding: 4px 12px; font-weight: bold; font-size: 12px;"
               :class="{ 'is-rated': isRated(event.id) }"
               @click="openRating(event)"
             >
@@ -200,43 +281,7 @@
       </section>
     </div>
 
-    <div v-show="activePanel === 'communities'" class="panel is-active">
-      <section class="section-head">
-        <h3>Joined Communities</h3>
-        <span class="community-count">{{ joinedCommunities.length }} communities</span>
-      </section>
 
-      <section class="community-grid" aria-label="Joined communities">
-        <article 
-          class="community-card" 
-          v-for="community in joinedCommunities" 
-          :key="community.id"
-        >
-          <img class="community-cover"
-            :src="community.image"
-            alt="Community cover image">
-          <div class="community-body">
-            <h4>{{ community.name }}</h4>
-            <p>{{ community.description }}</p>
-            <div class="community-meta">
-              <span class="community-chip">{{ community.role || 'Member' }}</span>
-              <span>Joined {{ community.joinedDate || 'recently' }}</span>
-            </div>
-          </div>
-        </article>
-        
-        <div v-if="joinedCommunities.length === 0" class="empty-state">
-          <div class="empty-icon">
-            <i class="fas fa-users"></i>
-          </div>
-          <h3>No communities yet</h3>
-          <p>Join a community to connect with others and see their events here.</p>
-          <router-link to="/communities" class="empty-btn">
-            Browse Communities
-          </router-link>
-        </div>
-      </section>
-    </div>
 
     <!-- PENDING APPLICATIONS PANEL -->
     <div v-show="activePanel === 'applications'" class="panel is-active">
@@ -249,20 +294,23 @@
         <el-empty description="No pending applications" />
       </div>
 
-      <section class="slider-shell" aria-label="Pending Applications" v-else>
-        <div class="slider-track" style="display: flex; flex-direction: column; gap: 15px; overflow-x: visible;">
-          <article class="card application-card" v-for="app in pendingApplications" :key="app.id" style="width: 100%; flex-direction: row; align-items: center; justify-content: space-between; padding: 15px;">
+      <section class="applications-container" aria-label="Pending Applications" v-else>
+        <div class="app-list">
+          <article class="app-card" v-for="app in pendingApplications" :key="app.id">
             <div class="app-info">
-              <h4 style="margin: 0; color: var(--ink);">{{ app.name }}</h4>
-              <p style="margin: 5px 0 0; font-size: 13px; color: var(--muted);">Applicant: {{ app.contact_person }}</p>
+              <h4>{{ app.name }}</h4>
+              <p class="app-desc">{{ app.short_description || app.description }}</p>
+              <button class="view-details-btn" @click="openApplicationDetails(app)">
+                View Details
+              </button>
             </div>
-            <div class="app-actions" style="display: flex; align-items: center; gap: 15px;">
-              <a :href="app.proof_document" target="_blank" style="font-size: 13px; color: var(--brand); font-weight: 600; text-decoration: none;">
-                View Proof
-              </a>
-              <el-button type="success" size="small" @click="approveApp(app.id)" :loading="approvingId === app.id">
-                Approve & Promote
-              </el-button>
+            <div class="app-actions">
+              <button class="app-reject-btn" @click="rejectApp(app.id)" :disabled="rejectingId === app.id">
+                {{ rejectingId === app.id ? 'Rejecting...' : 'Reject' }}
+              </button>
+              <button class="app-approve-btn" @click="approveApp(app.id)" :disabled="approvingId === app.id">
+                {{ approvingId === app.id ? 'Approving...' : 'Approve & Promote' }}
+              </button>
             </div>
           </article>
         </div>
@@ -323,7 +371,7 @@
             <button 
               v-else
               class="rate-pill" 
-              style="position: absolute; right: 16px; bottom: 16px; background-color: #1b8f48; color: white; border: none; border-radius: 20px; padding: 4px 12px; font-weight: bold; font-size: 12px;"
+              style="position: absolute; right: 16px; bottom: 16px; background-color: #111111; color: white; border: none; border-radius: 20px; padding: 4px 12px; font-weight: bold; font-size: 12px;"
               :class="{ 'is-rated': isRated(event.id) }"
               @click="openRating(event)"
             >
@@ -364,19 +412,92 @@
     >
       <div class="registration-list">
         <div class="registration-summary">
-          <strong>Total Registrations:</strong> {{ mockRegistrations.length }} / {{ registrationEvent?.capacity || 'Not Given' }}
+          <strong>Total Registrations:</strong> {{ registrations.length }} / {{ registrationEvent?.capacity || 'Not Given' }}
         </div>
-        <div class="attendee-list">
-          <div v-for="user in mockRegistrations" :key="user.id" class="attendee-item">
-            <img :src="user.avatar" alt="Avatar" class="attendee-avatar" />
-            <div class="attendee-info">
-              <div class="attendee-name">{{ user.name }}</div>
-              <div class="attendee-email">{{ user.email }}</div>
-            </div>
-          </div>
+
+        <div v-if="loadingRegistrations" class="loading-state">
+         Loading list...
         </div>
-      </div>
+
+        <div v-else-if="registrationsError" class="empty-state">
+         {{ registrationsError }}
+        </div>
+
+        <div v-else-if="registrations.length === 0" class="empty-state">
+          No registrations yet.
+         </div>
+
+         <div v-else class="attendee-list">
+           <div v-for="u in registrations" :key="u.id" class="attendee-item">
+             <el-avatar 
+               :size="40" 
+               :src="u.avatar_url || ''"
+               style="background-color: #f1f5f9; color: #111111; font-weight: 700; font-size: 14px; margin-right: 12px; flex-shrink: 0;"
+             >
+               {{ ((u.first_name?.charAt(0) || '') + (u.last_name?.charAt(0) || '')).toUpperCase() || '?' }}
+             </el-avatar>
+             <div class="attendee-info">
+               <div class="attendee-name">{{ u.first_name }} {{ u.last_name }}</div>
+              <div class="attendee-email">{{ u.email }}</div>
+             </div>
+           </div>
+         </div>
+       </div>
     </el-dialog>
+<el-dialog
+  v-model="showApplicationDialog"
+  width="500px"
+  title="Application Details"
+  class="saas-modal"
+  append-to-body
+>
+  <div v-if="selectedApplication" class="app-details-content">
+    <div class="detail-row">
+      <span class="detail-label">Name</span>
+      <span class="detail-value">{{ selectedApplication.name }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">University</span>
+      <span class="detail-value">{{ selectedApplication.university }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Description</span>
+      <span class="detail-value">{{ selectedApplication.description }}</span>
+    </div>
+    <div class="detail-row" v-if="selectedApplication.short_description">
+      <span class="detail-label">Short Desc</span>
+      <span class="detail-value">{{ selectedApplication.short_description }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Contact Person</span>
+      <span class="detail-value">{{ selectedApplication.contact_person }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Contact Email</span>
+      <span class="detail-value"><a :href="'mailto:' + selectedApplication.contact_email">{{ selectedApplication.contact_email }}</a></span>
+    </div>
+    <div class="detail-row" v-if="selectedApplication.student_number">
+      <span class="detail-label">Student No</span>
+      <span class="detail-value">{{ selectedApplication.student_number }}</span>
+    </div>
+    <div v-if="selectedApplication.image" class="detail-image-box">
+      <span class="detail-label">Club Image (Click to Expand)</span>
+      <el-image 
+        :src="selectedApplication.image" 
+        :preview-src-list="[selectedApplication.image]"
+        alt="Club Image" 
+        class="detail-image"
+        fit="contain"
+        hide-on-click-modal
+        style="cursor: pointer;"
+      >
+        <template #error>
+          <div class="image-slot">Failed to load image</div>
+        </template>
+      </el-image>
+    </div>
+  </div>
+</el-dialog>
 
   </div>
 </template>
@@ -389,10 +510,14 @@ import { CircleCheckFilled } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import RatingPopup from '../components/RatingPopup.vue'
 import { useToast } from "vue-toastification";
+import { apiFetch } from '../api'
 
 const router = useRouter()
 const activePanel = ref('events')
 const toast = useToast();
+
+const selectedApplication = ref(null)
+const showApplicationDialog = ref(false)
 
 const seeAllTarget = ref(null)
 const upcomingTrack = ref(null)
@@ -405,19 +530,77 @@ const ratedEvents = ref(new Set())
 // Admin Registration Logic
 const showRegistrationPopup = ref(false)
 const registrationEvent = ref(null)
-const mockRegistrations = [
-  { id: 1, name: 'Alice Johnson', email: 'alice@example.com', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Alice' },
-  { id: 2, name: 'Bob Smith', email: 'bob@example.com', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Bob' },
-  { id: 3, name: 'Charlie Brown', email: 'charlie@example.com', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Charlie' },
-  { id: 4, name: 'Diana Prince', email: 'diana@example.com', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Diana' },
-  { id: 5, name: 'Evan Wright', email: 'evan@example.com', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Evan' },
-  { id: 6, name: 'Fiona Gallagher', email: 'fiona@example.com', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Fiona' },
-  { id: 7, name: 'George Michael', email: 'george@example.com', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=George' },
-]
 
-const openRegistrations = (event) => {
+const registrations = ref([])
+const loadingRegistrations = ref(false)
+const registrationsError = ref("")
+
+const openApplicationDetails = (app) => {
+  selectedApplication.value = app
+  showApplicationDialog.value = true
+}
+
+const openRegistrations = async (event) => {
   registrationEvent.value = event
   showRegistrationPopup.value = true
+
+  registrations.value = []
+  registrationsError.value = ""
+  loadingRegistrations.value = true
+
+  try {
+    const data = await store.fetchParticipants(event.id)
+
+    registrations.value = (Array.isArray(data) ? data : []).map((u) => ({
+      id: u.id ?? u.user_id ?? u.email ?? Math.random(),
+      first_name: u.first_name ?? (u.name ? String(u.name).split(" ")[0] : ""),
+      last_name: u.last_name ?? (u.name ? String(u.name).split(" ").slice(1).join(" ") : ""),
+      email: u.email ?? "",
+      avatar_url: u.avatar_url ?? u.avatar ?? ""
+    }))
+  } catch (e) {
+    registrationsError.value = e?.message || "Failed to load registrations."
+    registrations.value = []
+  } finally {
+    loadingRegistrations.value = false
+  }
+}
+
+// Admin logic
+const stats = ref({
+  universities: 0,
+  clubs: 0,
+  events: 0,
+  students: 0,
+  top_communities: [] // IMPORTANT: Must be 'top_communities', not 'top_universities'
+})
+
+const searchQuery = ref("")
+
+const filteredCommunities = computed(() => {
+  const query = searchQuery.value.toLowerCase().trim()
+  const list = stats.value.top_communities || []
+  
+  if (!query) return list
+  
+  return list.filter(c => {
+    return (c.name && c.name.toLowerCase().includes(query)) ||
+           (c.university && c.university.toLowerCase().includes(query)) ||
+           (c.president && c.president.toLowerCase().includes(query)) ||
+           (c.email && c.email.toLowerCase().includes(query))
+  })
+})
+
+// Fetch Stats
+const fetchStats = async () => {
+  try {
+    const response = await apiFetch('/api/general/stats')
+    const data = await response.json()
+    console.log('Stats loaded:', data)
+    stats.value = data
+  } catch (error) {
+    console.error('Failed to fetch stats:', error)
+  }
 }
 
 // Reactive source for avatar
@@ -432,12 +615,29 @@ const user = reactive({
 
 const isAdmin = computed(() => user.role === 'admin' || user.role === 'super_admin')
 const isSuperAdmin = computed(() => user.role === 'super_admin')
-
-const pendingApplications = computed(() => store.pendingApplications)
+const pendingApplications = ref([])
+//const pendingApplications = computed(() => store.pendingApplications)
 const approvingId = ref(null)
 
+const rejectingId = ref(null);
+
+const rejectApp = async (id) => {
+  rejectingId.value = id;
+
+  const result = await store.rejectApplication(id);
+
+  if (result.success) {
+    toast.success("Application rejected.");
+    pendingApplications.value = pendingApplications.value.filter(app => app.id !== id);
+  } else {
+    toast.error("Failed to reject: " + (result.message || "Unknown error"));
+  }
+
+  rejectingId.value = null;
+};
+
 const approveApp = async (id) => {
-  approvingId.value = id
+  /*approvingId.value = id
   const result = await store.approveApplication(id, user.id || 1) // Fallback ID if not set
   
   if (result.success) {
@@ -445,7 +645,23 @@ const approveApp = async (id) => {
   } else {
     toast.error('Failed to approve: ' + (result.message || 'Unknown error'))
   }
-  approvingId.value = null
+  approvingId.value = null*/
+  const response = await apiFetch(`/api/general/communities/approve`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('user_token')}`
+    },
+    body: JSON.stringify({ id })
+  })
+  const data = await response.json()
+  if (data.success) {
+    toast.success('Application approved and club promoted!')
+    // Remove approved application from local list
+    pendingApplications.value = pendingApplications.value.filter(app => app.id !== id)
+  } else {
+    toast.error('Failed to approve: ' + (data.message || 'Unknown error'))
+  }
 }
 
 const loadUserData = () => {
@@ -490,36 +706,47 @@ const getEventRating = (eventId) => {
   return userReview ? userReview.rating : 0
 }
 
-const joinedCommunities = computed(() => {
-  return store.communities.filter(c => c.joined)
-})
+const toEventDateTime = (e) => {
+  if (!e || !e.date) return null
+  const time = e.time && String(e.time).trim() ? String(e.time).trim() : "00:00"
+  const dt = new Date(`${e.date}T${time}`)
+  return isNaN(dt.getTime()) ? null : dt
+}
+
 
 const registeredEvents = computed(() => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return store.events.filter(e => {
-    const eventDate = new Date(e.date);
-    return e.registered && eventDate >= today;
-  }).sort((a, b) => new Date(a.date) - new Date(b.date));
+  const now = new Date()
+  return store.events
+    .filter(e => e.registered && toEventDateTime(e) >= now)
+    .sort((a, b) => toEventDateTime(a) - toEventDateTime(b))
 })
 
 const pastEvents = computed(() => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return store.events.filter(e => {
-    const eventDate = new Date(e.date);
-    return e.registered && eventDate < today;
-  }).sort((a, b) => new Date(b.date) - new Date(a.date)); // Newest past event first
+  const now = new Date()
+
+  return store.events
+    .filter(e => {
+      const isPast = toEventDateTime(e) < now
+
+      // Super admin: tüm past eventler
+      if (isSuperAdmin.value) return isPast
+
+      // Admin: sadece kendi eventleri
+      if (isAdmin.value) return store.canEditEvent(e) && isPast
+
+      // User: sadece kayıt oldukları
+      return e.registered && isPast
+    })
+    .sort((a, b) => toEventDateTime(b) - toEventDateTime(a))
 })
 
 const upcomingEvents = computed(() => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return store.events.filter(e => {
-    const eventDate = new Date(e.date);
-    return eventDate >= today;
-  }).sort((a, b) => new Date(a.date) - new Date(b.date));
+  const now = new Date()
+  return store.events
+    .filter(e => toEventDateTime(e) >= now)
+    .sort((a, b) => toEventDateTime(a) - toEventDateTime(b))
 })
+
 
 // Computed property for User Avatar
 const userAvatar = computed(() => {
@@ -527,22 +754,35 @@ const userAvatar = computed(() => {
     return storedAvatar.value
   }
   // Default Letter Avatar using DiceBear Initials
-  return `https://api.dicebear.com/7.x/initials/svg?seed=${user.name}&backgroundColor=1b8f48&textColor=ffffff`
+  return `https://api.dicebear.com/7.x/initials/svg?seed=${user.name}&backgroundColor=111111&textColor=ffffff`
 })
 
 const loadAvatar = () => {
   storedAvatar.value = localStorage.getItem('user_avatar') || ''
 }
 
+const loadPenginds = () => {
+  apiFetch("/api/general/communities/pending", {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('user_token')}`
+    }
+  })
+    .then(response => response.json())
+    .then(data => {
+      pendingApplications.value = Array.isArray(data) ? data : []
+    })
+}
+
+
 onMounted(() => {
   loadUserData()
   loadAvatar()
-  // loadRatedEvents() // No longer needed with store
-  window.addEventListener('avatar-changed', loadAvatar)
-
   if (isSuperAdmin.value) {
-    store.fetchPendingApplications(user.id || 1)
+    loadPenginds()
+    fetchStats() // Fetch stats if super admin
   }
+
+  window.addEventListener('avatar-changed', loadAvatar)
 })
 
 onUnmounted(() => {
@@ -647,20 +887,20 @@ const handleRatingSubmit = (payload) => {
    DESIGN TOKENS
    ========================= */
 .page-wrap {
-  --brand: #1b8f48;
-  --brand-600: #167a3d;
-  --brand-200: #e6f3e9;
+ --brand: #111111;    
+  --brand-600: #000000;   
+  --brand-200: #f1f5f9;
 
-  --page: #fefbea;
-  --panel: #e6f6e6;
+  --page: #ffffff;
+  --panel: #f8fafc;
   --card: #ffffff;
-  --card-soft: #e1f0e3;
+  --card-soft: #f8fafc;
 
-  --ink: #153226;
-  --muted: #6b7c74;
-  --outline: #d8eadb;
+  --ink: #111111;
+  --muted: #6b7280;
+  --outline: #e2e8f0;
 
-  --pill: #bfe7c9;
+  --pill: #e2e8f0;
   --accent-orange: #f08c00;
 
   --r-md: 10px;
@@ -1411,6 +1651,12 @@ const handleRatingSubmit = (payload) => {
   background-color: #f56c6c;
   color: white;
   padding: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #f56c6c;
+  color: white;
+  padding: 0;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1418,4 +1664,383 @@ const handleRatingSubmit = (payload) => {
   font-weight: 700;
   border: 2px solid #fff;
 }
+
+/* ==================
+   ADMIN DASHBOARD STYLES
+   ================== */
+.admin-dashboard-section {
+  margin-bottom: 30px;
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* KPI Cards */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.kpi-card {
+  background: var(--card);
+  padding: 20px;
+  border-radius: var(--r-lg);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  box-shadow: var(--shadow);
+  border: 1px solid #f0f0f0;
+  transition: transform 0.2s;
+}
+
+.kpi-card:hover {
+  transform: translateY(-2px);
+}
+
+.kpi-icon {
+  width: 50px;
+  height: 50px;
+  background: #f1f5f9; /* Neutral bg */
+  color: var(--brand); /* Brand match */
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+
+.kpi-content h3 {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--brand);
+}
+
+.kpi-content p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Leaderboard */
+.leaderboard-section {
+  background: var(--card);
+  padding: 25px;
+  border-radius: var(--r-lg);
+  margin-bottom: 30px;
+  box-shadow: var(--shadow);
+}
+
+
+.leaderboard-section h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.leaderboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.search-box {
+  position: relative;
+  width: 250px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px 10px 10px 36px;
+  border: 1px solid var(--outline);
+  border-radius: 999px;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.search-input:focus {
+  border-color: var(--brand);
+}
+
+.table-scroll-container {
+  overflow-y: auto;
+  max-height: 400px;
+  border-radius: 8px;
+  border: 1px solid #f5f5f5;
+}
+
+.table-scroll-container::-webkit-scrollbar {
+  width: 6px;
+}
+.table-scroll-container::-webkit-scrollbar-thumb {
+  background-color: #ddd;
+  border-radius: 3px;
+}
+
+.leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.leaderboard-table th {
+  position: sticky;
+  top: 0;
+  background: #ffffff;
+  z-index: 2;
+  padding: 14px 15px;
+  text-align: left;
+  border-bottom: 2px solid #f0f0f0;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.leaderboard-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #f7f7f7;
+  color: var(--ink);
+  font-size: 0.95rem;
+}
+
+.leaderboard-table tr:hover td {
+  background-color: #fafafa;
+}
+
+.comm-details-cell {
+  display: flex;
+  flex-direction: column;
+}
+
+.comm-name {
+  font-weight: 700;
+  color: var(--ink);
+  font-size: 0.95rem;
+}
+
+.comm-uni {
+  font-size: 0.75rem; /* text-xs */
+  color: #6b7280; /* text-gray-500 equivalent */
+  margin-top: 2px;
+}
+
+.contact-info-cell {
+  display: flex;
+  flex-direction: column;
+}
+
+.contact-name {
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: var(--ink);
+}
+
+.contact-email {
+  font-size: 0.8rem;
+  color: var(--brand);
+  text-decoration: none;
+}
+
+.contact-email:hover {
+  text-decoration: underline;
+}
+
+.event-count-badge {
+  background: var(--brand-200);
+  color: var(--brand-600);
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.leaderboard-table tr:last-child td {
+  border-bottom: none;
+}
+
+.no-data {
+  text-align: center;
+  color: var(--muted);
+  padding: 30px;
+  font-style: italic;
+}
+
+/* SaaS App Card styling */
+.applications-container {
+  width: 100%;
+}
+.app-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.app-card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+.app-card:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+  border-color: #cbd5e1;
+}
+.app-info h4 {
+  margin: 0 0 6px 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #111111;
+}
+.app-info .app-desc {
+  margin: 0 0 10px 0;
+  font-size: 13px;
+  color: #64748b;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.view-details-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #111111;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.app-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.app-reject-btn, .app-approve-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.app-reject-btn {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #ef4444;
+}
+.app-reject-btn:hover {
+  background: #fef2f2;
+  border-color: #fca5a5;
+}
+.app-approve-btn {
+  background: #111111;
+  border: 1px solid #111111;
+  color: #ffffff;
+}
+.app-approve-btn:hover {
+  background: #333333;
+}
+.app-reject-btn:disabled, .app-approve-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+@media (max-width: 640px) {
+  .app-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .app-actions {
+    width: 100%;
+    margin-top: 10px;
+  }
+  .app-reject-btn, .app-approve-btn {
+    flex: 1;
+    text-align: center;
+  }
+}
+
+/* SaaS App Details Dialog */
+.app-details-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.detail-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f1f5f9;
+}
+.detail-row:last-child {
+  border-bottom: none;
+}
+.detail-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.detail-value {
+  font-size: 14px;
+  color: #1e293b;
+  line-height: 1.5;
+}
+.detail-value a {
+  color: #111111;
+  text-decoration: underline;
+  font-weight: 500;
+}
+.detail-image-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+.detail-image {
+  width: 100%;
+  max-width: 400px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+:global(.saas-modal .el-dialog__header) {
+  border-bottom: 1px solid #e2e8f0;
+  margin-right: 0;
+  padding-bottom: 16px;
+}
+:global(.saas-modal .el-dialog__title) {
+  font-weight: 700;
+  color: #111111;
+}
+
 </style>

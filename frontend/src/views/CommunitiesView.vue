@@ -21,37 +21,14 @@
       <!-- filter pills -->
       <div class="filters-row">
         <div class="filters-label-space"></div>
+
         <div class="filters-pills">
-          <button
-            class="filter-pill"
-            :class="{ 'is-active': activeFilter === 'all', 'primary': activeFilter === 'all' }"
-            type="button"
-            @click="activeFilter = 'all'"
-          >
-            All
-          </button>
-          <button
-            class="filter-pill"
-            :class="{ 'is-active': activeFilter === 'joined', 'primary': activeFilter === 'joined' }"
-            type="button"
-            @click="activeFilter = 'joined'"
-          >
-            Joined
-          </button>
-          <button
-            class="filter-pill"
-            :class="{ 'is-active': activeFilter === 'discover', 'primary': activeFilter === 'discover' }"
-            type="button"
-            @click="activeFilter = 'discover'"
-          >
-            Discover
-          </button>
-          
+
+
           <button v-if="isSuperAdmin" class="add-club-btn" @click="openModal">
             + Add Club
           </button>
         </div>
-
       </div>
     </section>
 
@@ -59,7 +36,7 @@
     <section class="community-list" id="communityList">
       <article
         v-for="community in filteredCommunities"
-        :key="community.name"
+        :key="community.id"
         class="community-card"
       >
         <img
@@ -70,25 +47,43 @@
 
         <div class="community-main">
           <h2 class="community-name">{{ community.name }}</h2>
-          <p class="community-desc">
-            {{ community.description }}
-          </p>
-          <div class="community-meta">
-            <span><i class="fas fa-user-group"></i> {{ community.members }} members</span>
-          </div>
+          <p class="community-desc">{{ community.description }}</p>
+
+
         </div>
 
-        <button 
-          class="status-pill" 
-          :class="community.joined ? 'joined' : 'outline'"
-          type="button"
-          @click="toggleJoin(community)"
-        >
-          <i v-if="community.joined" class="fas fa-check"></i>
-          {{ community.joined ? 'Joined' : 'Join Community' }}
-        </button>
+        <!-- ✅ REPLACED: Join -> Visit Website -->
+        <div class="community-actions">
+          <a
+            v-if="community.website_url"
+            class="status-pill outline website-btn"
+            :href="community.website_url"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Open community website"
+          >
+            <i class="fas fa-arrow-up-right-from-square"></i>
+            Visit Website
+          </a>
+          <button
+            v-if="store.canEditCommunity(community)"
+            class="status-pill outline edit-btn"
+            @click="openEditModal(community)"
+          >
+            <i class="fas fa-pen"></i>
+          </button>
+          <button
+            v-if="isSuperAdmin"
+            class="status-pill outline delete-btn"
+            type="button"
+            @click="deleteClub(community)"
+            title="Delete this club"
+          >
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
       </article>
-      
+
       <div v-if="filteredCommunities.length === 0" class="no-results">
         No communities found matching your criteria.
       </div>
@@ -102,7 +97,10 @@
         <span>&times;</span>
       </button>
 
-      <h2 class="modal-title">Create Club</h2>
+      <h2 class="modal-title">
+        {{ isEditMode ? 'Edit Club' : 'Create Club' }}
+      </h2>
+
 
       <form @submit.prevent="submitClub" class="modal-form">
         <div class="form-field">
@@ -115,17 +113,50 @@
           <textarea v-model="formData.description" rows="3" required></textarea>
         </div>
 
+        <!-- ✅ Website / Instagram URL -->
         <div class="form-field">
-          <label>Image URL</label>
-          <input type="text" v-model="formData.image" placeholder="https://..." />
+          <label>Instagram / Website Link</label>
+          <input type="url" v-model="formData.website_url" placeholder="https://instagram.com/..." />
+        </div>
+
+        <!-- ✅ Image File slot -->
+        <div class="form-field">
+          <label>Club Image</label>
+          <div class="file-upload-box" @click="triggerFileInput" :class="{ 'has-file': !!previewUrl }">
+            <input
+              ref="fileInput"
+              type="file"
+              accept="image/png, image/jpeg"
+              @change="onFileChange"
+              style="display: none;"
+            />
+            
+            <div v-if="previewUrl" class="preview-container">
+              <img :src="previewUrl" alt="Preview" class="preview-img" />
+              <button type="button" class="remove-file-btn" @click.stop="removeFile">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+
+            <div v-else class="upload-placeholder">
+              <i class="fas fa-cloud-upload-alt"></i>
+              <span>Click to upload image</span>
+              <small>(PNG, JPG)</small>
+            </div>
+          </div>
         </div>
 
         <div class="modal-actions">
           <button type="button" class="btn-secondary" @click="closeModal">
             Cancel
           </button>
-          <button type="submit" class="btn-primary">
-            Create Club
+          <button type="submit" class="btn-primary" :disabled="isSubmitting">
+            <span v-if="isSubmitting">
+              {{ isEditMode ? 'Saving...' : 'Creating...' }}
+            </span>
+            <span v-else>
+              {{ isEditMode ? 'Save Changes' : 'Create Club' }}
+            </span>
           </button>
         </div>
       </form>
@@ -135,107 +166,208 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted, watch } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { store } from '../store.js'
+import { apiFetch } from '../api'
 
-import ConfettiOverlay from '../components/ConfettiOverlay.vue'
-
-const router = useRouter()
 const route = useRoute()
-const searchQuery = ref('')
-const activeFilter = ref('all')
-const isSuperAdmin = ref(false)
-const showCelebration = ref(false)
 
-// Modal State
+const searchQuery = ref('')
+const isSuperAdmin = ref(false)
+const isAdmin = ref(false)
 const isModalOpen = ref(false)
+const isSubmitting = ref(false)
+
+const isEditMode = ref(false)
+const editingCommunityId = ref(null)
+
+
+const fileInput = ref(null)
+const selectedFile = ref(null)
+const previewUrl = ref(null)
+
 const formData = reactive({
   name: '',
   description: '',
-  image: ''
+  website_url: ''
 })
 
-const applyFilters = () => {
-  if (route.query.filter === 'joined') {
-    activeFilter.value = 'joined'
-  } else {
-    activeFilter.value = 'all'
+const loadCommunities = async () => {
+  try {
+    const res = await apiFetch("/api/general/communities")
+    const data = await res.json()
+
+    store.communities = (Array.isArray(data) ? data : []).map(c => ({
+      id: c.id,
+      name: c.name,
+      description: c.description || "",
+      members: c.members_count ?? 0,
+      admin_id: c.admin_id ?? null,
+      // ✅ accept either backend field
+      website_url: c.website_url || c.external_link || "",
+      image: c.image_url || "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=800&q=80"
+    }))
+  } catch (err) {
+    console.error("Failed to load communities:", err)
   }
 }
 
 onMounted(() => {
-  applyFilters()
-  
-  // Check for Super Admin role
-  const role = localStorage.getItem('user_role')
-  isSuperAdmin.value = role === 'super_admin'
+  loadCommunities()
+
+  const role = (localStorage.getItem('user_role') || '').toLowerCase()
+  isSuperAdmin.value = role === 'super_admin' || role === 'superadmin'
+  isAdmin.value = role === 'admin' || role === 'super_admin'
 })
 
-watch(() => route.query.filter, () => {
-  applyFilters()
-})
 
 const filteredCommunities = computed(() => {
   const q = searchQuery.value.trim().toLowerCase()
-  
   return store.communities.filter(community => {
-    // Filter by type
-    if (activeFilter.value === 'joined' && !community.joined) return false
-    if (activeFilter.value === 'discover' && community.joined) return false
-    
-    // Filter by search
-    if (q && !community.name.toLowerCase().includes(q)) return false
-    
+    if (q && !String(community.name || "").toLowerCase().includes(q)) return false
     return true
   })
 })
 
-const toggleJoin = (community) => {
-  // Check if user is logged in
-  if (!localStorage.getItem('user_token')) {
-    router.push('/login')
+
+
+async function deleteClub(community) {
+  if (!confirm(`Are you sure you want to delete "${community.name}"? This cannot be undone.`)) {
     return
   }
   
-  // User is authenticated, proceed with toggle
-  store.joinCommunity(community)
+  const success = await store.deleteCommunity(community.id)
+  if (success) {
+    // optional: show success toast or alert
+  }
 }
 
-// Modal Methods
-const openModal = () => {
-  formData.name = ''
-  formData.description = ''
-  formData.image = ''
+function onFileChange(e) {
+  const file = e.target.files?.[0] || null
+  if (file) {
+    selectedFile.value = file
+    // create preview
+    const reader = new FileReader()
+    reader.onload = (evt) => {
+      previewUrl.value = evt.target.result
+    }
+    reader.readAsDataURL(file)
+  }
+}
+
+function triggerFileInput() {
+  fileInput.value?.click()
+}
+
+function removeFile() {
+  selectedFile.value = null
+  previewUrl.value = null
+  if (fileInput.value) fileInput.value.value = ""
+}
+const openEditModal = (community) => {
+  isEditMode.value = true
+  editingCommunityId.value = community.id
+
+  formData.name = community.name
+  formData.description = community.description
+  formData.website_url = community.website_url || ""
+
+  previewUrl.value = community.image || null
+  selectedFile.value = null
+
   isModalOpen.value = true
   document.body.style.overflow = 'hidden'
 }
 
+// Modal Methods
+const openModal = () => {
+  isEditMode.value = false
+  editingCommunityId.value = null
+
+  formData.name = ''
+  formData.description = ''
+  formData.website_url = ''
+  selectedFile.value = null
+  previewUrl.value = null
+
+  isModalOpen.value = true
+}
+
+
 const closeModal = () => {
   isModalOpen.value = false
+  isEditMode.value = false
+  editingCommunityId.value = null
   document.body.style.overflow = ''
 }
 
-const submitClub = () => {
-  // Use default image if none provided
-  const image = formData.image || 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=800&q=80'
-  
-  store.createClub({
-    name: formData.name,
-    description: formData.description,
-    image: image
-  })
-  
-  closeModal()
+
+const submitClub = async () => {
+  const token = localStorage.getItem("user_token")
+  if (!token) {
+    alert("Please login first.")
+    return
+  }
+
+  isSubmitting.value = true
+  try {
+    const fd = new FormData()
+    fd.append("name", formData.name)
+    fd.append("description", formData.description)
+    fd.append("website_url", formData.website_url)
+
+    if (selectedFile.value instanceof File) {
+      fd.append("image", selectedFile.value)
+    }
+
+    let res;
+
+    if (isEditMode.value && editingCommunityId.value) {
+      // ⭐ REAL EDIT — DO NOT DELETE ANYTHING
+      res = await apiFetch(`/api/general/communities/${editingCommunityId.value}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        body: fd
+      });
+    } else {
+      // CREATE
+      res = await apiFetch("/api/general/communities", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        body: fd
+      });
+    }
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      throw new Error(err.error || "Operation failed")
+    }
+
+    await loadCommunities()
+    closeModal()
+
+  } catch (err) {
+    console.error(err)
+    alert(err.message || "Failed to save community")
+  } finally {
+    isSubmitting.value = false
+  }
 }
+
 </script>
 
 <style scoped>
-/* Design Tokens (scoped to this component) */
+/* Your CSS is mostly fine; I added ONLY website styles */
+
 .page-wrap {
-  --brand: #1b8f48;
-  --brand-600: #167a3d;
-  --brand-200: #e6f3e9;
-  --page: #fefbea;
+ --brand: #372D2D;    
+  --brand-600: #241D1D;   
+  --brand-200: #EBE8E8;
+  --page: #ffffff;
   --panel: #e6f6e6;
   --card: #ffffff;
   --card-soft: #e1f0e3;
@@ -257,7 +389,6 @@ const submitClub = () => {
   color: var(--ink);
 }
 
-/* Intro + Search */
 .intro-text {
   font-size: 14px;
   color: var(--muted);
@@ -266,36 +397,41 @@ const submitClub = () => {
 
 .community-search-shell {
   width: 100%;
-  height: 46px;
+  height: 48px;
   border-radius: 999px;
-  background: #f7fbf8;
-  border: 1px solid var(--outline);
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 0 16px;
-  margin-bottom: 10px;
+  gap: 12px;
+  padding: 0 20px;
+  margin-bottom: 16px;
+  transition: all 0.2s ease;
+}
+
+.community-search-shell:focus-within {
+  border-color: #111111;
+  box-shadow: 0 0 0 1px #111111;
 }
 
 .community-search-shell i {
-  font-size: 15px;
-  color: #6d8677;
+  font-size: 16px;
+  color: #6b7280;
 }
 
 .community-search-shell input {
   border: none;
   outline: none;
   flex: 1;
-  font-size: 14px;
+  font-size: 15px;
   background: transparent;
-  color: #294033;
+  color: #111111;
 }
 
 .community-search-shell input::placeholder {
-  color: #a5b9ab;
+  color: #9ca3af;
 }
 
-/* Filters */
 .filters-row {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -331,7 +467,6 @@ const submitClub = () => {
   color: #fff;
 }
 
-/* Add Club Button */
 .add-club-btn {
   margin-left: 10px;
   border: none;
@@ -344,7 +479,6 @@ const submitClub = () => {
   cursor: pointer;
 }
 
-/* Community List */
 .community-list {
   display: flex;
   flex-direction: column;
@@ -387,20 +521,48 @@ const submitClub = () => {
   margin: 0;
 }
 
-.community-meta {
-  margin-top: 4px;
+
+/* ✅ NEW */
+.community-website {
+  margin-top: 6px;
   font-size: 12px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
   color: #556b5f;
 }
 
-.community-meta i {
-  margin-right: 6px;
+.community-website.muted {
+  color: #7a8b84;
 }
 
-/* Status Pill */
+.website-link {
+  color: var(--brand);
+  text-decoration: none;
+  max-width: 520px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.website-link:hover {
+  text-decoration: underline;
+}
+
+/* Actions Column */
+.community-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end; /* Align right */
+  justify-content: center;
+  padding-right: 18px;
+}
+
 .status-pill {
-  align-self: center;
-  margin-right: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 6px 14px;
   border-radius: 999px;
   font-size: 12px;
@@ -408,22 +570,33 @@ const submitClub = () => {
   border: 1px solid transparent;
   cursor: pointer;
   white-space: nowrap;
-}
-
-.status-pill.joined {
-  background: #e5f7e7;
-  color: #1e8b47;
-  border-color: #bce5c4;
-}
-
-.status-pill.joined i {
-  margin-right: 6px;
+  text-decoration: none;
 }
 
 .status-pill.outline {
   background: #fff;
   border-color: var(--brand);
   color: var(--brand);
+}
+
+.website-btn {
+  min-width: 140px;
+}
+
+.website-btn i {
+  margin-right: 6px;
+}
+
+.delete-btn {
+  border-color: #e55353 !important;
+  color: #e55353 !important;
+  width: 40px; /* Small square-ish button for trash */
+  padding: 6px 0; /* Center icon */
+}
+
+.status-pill.outline:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .no-results {
@@ -433,8 +606,7 @@ const submitClub = () => {
   font-style: italic;
 }
 
-/* ========= MODAL ========= */
-
+/* MODAL */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -452,7 +624,7 @@ const submitClub = () => {
 .modal-card {
   width: 420px;
   max-width: 95%;
-  background: #fefbea;
+  background: #ffffff;
   border-radius: 18px;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2);
   padding: 20px 22px 18px;
@@ -545,13 +717,12 @@ const submitClub = () => {
   color: #ffffff;
 }
 
-/* Responsive */
 @media (max-width: 960px) {
   .community-card {
     grid-template-columns: 180px minmax(0, 1fr);
     grid-template-rows: auto auto;
   }
-  
+
   .status-pill {
     grid-column: 1 / -1;
     margin: 0 0 10px 18px;
@@ -564,17 +735,93 @@ const submitClub = () => {
     margin: 18px auto 32px;
     padding: 0 14px 30px;
   }
-  
+
   .community-card {
     grid-template-columns: 1fr;
   }
-  
+
   .community-image {
     height: 140px;
   }
-  
+
   .status-pill {
     margin-left: 18px;
   }
+}
+
+/* FILE UPLOAD CSS */
+.file-upload-box {
+  border: 2px dashed #e2e8f0;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  background: #ffffff;
+  transition: all 0.2s;
+  position: relative;
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.file-upload-box:hover {
+  border-color: #111111;
+  background: #f8fafc;
+}
+
+.file-upload-box.has-file {
+  border-style: solid;
+  padding: 0;
+  overflow: hidden;
+  background: #000;
+}
+
+.upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+}
+
+.upload-placeholder i {
+  font-size: 24px;
+  color: #111111;
+}
+
+.preview-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+}
+
+.preview-img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  display: block;
+}
+
+.remove-file-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+
+.remove-file-btn:hover {
+  background: rgba(200, 50, 50, 0.9);
 }
 </style>

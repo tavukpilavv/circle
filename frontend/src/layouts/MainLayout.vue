@@ -120,7 +120,7 @@ const loadAvatar = () => {
   } else {
     // Default avatar if none set - MATCH PROFILE PAGE LOGIC
     const name = localStorage.getItem('user_name') || 'User'
-    userAvatar.value = `https://api.dicebear.com/7.x/initials/svg?seed=${name}&backgroundColor=1b8f48&textColor=ffffff`
+    userAvatar.value = `https://api.dicebear.com/7.x/initials/svg?seed=${name}&backgroundColor=372d2d&textColor=ffffff`
   }
 }
 
@@ -229,11 +229,11 @@ const toggleAuth = () => {
 <style>
 /* ========= BRAND TOKENS ========= */
 :root {
-  --brand: #1b8f48;
-  --brand-600: #167a3d;
-  --brand-200: #e6f3e9;
+ --brand: #372D2D;    
+  --brand-600: #241D1D;   
+  --brand-200: #EBE8E8;
 
-  --page: #fefbea;
+  --page: #ffffff;
   --card: #ffffff;
 
   --ink: #153226;
@@ -274,7 +274,7 @@ body {
 .top-bar {
   width: 100%;
   height: 14px;
-  background: var(--brand);
+  background: #372D2D;
 }
 
 .navbar {
@@ -294,7 +294,7 @@ body {
 
 .nav-bottom-line {
   height: 2px;
-  background: var(--brand);
+  background: #372D2D;
   opacity: 0.6;
 }
 
@@ -312,7 +312,7 @@ body {
   font-weight: 900;
   font-size: 40px;
   letter-spacing: -1px;
-  color: var(--brand);
+  color: #372D2D;
   text-decoration: none;
   position: relative;
   z-index: 5; /* Letters above cat when cat is behind */
@@ -341,7 +341,7 @@ body {
 }
 
 .tab.is-active {
-  border-bottom: 2px solid var(--brand);
+  border-bottom: 2px solid #372D2D;
 }
 
 /* center: search bar */
@@ -358,7 +358,7 @@ body {
   height: 44px;
   padding: 0 18px;
   border-radius: 26px;
-  background: var(--brand-200);
+  background: #EAE6E6;
   display: flex;
   align-items: center;
   position: relative;
@@ -371,17 +371,17 @@ body {
   outline: none;
   background: transparent;
   font-size: 15px;
-  color: #2b4c3d;
+  color: #4A3C3C;
 }
 
 .global-search input::placeholder {
-  color: #8ca59a;
+  color: #A39696;
 }
 
 .search-btn {
   background: none;
   border: none;
-  color: #1f5c3f;
+  color: #372D2D;
   cursor: pointer;
   padding: 8px;
   display: flex;
@@ -415,14 +415,14 @@ body {
   height: 48px;
   border-radius: 999px;
   border: none;
-  background: var(--brand-200);
+  background: #EAE6E6;
   display: grid;
   place-items: center;
   cursor: pointer;
 }
 
 .icon-btn i {
-  color: #1f5c3f;
+  color: #372D2D;
 }
 
 .sign-in-btn {
@@ -584,7 +584,7 @@ body {
   width: 18px;
   height: 7px;
   border-radius: 6px;
-  background: var(--brand);
+  background: #372D2D;
 }
 
 .cat-scarf-end {
@@ -594,7 +594,7 @@ body {
   width: 6px;
   height: 10px;
   border-radius: 4px;
-  background: var(--brand);
+  background: #372D2D;
 }
 
 /* Legs */

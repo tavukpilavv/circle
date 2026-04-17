@@ -1,6 +1,13 @@
 /* ---------------------------------- */
 /* GENEL STİLLER ve TEMEL AYARLAR     */
 /* ---------------------------------- */
+
+:root {
+    --brand: #111111;
+    --brand-600: #000000;
+    --brand-200: #f1f5f9;
+}
+
 * {
     box-sizing: border-box
 }
@@ -11,10 +18,10 @@ body {
 }
 
 body {
-    font-family: 'Roboto', sans-serif;
-    background-color: #FDFDEE;
-    /* sarı arka plan */
-    color: #333;
+    font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    background-color: #ffffff;
+    color: #111111;
+    -webkit-font-smoothing: antialiased;
 }
 
 /* Sayfa içeriğini ortalayan ana taşıyıcı */
@@ -32,7 +39,7 @@ body {
     width: 100%;
     height: 12px;
     /* Kalınlığını buradan ayarlayabilirsiniz */
-    background-color: #2E8540;
+    background-color: var(--brand);
     /* Logodaki koyu yeşil */
 }
 
@@ -41,7 +48,7 @@ body {
 /* 1. ÜST MENÜ (NAVBAR)                */
 /* ---------------------------------- */
 .navbar {
-    background-color: #FDFDEE;
+    background-color: #ffffff;
 
     padding: 0;
     width: 100%;
@@ -58,7 +65,7 @@ body {
     position: relative;
 
     /* YENİ EKLENEN SATIRLAR: */
-    border-bottom: 2px solid #2E8540;
+    border-bottom: 2px solid var(--brand);
     /* Çizgiyi buraya taşıdık */
     padding-bottom: 15px;
     /* Çizgi ile içerik arasına boşluk */
@@ -81,7 +88,7 @@ body {
 .logo {
     font-size: 48px;
     font-weight: 900;
-    color: #2E8540;
+    color: var(--brand);
     /* Koyu yeşil */
     text-decoration: none;
     margin-right: 160px;
@@ -100,7 +107,7 @@ body {
 .navbar nav a.active {
     color: #000;
     font-weight: 600;
-    border-bottom: 2px solid #2E8540;
+    border-bottom: 2px solid var(--brand);
     /* Altındaki yeşil çizgi */
 }
 
@@ -113,12 +120,17 @@ body {
 .navbar-center .search-bar {
     display: flex;
     align-items: center;
-    background-color: #E3F6DB;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
     padding: 10px 15px;
     border-radius: 32px;
     width: 500px;
     height: 50px;
+    transition: all 0.2s;
+}
 
+.navbar-center .search-bar:focus-within {
+    border-color: #111111;
 }
 
 .search-bar i {
@@ -148,8 +160,8 @@ body {
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    background-color: #E3F6DB;
-    color: #2E8540;
+    background-color: var(--brand-200);
+    color: var(--brand);
     align-items: center;
     justify-content: center;
     font-size: 18px;
@@ -158,7 +170,7 @@ body {
 }
 
 .navbar-right .profile-button:hover {
-    background-color: #2E8540;
+    background-color: var(--brand);
     color: #ffffff;
 }
 
@@ -311,10 +323,10 @@ body {
 
 /* Tek bir etkinlik kartı */
 .event-card {
-    background-color: #E9F5E6;
-    /* Light green background from reference */
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
     border-radius: 16px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
     position: relative;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     overflow: hidden;
@@ -384,7 +396,7 @@ body {
     font-weight: 700;
     margin-bottom: 12px;
     line-height: 1.3;
-    color: #153226;
+    color: var(--brand-600);
     /* Dark green text */
 }
 
@@ -450,16 +462,16 @@ body {
     font-family: 'Inter', sans-serif;
     /* Diğerleriyle aynı font */
     font-size: 15px;
-    border: 1px solid #ccc;
+    border: 1px solid #e2e8f0;
     border-radius: 8px;
     outline: none;
-    color: #555;
-    background-color: #fafafa;
+    color: #111111;
+    background-color: #ffffff;
     transition: border-color 0.2s;
 }
 
 .date-filter-container input[type="date"]:focus {
-    border-color: #2E8540;
+    border-color: var(--brand);
     /* Odaklanınca yeşil çerçeve */
     background-color: #fff;
 }
@@ -487,9 +499,10 @@ body {
     }
 
     .filters h3 {
-        display: none; /* Optional: hide title to save space or keep it */
+        display: none;
+        /* Optional: hide title to save space or keep it */
     }
-    
+
     /* Make filter items horizontal scrollable or wrapped */
     .filters {
         display: flex;
@@ -505,7 +518,7 @@ body {
         margin-right: 0;
         background: #f9f9f9;
     }
-    
+
     .filter-item:last-child {
         border-bottom: 1px solid #e0e0e0;
     }
@@ -520,58 +533,79 @@ body {
     .event-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .event-card {
-        height: auto; /* Allow height to grow */
-        flex-direction: column; /* Stack image and content */
+        height: auto;
+        /* Allow height to grow */
+        flex-direction: column;
+        /* Stack image and content */
         align-items: flex-start;
     }
-    
+
     .card-image-wrapper {
         width: 100%;
         height: 180px;
         margin-bottom: 12px;
     }
-    
+
     .card-content {
         padding-left: 0;
         width: 100%;
     }
-    
+
     .navbar-content {
         flex-direction: column;
         gap: 15px;
         padding-bottom: 10px;
     }
-    
+
     .navbar-center {
         position: static;
         transform: none;
         width: 100%;
-        order: 3; /* Move search bar to bottom */
+        order: 3;
+        /* Move search bar to bottom */
     }
-    
+
     .navbar-center .search-bar {
         width: 100%;
     }
-    
+
     .logo {
         margin-right: 0;
         font-size: 32px;
     }
-    
+
     .navbar-left {
         width: 100%;
         justify-content: space-between;
     }
-    
+
     .navbar nav {
-        display: none; /* Hide nav links on mobile for now or move to hamburger */
+        display: none;
+        /* Hide nav links on mobile for now or move to hamburger */
     }
-    
+
     .navbar-right {
         position: absolute;
         top: 15px;
         right: 20px;
     }
+}
+
+/* Toast Overrides to match minimalist brand */
+.Vue-Toastification__toast--success {
+    background-color: #111111 !important;
+    color: #ffffff !important;
+}
+
+.Vue-Toastification__toast--error {
+    background-color: #e55353 !important;
+    color: #ffffff !important;
+}
+
+.Vue-Toastification__toast--info {
+    background-color: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    color: #111111 !important;
 }

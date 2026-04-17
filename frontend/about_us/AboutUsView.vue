@@ -274,11 +274,11 @@ onMounted(() => {
 /* ROOT TOKENS */
 
 :root {
-  --brand: #1b8f48;
-  --brand-600: #167a3d;
-  --brand-200: #e6f3e9;
+ --brand: #372D2D;    
+  --brand-600: #241D1D;   
+  --brand-200: #EBE8E8;
 
-  --page: #fefbea;
+  --page: #ffffff;
   --card: #ffffff;
 
   --ink: #153226;
@@ -296,7 +296,7 @@ onMounted(() => {
 
 .about-us-container {
   font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
-  background: #fefbea; /* var(--page) */
+  background: #ffffff; /* var(--page) */
   color: #153226; /* var(--ink) */
   min-height: 100vh;
 }
@@ -310,7 +310,7 @@ onMounted(() => {
 }
 
 .navbar {
-  background: #fefbea; /* var(--page) */
+  background: #ffffff; /* var(--page) */
 }
 
 .nav-inner {

@@ -15,10 +15,10 @@
               width="228"
               height="160"
               rx="26"
-              fill="#f4fbf6"
+              fill="#f8fafc"
             />
             <!-- Decorative soft circle -->
-            <circle cx="50" cy="40" r="18" fill="#e0f2e6" />
+            <circle cx="50" cy="40" r="18" fill="#e2e8f0" />
             <circle cx="215" cy="168" r="16" fill="#ffe6c9" />
 
             <!-- Main monitor -->
@@ -29,21 +29,21 @@
               height="92"
               rx="12"
               fill="#ffffff"
-              stroke="#d8eadb"
+              stroke="#e2e8f0"
               stroke-width="1.5"
             />
             <!-- Monitor header bar -->
-            <rect x="42" y="46" width="150" height="16" rx="10" fill="#f3f7f3" />
+            <rect x="42" y="46" width="150" height="16" rx="10" fill="#f8fafc" />
             <circle cx="52" cy="54" r="3" fill="#f37c57" />
             <circle cx="60" cy="54" r="3" fill="#f4c95d" />
-            <circle cx="68" cy="54" r="3" fill="#6cc090" />
+            <circle cx="68" cy="54" r="3" fill="#9ca3af" />
 
             <!-- Left panel "logs" -->
-            <rect x="52" y="70" width="56" height="8" rx="4" fill="#e6f3ea" />
-            <rect x="52" y="84" width="44" height="7" rx="3.5" fill="#e6f3ea" />
-            <rect x="52" y="96" width="50" height="7" rx="3.5" fill="#e6f3ea" />
-            <rect x="52" y="108" width="32" height="7" rx="3.5" fill="#e6f3ea" />
-            <rect x="52" y="120" width="40" height="7" rx="3.5" fill="#e6f3ea" />
+            <rect x="52" y="70" width="56" height="8" rx="4" fill="#f1f5f9" />
+            <rect x="52" y="84" width="44" height="7" rx="3.5" fill="#f1f5f9" />
+            <rect x="52" y="96" width="50" height="7" rx="3.5" fill="#f1f5f9" />
+            <rect x="52" y="108" width="32" height="7" rx="3.5" fill="#f1f5f9" />
+            <rect x="52" y="120" width="40" height="7" rx="3.5" fill="#f1f5f9" />
 
             <!-- Right "status" panel -->
             <rect
@@ -59,12 +59,12 @@
 
             <!-- Rotating gear in panel -->
             <g class="gear-main">
-              <circle cx="148" cy="87" r="10" fill="#ffffff" stroke="#167a3d" stroke-width="2" />
-              <circle cx="148" cy="87" r="4" fill="#167a3d" />
-              <rect x="146" y="75" width="4" height="6" rx="1" fill="#167a3d" />
-              <rect x="146" y="93" width="4" height="6" rx="1" fill="#167a3d" />
-              <rect x="136" y="85" width="6" height="4" rx="1" fill="#167a3d" />
-              <rect x="154" y="85" width="6" height="4" rx="1" fill="#167a3d" />
+              <circle cx="148" cy="87" r="10" fill="#ffffff" stroke="#111111" stroke-width="2" />
+              <circle cx="148" cy="87" r="4" fill="#111111" />
+              <rect x="146" y="75" width="4" height="6" rx="1" fill="#111111" />
+              <rect x="146" y="93" width="4" height="6" rx="1" fill="#111111" />
+              <rect x="136" y="85" width="6" height="4" rx="1" fill="#111111" />
+              <rect x="154" y="85" width="6" height="4" rx="1" fill="#111111" />
             </g>
 
             <!-- Scan bar -->
@@ -75,13 +75,13 @@
               width="20"
               height="4"
               rx="2"
-              fill="#1b8f48"
+              fill="#111111"
               opacity="0.15"
             />
 
             <!-- Monitor stand -->
-            <rect x="94" y="142" width="46" height="6" rx="3" fill="#d6e3da" />
-            <rect x="84" y="148" width="66" height="9" rx="4.5" fill="#c8d9ce" />
+            <rect x="94" y="142" width="46" height="6" rx="3" fill="#e2e8f0" />
+            <rect x="84" y="148" width="66" height="9" rx="4.5" fill="#cbd5e1" />
 
             <!-- Side chat bubble (floating) -->
             <g class="chat-floating">
@@ -91,11 +91,11 @@
                 width="52"
                 height="20"
                 rx="10"
-                fill="#1b8f48"
+                fill="#111111"
               />
               <path
                 d="M178 92 L184 92 L180 98 Z"
-                fill="#1b8f48"
+                fill="#111111"
               />
               <g class="dot-typing" transform="translate(178 80)">
                 <circle cx="0" cy="0" r="2.4" fill="#ffffff" />
@@ -117,20 +117,20 @@
               <!-- headset band -->
               <path
                 d="M-7 -4 q7 -7 14 0"
-                stroke="#167a3d"
+                stroke="#111111"
                 stroke-width="2"
                 fill="none"
                 stroke-linecap="round"
               />
-              <circle cx="-11" cy="0" r="3" fill="#167a3d" />
+              <circle cx="-11" cy="0" r="3" fill="#111111" />
               <path
                 d="M5 3 q5 4 0 7"
-                stroke="#167a3d"
+                stroke="#111111"
                 stroke-width="1.6"
                 fill="none"
                 stroke-linecap="round"
               />
-              <circle cx="5" cy="12" r="2" fill="#167a3d" />
+              <circle cx="5" cy="12" r="2" fill="#111111" />
             </g>
 
             <!-- Small ticket badge -->
@@ -141,11 +141,11 @@
               height="16"
               rx="8"
               fill="#ffffff"
-              stroke="#e0e5df"
+              stroke="#e2e8f0"
               stroke-width="1"
             />
             <circle cx="190" cy="136" r="4" fill="#f9c86f" />
-            <rect x="198" y="133" width="20" height="6" rx="3" fill="#e6f3ea" />
+            <rect x="198" y="133" width="20" height="6" rx="3" fill="#f1f5f9" />
           </svg>
         </div>
 
@@ -203,19 +203,33 @@ const form = ref({
 })
 const showSuccess = ref(false)
 
-const handleSubmit = () => {
-  // Simulate API call
-  console.log('Form submitted:', form.value)
-  
-  // Reset form
-  form.value = { name: '', email: '', issue: '' }
-  
-  // Show success message
-  alert('Message sent to help@circleevent.app')
-  showSuccess.value = true
-  setTimeout(() => {
-    showSuccess.value = false
-  }, 4000)
+const handleSubmit = async () => {
+  try {
+    const response = await fetch('https://circle-9srg.onrender.com/api/general/send-support', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(form.value)
+    })
+
+    if (response.ok) {
+      // Reset form
+      form.value = { name: '', email: '', issue: '' }
+      
+      // Show success message
+      alert('Message sent successfully!')
+      showSuccess.value = true
+      setTimeout(() => {
+        showSuccess.value = false
+      }, 4000)
+    } else {
+      alert('Failed to send message. Please try again.')
+    }
+  } catch (error) {
+    console.error('Error submitting form:', error)
+    alert('An error occurred. Please try again later.')
+  }
 }
 </script>
 
@@ -228,7 +242,8 @@ const handleSubmit = () => {
 }
 
 .support-card {
-  background: linear-gradient(135deg, #e7f5ea, #ffe8d4);
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
   border-radius: 26px;
   padding: 24px;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
@@ -332,20 +347,21 @@ const handleSubmit = () => {
   gap: 8px;
   padding: 4px 11px;
   margin-bottom: 10px;
-  background: #ffffffc8;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
   border-radius: 999px;
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #167a3d;
+  color: #111111;
 }
 
 .support-pill-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  border: 2px solid #167a3d;
+  border: 2px solid #111111;
   background: #fff;
 }
 
@@ -353,21 +369,22 @@ const handleSubmit = () => {
   font-size: 24px;
   font-weight: 800;
   margin-bottom: 4px;
-  color: #163828;
+  color: #111111;
 }
 
 .support-subtext {
   font-size: 13px;
-  color: #385445;
+  color: #4b5563;
   margin-bottom: 16px;
   line-height: 1.5;
 }
 
 .support-form-card {
   background: #ffffff;
+  border: 1px solid #e2e8f0;
   border-radius: 18px;
   padding: 16px;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.02);
 }
 
 .form-group {
@@ -380,17 +397,25 @@ const handleSubmit = () => {
 .form-label {
   font-size: 12px;
   font-weight: 600;
-  color: #234135;
+  color: #4b5563;
 }
 
 .form-input,
 .form-textarea {
   border-radius: 10px;
-  border: 1px solid #d8eadb;
+  border: 1px solid #e2e8f0;
   padding: 8px 10px;
   font-size: 13px;
-  background: #fdfdf9;
+  background: #ffffff;
   outline: none;
+  transition: all 0.2s;
+  color: #111111;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+  border-color: #111111;
+  box-shadow: 0 0 0 1px #111111;
 }
 
 .form-textarea {
@@ -405,9 +430,10 @@ const handleSubmit = () => {
   padding: 8px 20px;
   font-size: 13px;
   font-weight: 600;
-  background: #1b8f48;
+  background: #111111;
   color: #fff;
   cursor: pointer;
+  transition: box-shadow 0.2s ease, transform 0.1s ease;
 }
 
 .btn-primary:active {
@@ -421,8 +447,8 @@ const handleSubmit = () => {
   border-radius: 999px;
   padding: 6px 12px;
   font-size: 12px;
-  color: #145c32;
-  background-color: #e0f5e5;
+  color: #111111;
+  background-color: #f1f5f9;
 }
 
 @media (max-width: 900px) {

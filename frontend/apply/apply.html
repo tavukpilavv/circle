@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -8,16 +9,11 @@
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
-    rel="stylesheet"
-  />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet" />
 
   <!-- Icons (optional, just for small icons) -->
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-  />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
   <style>
     :root {
@@ -25,7 +21,7 @@
       --brand-600: #167a3d;
       --brand-200: #e6f3e9;
 
-      --page: #fefbea;
+      --page: #ffffff;
       --card: #ffffff;
 
       --ink: #153226;
@@ -472,12 +468,7 @@
               <label class="form-label" for="clubName">
                 Club / community name <span>*</span>
               </label>
-              <input
-                id="clubName"
-                name="clubName"
-                class="form-input"
-                required
-              />
+              <input id="clubName" name="clubName" class="form-input" required />
               <div class="form-error-inline" data-error-for="clubName">
                 Please enter a club name.
               </div>
@@ -534,13 +525,8 @@
             <label class="form-label" for="description">
               Short description <span>*</span>
             </label>
-            <textarea
-              id="description"
-              name="description"
-              class="form-textarea"
-              placeholder="Tell us briefly what your club is about and who it is for."
-              required
-            ></textarea>
+            <textarea id="description" name="description" class="form-textarea"
+              placeholder="Tell us briefly what your club is about and who it is for." required></textarea>
             <div class="form-error-inline" data-error-for="description">
               Please add a short description.
             </div>
@@ -550,12 +536,8 @@
             <label class="form-label" for="events">
               What kind of events do you organize?
             </label>
-            <textarea
-              id="events"
-              name="events"
-              class="form-textarea"
-              placeholder="Example: weekly meetups, workshops, competitions, trips, online sessions..."
-            ></textarea>
+            <textarea id="events" name="events" class="form-textarea"
+              placeholder="Example: weekly meetups, workshops, competitions, trips, online sessions..."></textarea>
           </div>
 
           <div class="section-label" style="margin-top: 8px;">Contact</div>
@@ -566,12 +548,7 @@
               <label class="form-label" for="contactName">
                 Contact person name <span>*</span>
               </label>
-              <input
-                id="contactName"
-                name="contactName"
-                class="form-input"
-                required
-              />
+              <input id="contactName" name="contactName" class="form-input" required />
               <div class="form-error-inline" data-error-for="contactName">
                 Please enter a contact name.
               </div>
@@ -581,12 +558,8 @@
               <label class="form-label" for="studentNumber">
                 Student number (optional)
               </label>
-              <input
-                id="studentNumber"
-                name="studentNumber"
-                class="form-input"
-                placeholder="If you are from OSTIM, you can add it."
-              />
+              <input id="studentNumber" name="studentNumber" class="form-input"
+                placeholder="If you are from OSTIM, you can add it." />
             </div>
           </div>
 
@@ -595,13 +568,7 @@
               <label class="form-label" for="email">
                 Contact email <span>*</span>
               </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                class="form-input"
-                required
-              />
+              <input id="email" name="email" type="email" class="form-input" required />
               <div class="form-error-inline" data-error-for="email">
                 Please enter a valid email.
               </div>
@@ -611,12 +578,7 @@
               <label class="form-label" for="instagram">
                 Instagram (optional)
               </label>
-              <input
-                id="instagram"
-                name="instagram"
-                class="form-input"
-                placeholder="https://instagram.com/yourclub"
-              />
+              <input id="instagram" name="instagram" class="form-input" placeholder="https://instagram.com/yourclub" />
             </div>
           </div>
 
@@ -624,12 +586,8 @@
             <label class="form-label" for="otherLink">
               Other link (optional)
             </label>
-            <input
-              id="otherLink"
-              name="otherLink"
-              class="form-input"
-              placeholder="Website, Telegram, WhatsApp, Discord..."
-            />
+            <input id="otherLink" name="otherLink" class="form-input"
+              placeholder="Website, Telegram, WhatsApp, Discord..." />
           </div>
 
           <div class="section-label" style="margin-top: 8px;">Verification</div>
@@ -639,15 +597,10 @@
             <label class="form-label" for="proof">
               Proof of club (optional for now)
             </label>
-            <input
-              id="proof"
-              name="proof"
-              type="file"
-              class="form-file"
-              accept=".png,.jpg,.jpeg,.pdf"
-            />
+            <input id="proof" name="proof" type="file" class="form-file" accept=".png,.jpg,.jpeg,.pdf" />
             <p class="form-small">
-              For official clubs, you can upload a document or screenshot that shows the club is recognized by the university.
+              For official clubs, you can upload a document or screenshot that shows the club is recognized by the
+              university.
             </p>
           </div>
 
@@ -746,4 +699,5 @@
     });
   </script>
 </body>
+
 </html>

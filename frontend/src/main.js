@@ -1,4 +1,5 @@
 import { createApp } from 'vue'
+import { inject } from '@vercel/analytics'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
@@ -8,6 +9,23 @@ import '../style.css' // Import global styles
 import './assets/main.css' // Import custom Element Plus overrides
 import Toast from "vue-toastification";
 import "vue-toastification/dist/index.css";
+
+// Initialize Vercel Analytics
+inject()
+import { store } from './store.js';
+/* ======================
+   PRELOAD DATA BEFORE APP MOUNTS
+   ====================== */
+async function preload() {
+  try {
+    await store.loadCommunitiesFromBackend();
+    if (store.loadEvents) {
+      await store.loadEvents();        // ✅ This prevents carousel disappearing
+    }
+  } catch (err) {
+    console.error("Preload failed:", err);
+  }
+}
 
 const app = createApp(App)
 
@@ -38,4 +56,9 @@ const options = {
 
 app.use(Toast, options);
 
-app.mount('#app')
+/* ======================
+   MOUNT ONLY AFTER DATA LOADED
+   ====================== */
+preload().then(() => {
+  app.mount('#app');
+});

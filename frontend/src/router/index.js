@@ -34,6 +34,21 @@ const routes = [
         component: LoginView
     },
     {
+        path: '/forgot-password',
+        name: 'ForgotPassword',
+        component: () => import('../views/ForgotPasswordView.vue')
+    },
+    {
+        path: '/reset-password',
+        name: 'ResetPassword',
+        component: () => import('../views/ResetPasswordView.vue')
+    },
+    {
+    path: '/verify-email',
+    name: 'VerifyEmail',
+    component: () => import('../views/VerifyEmailView.vue')
+   },
+    {
         path: '/signup',
         name: 'Signup',
         component: () => import('../views/SignupView.vue')
@@ -67,7 +82,8 @@ const routes = [
         path: '/community-applications',
         name: 'CommunityApplications',
         component: () => import('../views/CommunityApplications.vue')
-    }
+    },
+
 ]
 
 const router = createRouter({

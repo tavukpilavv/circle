@@ -99,13 +99,13 @@ const handleSwipe = () => {
   width: 200px !important; /* Force wide bars */
   height: 9px !important; /* Force thicker */
   border-radius: 4px !important;
-  background-color: #E8F5E9 !important; /* Inactive color */
+  background-color: var(--brand-200) !important; /* Inactive color */
   opacity: 1 !important;
   transition: all 0.3s !important;
 }
 
 :deep(.el-carousel__indicator--outside.is-active .el-carousel__button) {
-  background-color: #81C784 !important; /* Active color */
+  background-color: var(--brand) !important; /* Active color */
 }
 
 /* Mobile Responsiveness */

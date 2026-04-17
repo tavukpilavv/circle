@@ -1,10 +1,10 @@
 /* ========= BRAND TOKENS ========= */
 :root {
-  --brand: #1b8f48;
-  --brand-600: #167a3d;
-  --brand-200: #e6f3e9;
+  --brand: #372D2D;
+  --brand-600: #241D1D;
+  --brand-200: #EBE8E8;
 
-  --page: #fefbea;
+  --page: #ffffff;
   --card: #ffffff;
 
   --ink: #153226;
@@ -335,7 +335,7 @@ body {
 .modal-card {
   width: 420px;
   max-width: 95%;
-  background: #fefbea;
+  background: #ffffff;
   border-radius: 18px;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2);
   padding: 20px 22px 18px;

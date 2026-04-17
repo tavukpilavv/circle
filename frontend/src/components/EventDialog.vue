@@ -24,7 +24,7 @@ const navigateToDetails = () => {
 
 <style scoped>
 .see-all-btn {
-  background-color: #2E8540;
+  background-color: var(--brand);
   color: #ffffff;
   border: none;
   padding: 8px 20px;
@@ -33,12 +33,12 @@ const navigateToDetails = () => {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 6px rgba(46, 133, 64, 0.2);
+  box-shadow: 0 2px 6px rgba(36, 29, 29, 0.2);
 }
 
 .see-all-btn:hover {
-  background-color: #167a3d;
+  background-color: var(--brand-600);
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(46, 133, 64, 0.3);
+  box-shadow: 0 4px 8px rgba(36, 29, 29, 0.3);
 }
 </style>

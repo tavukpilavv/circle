@@ -60,6 +60,7 @@
 import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { apiFetch } from '../api'
 
 const router = useRouter()
 const formRef = ref(null)
@@ -73,6 +74,16 @@ const form = ref({
     password: '',
     confirmPassword: ''
 })
+
+const validatePasswordStrength = (rule, value, callback) => {
+    if (!value) {
+        callback(new Error('Password is required'))
+    } else if (value.length < 8) {
+        callback(new Error('Password must be at least 8 characters'))
+    } else {
+        callback()
+    }
+}
 
 const validateConfirmPassword = (rule, value, callback) => {
     if (!value) {
@@ -102,11 +113,10 @@ const rules = {
         { type: 'email', message: 'Enter a valid email', trigger: ['blur', 'change'] }
     ],
     password: [
-        { required: true, message: 'Password is required', trigger: 'blur' },
-        { min: 6, message: 'Password must be at least 6 characters', trigger: 'blur' }
+        { validator: validatePasswordStrength, trigger: 'blur' }
     ],
     confirmPassword: [
-        { validator: validateConfirmPassword, trigger: ['blur', 'change'] }
+        { validator: validateConfirmPassword, trigger: 'blur' }
     ]
 }
 
@@ -120,20 +130,50 @@ watch(
 
 const submit = () => {
     if (!formRef.value) return
-    formRef.value.validate((valid) => {
+    
+    formRef.value.validate(async (valid) => { // async ekledik
         if (valid) {
             isSubmitting.value = true
             
-            // Save user info to localStorage
-            // Save user info to localStorage
-            localStorage.setItem('user_username', form.value.username)
-            localStorage.setItem('user_major', form.value.major)
-            
-            ElMessage.success('Sign up form submitted!')
-            setTimeout(() => {
-                isSubmitting.value = false
-                router.push('/login')
-            }, 1200)
+            try {
+                // --- BACKEND BAĞLANTISI (YENİ EKLENEN KISIM) ---
+                const response = await apiFetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    // Backend auth.py tam olarak bu isimleri bekliyor:
+                    body: JSON.stringify({
+                        firstName: form.value.firstName,
+                        lastName: form.value.lastName,
+                        username: form.value.username,
+                        email: form.value.email,
+                        major: form.value.major,
+                        password: form.value.password
+                    })
+                });
+
+                const data = await response.json();
+
+            if (response.ok) {
+                ElMessage.success({
+                    message: 'Registration successful! Please check your email to verify your account.',
+                    duration: 3000
+                });
+
+                setTimeout(() => {
+                    router.push('/login');
+                }, 3000);
+            } else {
+                    // Backend hata döndürdü (Örn: "Email zaten var")
+                    ElMessage.error(data.error || 'Registration failed. Please try again.');
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                ElMessage.error('Unable to connect to the server.');
+            } finally {
+                isSubmitting.value = false;
+            }
         }
     })
 }
@@ -144,10 +184,10 @@ const submit = () => {
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
 .signup-page {
-    --color-bg-main: #f0f7f0;
+    --color-bg-main: #ffffff;
     --color-text-dark: #000000;
     --color-text-link: #FF9E4A;
-    --color-green-dark: #1A916D;
+    --color-green-dark: #111111;
     
     font-family: 'Roboto', sans-serif;
     color: #333;
@@ -173,14 +213,15 @@ main {
 }
 
 .signup-box {
-    background-color: #E3F6DB;
+    background-color: #ffffff;
     border-radius: 15px;
     padding: 40px 50px;
     width: 100%;
     max-width: 740px; /* Increased width to match Login box */
     text-align: center;
     position: relative;
-    border: 2px dashed #1A916D;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     box-sizing: border-box;
 }
 
@@ -197,7 +238,7 @@ main {
 }
 
 .title {
-    color: #16A34A;     
+    color: #111111;     
     font-size: 36px;   
     font-weight: 800;  
     margin-bottom: 30px; 
@@ -226,14 +267,14 @@ main {
     height: 69px; /* Increased to match Login page */
     border-radius: 8px;
     box-shadow: none;
-    border: 1px solid #FFFFFF;
+    border: 1px solid #e2e8f0;
     background-color: #ffffff;
     padding: 0 20px;
 }
 
 :deep(.el-input__wrapper.is-focus) {
-    border-color: #1A916D;
-    box-shadow: 0 0 0 1px #1A916D;
+    border-color: #111111;
+    box-shadow: 0 0 0 1px #111111;
 }
 
 :deep(.el-input__inner) {
@@ -245,7 +286,7 @@ main {
 :deep(.el-form-item__label) {
     font-size: 16px;
     font-weight: 600;
-    color: #153226;
+    color: #4b5563;
     margin-bottom: 6px;
 }
 
@@ -254,18 +295,19 @@ main {
     width: 100%;
     height: 76.18px;
     border-radius: 16px;
-    background-color: #1A916D;
-    border-color: #1A916D;
+    background-color: #111111;
+    border-color: #111111;
     font-size: 24px;
     font-weight: 800;
     font-family: 'Roboto', sans-serif;
     color: #ffffff;
     margin-top: 10px;
+    transition: background-color 0.3s, border-color 0.3s;
 }
 
 .signup-button:hover {
-    background-color: #157a5c;
-    border-color: #157a5c;
+    background-color: #333333;
+    border-color: #333333;
 }
 
 /* Links */

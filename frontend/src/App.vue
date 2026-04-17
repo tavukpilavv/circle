@@ -5,7 +5,36 @@
 </template>
 
 <script setup>
-import MainLayout from './layouts/MainLayout.vue'
+import { onMounted, watch } from "vue"
+import { useRoute } from "vue-router"
+import MainLayout from "./layouts/MainLayout.vue"
+import { store } from "./store.js"
+
+const route = useRoute()
+
+const syncAuth = async () => {
+  store.refreshAuth()
+
+
+  if (
+    store.userRole === "admin" ||
+    store.userRole === "super_admin" ||
+    store.userRole === "superadmin"
+  ) {
+    await store.loadCommunitiesFromBackend()
+  }
+}
+
+// İlk yüklemede
+onMounted(syncAuth)
+
+// Login/logout sonrası yönlendirmelerde / sayfa geçişlerinde
+watch(
+  () => route.fullPath,
+  () => {
+    syncAuth()
+  }
+)
 </script>
 
 <style>
@@ -26,19 +55,20 @@ html, body {
   -ms-overflow-style: none;
 }
 
-/* Element Plus Dialog - Yellow background with green dashed border */
+/* Element Plus Dialog Styling */
 .el-dialog {
-  background-color: #fefbea !important;
-  border: 3px dashed #1b8f48 !important;
-  box-shadow: none !important;
+  background-color: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+  border-radius: 16px !important;
 }
 
 .el-dialog__header {
-  background-color: #fefbea !important;
+  background-color: #ffffff !important;
 }
 
 .el-dialog__body {
-  background-color: #fefbea !important;
+  background-color: #ffffff !important;
 }
 
 /* Global Layout Container - Single Source of Truth */

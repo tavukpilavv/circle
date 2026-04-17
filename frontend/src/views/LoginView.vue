@@ -34,7 +34,7 @@
                             <input type="checkbox" id="remember" checked>
                             <label for="remember">Remember me</label>
                         </div>
-                        <a href="#" class="forgot-password">Forget password?</a>
+                        <span class="forgot-password" @click="$router.push('/forgot-password')" style="cursor: pointer; position: relative; z-index: 10;">Forget password?</span>
                         
                     </div>
                 </form>
@@ -54,40 +54,90 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { apiFetch } from '../api'
 
 const router = useRouter()
 const showPassword = ref(false)
 const username = ref('')
 const password = ref('')
 
-const handleLogin = () => {
-  const user = username.value.toLowerCase();
+const handleLogin = async () => {
+  const user = username.value;
   const pass = password.value;
 
-  // Mock Credential Check
-  if (user === 'superadmin') {
-    if (pass !== 'superadmin') {
-      alert('Invalid password for Super Admin');
-      return;
-    }
-    localStorage.setItem('user_role', 'super_admin');
-  } else if (user === 'admin') {
-    if (pass !== 'admin') {
-      alert('Invalid password for Admin');
-      return;
-    }
-    localStorage.setItem('user_role', 'admin');
-  } else {
-    // Regular user - allow any password for demo
-    localStorage.setItem('user_role', 'user');
-  }
+  try {
+    // 1. Send request to Backend
+    const response = await apiFetch('/api/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        username: user,
+        password: pass
+      })
+    });
 
-  localStorage.setItem('user_token', 'logged_in')
-  localStorage.setItem('user_name', username.value) 
-  
-  window.dispatchEvent(new Event('auth-changed'))
-  // Force reload to ensure all components pick up the new role/token
-  window.location.href = '/'
+    // 2. Check if response is OK
+    const data = await response.json();
+    if (response.ok) {
+      if (data.access_token) {
+        // Store auth data
+        localStorage.setItem('user_token', data.access_token);
+
+        
+        // Fix: Use backend name instead of input email
+        let displayName = user;
+        const u = data.user || {}; 
+        if (u.first_name && u.last_name) {
+             displayName = `${u.first_name} ${u.last_name}`;
+        } else if (u.name) {
+             displayName = u.name;
+        } else if (u.username) {
+             displayName = u.username;
+        }
+        localStorage.setItem('user_name', displayName);
+        // ⭐ ADD THIS HERE
+        localStorage.setItem("user_id", data.id || data.user_id || data.user.id || data.user?.id || 0);
+        // --- FIXED LOGIC (ENGLISH) ---
+        // We strictly use the role from the backend response.
+        // If the backend doesn't send a role, we default to 'user'.
+        // We DO NOT rely on the username being "admin".
+        let userRole = 'user';
+        
+        if (data.user && data.user.role) {
+            userRole = data.user.role;
+        } else if (data.role) {
+            // Fallback if backend sends role at the top level
+            userRole = data.role;
+        }
+
+        localStorage.setItem('user_role', userRole);
+        // -----------------------------
+
+        window.dispatchEvent(new Event('auth-changed'));
+        
+        // Redirect logic
+        if (userRole === 'admin' || userRole === 'super_admin' || userRole === 'superadmin') {
+             router.push('/'); 
+        } else {
+             router.push('/');
+        }
+        
+      } else {
+        alert('Login failed: Token missing from response.');
+      }
+    } else {
+  if (response.status === 403) {
+    alert('Please verify your email address before logging in. Check your inbox for the verification link.');
+  } else {
+    alert('Invalid username or password!');
+  }
+}
+  } catch (error) {
+    console.error('Login error:', error);
+    alert('Unable to connect to the server.');
+  }
 }
 </script>
 
@@ -98,10 +148,10 @@ const handleLogin = () => {
 
 /* Renk Paleti */
 .login-page {
-    --color-bg-main: #f0f7f0; /* Genel Açık Gri/Beyaz Alan */
+    --color-bg-main: #ffffff; /* Genel Açık Gri/Beyaz Alan */
     --color-text-dark: #000000;
     --color-text-link: #FF9E4A; /* Register ve Şifre Linkleri */
-    --color-green-dark: #1A916D;
+    --color-green-dark: #111111;
     
     font-family: 'Roboto', sans-serif;
     color: #333;
@@ -134,7 +184,7 @@ main {
 }
 
 .signin-box {
-    background-color: #E3F6DB;
+    background-color: #ffffff;
     border-radius: 15px;
     padding: 40px 50px;
     width: 100%;
@@ -143,7 +193,8 @@ main {
     
     text-align: center;
     position: relative;
-    border: 2px dashed #1A916D; /* Kesikli Çizgi Efekti */
+    border: 1px solid #e2e8f0; /* Kesikli Çizgi Efekti KALDIRILDI */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     box-sizing: border-box;
 }
 /* ... (rest of CSS) ... */
@@ -184,7 +235,7 @@ main {
 
 
 .title {
-    color: #16A34A;     
+    color: #111111;     
     font-size: 36px;   
     font-weight: 800;  
     margin-bottom: 30px; 
@@ -202,7 +253,7 @@ main {
     max-width: 642px;
     height : 69px;
     padding: 15px 20px;
-    border: 1px solid #FFFFFF;
+    border: 1px solid #e2e8f0;
     border-radius: 8px;
     font-size: 15px;
     outline: none;
@@ -243,11 +294,11 @@ main {
 }
 
 .password-toggle-btn:hover {
-    color: #1A916D;
+    color: #111111;
 }
 
 .password-toggle-btn:focus-visible {
-    outline: 2px solid #1A916D;
+    outline: 2px solid #111111;
     border-radius: 50%;
 }
 
@@ -255,12 +306,11 @@ main {
     pointer-events: none;
 }
 
-/* Giriş Butonu */
 .signin-button {
     width: 100%; /* Changed from fixed 637px */
     max-width: 637px;
     height: 76.18px;
-    background-color: #1A916D; /* Figma'daki yeni yeşil renk */
+    background-color: #111111; /* Figma'daki yeni yeşil renk */
     border-radius: 16px;       /* Figma'daki border-radius */
     font-size: 24px;           /* Figma'daki font boyutu */
     font-weight: 800;          /* Figma'daki font kalınlığı */
@@ -280,7 +330,7 @@ main {
 }
 
 .signin-button:hover {
-    background-color:#157a5c;
+    background-color:#333333;
 }
 
 /* Seçenekler (Hatırla Beni / Şifremi Unuttum) */
@@ -339,7 +389,7 @@ main {
     
     width: 31px;
     height: 30px; 
-    background-color: #5871EB; /* Figma SVG'den gelen renk */
+    background-color: #111111; /* Figma SVG'den gelen renk */
     
     /* Figma SVG'deki yuvarlak köşelere benzer bir değer */
     border-radius: 6px; 

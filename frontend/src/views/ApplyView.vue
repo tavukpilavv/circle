@@ -33,7 +33,7 @@
 
         <!-- RIGHT SIDE: FORM -->
         <div class="club-form-card">
-          <form @submit.prevent="handleSubmit" novalidate>
+          <el-form :model="form"  @submit.prevent="handleSubmit" novalidate>
             <div class="section-label">Club information</div>
             <div class="section-divider"></div>
 
@@ -42,7 +42,7 @@
                 <label class="form-label" for="clubName">
                   Club / community name <span>*</span>
                 </label>
-                <input
+                <el-input
                   id="clubName"
                   v-model="form.clubName"
                   class="form-input"
@@ -55,11 +55,16 @@
 
               <div class="form-group">
                 <label class="form-label" for="university">University <span>*</span></label>
-                <select id="university" v-model="form.university" class="form-select" required>
-                  <option value="">Select university</option>
-                  <option value="Ankara Yıldırım Beyazıt University">Ankara Yıldırım Beyazıt University</option>
-                  <option value="Other">Other</option>
-                </select>
+                <el-select id="university" v-model="form.university" class="form-select" required>
+                  <el-option value="">Select university</el-option>
+                  <el-option value="Ankara Yıldırım Beyazıt University">Ankara Yıldırım Beyazıt University</el-option>
+                  <el-option value="Ankara University">Ankara University</el-option>
+                  <el-option value="Orta doğu teknik Üniversitesi">Orta doğu teknik Üniversitesi</el-option>
+                  <el-option value="Hacettepe Üniversitesi">Hacettepe Üniversitesi</el-option>
+                  <el-option value="Bilkent Üniversitesi ">Bilkent Üniversitesi </el-option>
+                  <el-option value="Gazi Üniversitesi">Gazi Üniversitesi</el-option>
+                  <el-option value="Other">Other</el-option>
+                </el-select>
                 <div v-if="errors.university" class="form-error-inline">
                   {{ errors.university }}
                 </div>
@@ -71,11 +76,11 @@
                 <label class="form-label" for="clubType">
                   Club type <span>*</span>
                 </label>
-                <select id="clubType" v-model="form.clubType" class="form-select" required>
-                  <option value="">Select type</option>
-                  <option value="official">Official university club</option>
-                  <option value="community">Student community / interest group</option>
-                </select>
+                <el-select id="clubType" v-model="form.clubType" class="form-select" required>
+                  <el-option value="">Select type</el-option>
+                  <el-option value="official">Official university club</el-option>
+                  <el-option value="community">Student community / interest group</el-option>
+                </el-select>
                 <div v-if="errors.clubType" class="form-error-inline">
                   {{ errors.clubType }}
                 </div>
@@ -85,15 +90,15 @@
                 <label class="form-label" for="category">
                   Category <span>*</span>
                 </label>
-                <select id="category" v-model="form.category" class="form-select" required>
-                  <option value="">Select category</option>
-                  <option value="Academic">Academic</option>
-                  <option value="Technology">Technology</option>
-                  <option value="Culture & Arts">Culture &amp; Arts</option>
-                  <option value="Sports">Sports</option>
-                  <option value="Social">Social</option>
-                  <option value="Others">Others</option>
-                </select>
+                <el-select id="category" v-model="form.category" class="form-select" required>
+                  <el-option value="">Select category</el-option>
+                  <el-option value="Academic">Academic</el-option>
+                  <el-option value="Technology">Technology</el-option>
+                  <el-option value="Culture & Arts">Culture &amp; Arts</el-option>
+                  <el-option value="Sports">Sports</el-option>
+                  <el-option value="Social">Social</el-option>
+                  <el-option value="Others">Others</el-option>
+                </el-select>
                 <div v-if="errors.category" class="form-error-inline">
                   {{ errors.category }}
                 </div>
@@ -104,13 +109,14 @@
               <label class="form-label" for="description">
                 Short description <span>*</span>
               </label>
-              <textarea
+              <el-input
+                type="textarea"
                 id="description"
                 v-model="form.description"
                 class="form-textarea"
                 placeholder="Tell us briefly what your club is about and who it is for."
                 required
-              ></textarea>
+              ></el-input>
               <div v-if="errors.description" class="form-error-inline">
                 {{ errors.description }}
               </div>
@@ -120,12 +126,13 @@
               <label class="form-label" for="events">
                 What kind of events do you organize?
               </label>
-              <textarea
+              <el-input
+                type="textarea" 
                 id="events"
                 v-model="form.events"
                 class="form-textarea"
                 placeholder="Example: weekly meetups, workshops, competitions, trips, online sessions..."
-              ></textarea>
+              ></el-input>
             </div>
 
             <div class="section-label" style="margin-top: 8px;">Contact</div>
@@ -136,7 +143,7 @@
                 <label class="form-label" for="contactName">
                   Contact person name <span>*</span>
                 </label>
-                <input
+                <el-input
                   id="contactName"
                   v-model="form.contactName"
                   class="form-input"
@@ -151,7 +158,7 @@
                 <label class="form-label" for="studentNumber">
                   Student number (optional)
                 </label>
-                <input
+                <el-input
                   id="studentNumber"
                   v-model="form.studentNumber"
                   class="form-input"
@@ -165,7 +172,7 @@
                 <label class="form-label" for="email">
                   Contact email <span>*</span>
                 </label>
-                <input
+                <el-input
                   id="email"
                   v-model="form.email"
                   type="email"
@@ -181,7 +188,7 @@
                 <label class="form-label" for="instagram">
                   Instagram (optional)
                 </label>
-                <input
+                <el-input
                   id="instagram"
                   v-model="form.instagram"
                   class="form-input"
@@ -194,7 +201,7 @@
               <label class="form-label" for="otherLink">
                 Other link (optional)
               </label>
-              <input
+              <el-input
                 id="otherLink"
                 v-model="form.otherLink"
                 class="form-input"
@@ -206,24 +213,24 @@
             <div class="section-divider"></div>
 
             <div class="form-group">
-              <label class="form-label" for="proof">
-                Proof of club (optional for now)
+              <label class="form-label" for="clubImage">
+                Club Image (optional)
               </label>
               <input
-                id="proof"
+                id="clubImage"
                 type="file"
                 class="form-file"
-                accept=".png,.jpg,.jpeg,.pdf"
+                accept=".png,.jpg,.jpeg"
                 @change="handleFileChange"
               />
               <p class="form-small">
-                For official clubs, you can upload a document or screenshot that shows the club is recognized by the university.
+                Upload a logo or representative image for your club.
               </p>
             </div>
 
             <div class="form-footer-row">
               <label class="checkbox-row">
-                <input type="checkbox" v-model="form.confirm" required />
+                <el-checkbox type="checkbox" v-model="form.confirm" required />
                 <span>
                   I confirm that I am an official representative of this club /
                   community and the information is correct.
@@ -240,16 +247,21 @@
               <i class="far fa-check-circle"></i>
               Your application was sent. We’ll review it as soon as possible 💚
             </div>
-          </form>
+          </el-form>
         </div>
       </section>
     </div>
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { apiFetch } from '../api'
+
+const router = useRouter()
 
 const form = reactive({
+  subject: "Yeni Kulüp Başvurusu",
   clubName: '',
   university: '',
   clubType: '',
@@ -261,7 +273,7 @@ const form = reactive({
   email: '',
   instagram: '',
   otherLink: '',
-  proof: null,
+  clubImage: null,
   confirm: false
 })
 
@@ -278,8 +290,18 @@ const studentNumberPlaceholder = computed(() => {
 })
 
 const handleFileChange = (event) => {
-  form.proof = event.target.files[0]
+  const file = event.target.files[0]
+  if (file) {
+    form.clubImage = file
+  }
 }
+
+onMounted(() => {
+  const token = localStorage.getItem('user_token')
+  if (!token) {
+    router.push('/login')
+  }
+})
 
 const validate = () => {
   Object.keys(errors).forEach(key => delete errors[key])
@@ -321,39 +343,89 @@ const validate = () => {
   return isValid
 }
 
-const handleSubmit = () => {
+const handleSubmit = async () => {
   if (!validate()) return
 
   // Simulate API call
   console.log("Submitting application:", form)
   
-  // Reset form
-  Object.keys(form).forEach(key => {
-    if (key === 'confirm') form[key] = false
-    else if (key === 'proof') form[key] = null
-    else form[key] = ''
-  })
+
   
   // Reset file input manually if needed
   const fileInput = document.getElementById('proof')
   if (fileInput) fileInput.value = ''
 
-  alert('Application sent to help@circleevent.app')
-  showSuccess.value = true
-  setTimeout(() => {
-    showSuccess.value = false
-  }, 4000)
+  let token = localStorage.getItem('user_token');
+  // let payload = JSON.stringify(form);
+  const fd = new FormData();
+  fd.append("clubName", form.clubName);
+  fd.append("university", form.university);
+  fd.append("clubType", form.clubType);
+  fd.append("category", form.category);
+  fd.append("shortDescription", form.description); // preserving duplication if backend expects it
+  fd.append("description", form.description);
+  fd.append("contactName", form.contactName);
+  fd.append("events", form.events);
+  fd.append("studentNumber", form.studentNumber);
+  fd.append("email", form.email);
+  fd.append("instagram", form.instagram);
+  fd.append("otherLink", form.otherLink);
+  
+  if (form.clubImage) {
+    fd.append("clubImage", form.clubImage);
+  }
+
+  // Log for verification
+  for (let [key, value] of fd.entries()) {
+    console.log(`FormData Apply: ${key} =`, value)
+  }
+
+
+
+  let response = await apiFetch('/api/general/communities/apply', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`
+    },
+    body: fd
+  })
+    if (response.status === 422) {
+      response.json().then(error => {
+        console.log('Validation hatası:', error);
+        debugger;
+      })
+    }    
+    let data = await response.json();
+    if (data.error) {
+      alert(data.error);
+      return;
+    }
+    if (data.message) {
+      alert(data.message);
+    }
+    console.log('Response from server:', data);
+    // Reset form
+    /*Object.keys(form).forEach(key => {
+      if (key === 'confirm') form[key] = false
+      else if (key === 'proof') form[key] = null
+      else form[key] = ''
+    })*/
+    showSuccess.value = true
+    setTimeout(() => {
+      showSuccess.value = false
+    }, 4000)
+
 }
 </script>
 
 <style scoped>
 /* Scoped styles ported from apply.html */
 :root {
-  --brand: #1b8f48;
-  --brand-600: #167a3d;
-  --brand-200: #e6f3e9;
+ --brand: #372D2D;    
+  --brand-600: #241D1D;   
+  --brand-200: #EBE8E8;
 
-  --page: #fefbea;
+  --page: #ffffff;
   --card: #ffffff;
 
   --ink: #153226;
@@ -372,57 +444,57 @@ const handleSubmit = () => {
 }
 
 .club-card {
-  border-radius: 28px;
-  background: linear-gradient(135deg, #e6f6e6, #ffe7d8);
-  padding: 26px 26px 24px;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+  border-radius: 20px;
+  background: #ffffff;
+  padding: 32px 0 24px;
   display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.5fr);
-  gap: 24px;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.4fr);
+  gap: 40px;
   align-items: flex-start;
 }
 
 .club-left-title {
-  font-size: 26px;
+  font-size: 32px;
   font-weight: 800;
-  color: #163828;
-  margin-bottom: 8px;
+  color: #111111;
+  margin-bottom: 12px;
+  letter-spacing: -0.02em;
 }
 
 .club-left-sub {
-  font-size: 13px;
-  color: #385445;
-  margin-bottom: 16px;
+  font-size: 15px;
+  color: #4b5563;
+  margin-bottom: 24px;
   line-height: 1.6;
 }
 
 .check-list {
   list-style: none;
   display: grid;
-  gap: 8px;
-  margin-bottom: 16px;
+  gap: 12px;
+  margin-bottom: 24px;
   padding-left: 0;
 }
 
 .check-list li {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: #234135;
+  gap: 10px;
+  font-size: 14px;
+  color: #374151;
 }
 
 .check-icon {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   border-radius: 999px;
-  background: #ffffffc8;
-  border: 1px solid #cfe5d5;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
-  color: #167a3d;
+  font-size: 10px;
+  color: #111111;
   flex-shrink: 0;
 }
 
@@ -439,14 +511,15 @@ const handleSubmit = () => {
 
 .info-pill i {
   font-size: 12px;
-  color: #167a3d;
+  color: #4B2E15;
 }
 
 .club-form-card {
   background: #ffffff;
-  border-radius: 18px;
-  padding: 16px;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+  border-radius: 16px;
+  padding: 32px 36px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
 }
 
 .section-label {
@@ -454,33 +527,33 @@ const handleSubmit = () => {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #4b6657;
+  color: #6b7280;
   margin-bottom: 6px;
 }
 
 .section-divider {
   height: 1px;
-  background: #edf3ee;
-  margin-bottom: 10px;
+  background: #e5e7eb;
+  margin-bottom: 16px;
 }
 
 .form-grid-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  gap: 16px;
 }
 
 .form-group {
-  margin-bottom: 10px;
+  margin-bottom: 16px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .form-label {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
-  color: #234135;
+  color: #374151;
 }
 
 .form-label span {
@@ -491,13 +564,22 @@ const handleSubmit = () => {
 .form-select,
 .form-textarea,
 .form-file {
-  border-radius: 10px;
-  border: 1px solid #d8eadb;
-  padding: 8px 10px;
-  font-size: 13px;
-  background: #fdfdf9;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  padding: 10px 12px;
+  font-size: 14px;
+  background: #ffffff;
   outline: none;
   width: 100%;
+  transition: all 0.2s ease;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus,
+.form-file:focus {
+  border-color: #111111;
+  box-shadow: 0 0 0 1px #111111;
 }
 
 .form-select {
@@ -526,34 +608,35 @@ const handleSubmit = () => {
 .checkbox-row {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 11px;
-  color: #385445;
+  gap: 8px;
+  font-size: 12px;
+  color: #4b5563;
 }
 
 .checkbox-row input {
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
   border-radius: 4px;
-  border: 1px solid #d8eadb;
+  border: 1px solid #e2e8f0;
 }
 
 .btn-primary {
   border: none;
   border-radius: 999px;
-  padding: 8px 20px;
-  font-size: 13px;
+  padding: 10px 24px;
+  font-size: 14px;
   font-weight: 600;
-  background: #1b8f48;
+  background: #111111;
   color: #ffffff;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .btn-primary i {
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .btn-primary:active {

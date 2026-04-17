@@ -64,8 +64,19 @@ const props = defineProps({
     default: 'nearest'
   }
 })
+const schools = ['All', 'AYBU', 'AU', 'ODTÜ', 'Hacettepe', 'Bilkent', 'Gazi Üni', 'Other']
 
-const schools = ['All', 'AYBU', 'ODTÜ', 'Hacettepe', 'Bilkent', 'Gazi Üni']
+const universityMap = {
+  "AYBU": "Ankara Yıldırım Beyazıt University",
+  "AU": "Ankara University",
+  "ODTÜ": "Orta doğu teknik Üniversitesi",
+  "Hacettepe": "Hacettepe Üniversitesi",
+  "Bilkent": "Bilkent Üniversitesi",
+  "Gazi Üni": "Gazi Üniversitesi",
+  "Other": "Other"
+};
+
+
 
 const emit = defineEmits(['update:activeType', 'update:sortOrder'])
 
@@ -100,7 +111,7 @@ watch(dateRange, (nv) => {
   margin-top: 0;
   margin-bottom: 16px;
   font-size: 18px;
-  color: #153226;
+  color: var(--brand-600);
 }
 
 .filter-group {
@@ -112,7 +123,7 @@ watch(dateRange, (nv) => {
   margin-bottom: 8px;
   font-size: 14px;
   font-weight: 600;
-  color: #153226;
+  color: var(--brand-600);
 }
 
 .filter-item {

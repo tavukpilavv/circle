@@ -9,8 +9,13 @@
         </p>
       </div>
 
-      <!-- BACKEND SHOULD ONLY RENDER THIS FOR ADMINS -->
-      <button v-if="isAdmin" id="openCreateEventModal" class="primary-btn" @click="openModal('create')">
+      <!-- Create button for admin + super_admin -->
+      <button
+        v-if="canCreateEvent"
+        id="openCreateEventModal"
+        class="primary-btn"
+        @click="openModal('create')"
+      >
         + Create Event
       </button>
     </section>
@@ -18,31 +23,33 @@
     <!-- FILTERS -->
     <section class="events-filters">
       <div class="filters-pills">
-        <button 
-          class="filter-pill" 
-          :class="{ 'is-active': activeFilter === 'upcoming' }" 
+        <button
+          class="filter-pill"
+          :class="{ 'is-active': activeFilter === 'upcoming' }"
           @click="activeFilter = 'upcoming'"
-        >Upcoming</button>
-        <button 
-          class="filter-pill" 
-          :class="{ 'is-active': activeFilter === 'past' }" 
+        >
+          Upcoming
+        </button>
+        <button
+          class="filter-pill"
+          :class="{ 'is-active': activeFilter === 'past' }"
           @click="activeFilter = 'past'"
-        >Past</button>
-        <button 
-          class="filter-pill" 
-          :class="{ 'is-active': activeFilter === 'all' }" 
+        >
+          Past
+        </button>
+        <button
+          class="filter-pill"
+          :class="{ 'is-active': activeFilter === 'all' }"
           @click="activeFilter = 'all'"
-        >All</button>
+        >
+          All
+        </button>
       </div>
     </section>
 
     <!-- EVENTS LIST -->
     <section class="events-list" id="eventsList">
-      <article 
-        v-for="event in filteredEvents" 
-        :key="event.id" 
-        class="event-card"
-      >
+      <article v-for="event in filteredEvents" :key="event.id" class="event-card">
         <div class="event-date-pill">
           <span class="event-date-day">{{ getDay(event.date) }}</span>
           <span class="event-date-month">{{ getMonth(event.date) }}</span>
@@ -52,60 +59,96 @@
           <h2 class="event-name">{{ event.name }}</h2>
           <p class="event-desc">{{ event.description }}</p>
           <div class="event-meta">
+            <span v-if="event.time"><i class="fas fa-clock"></i> {{ event.time }}</span>
             <span><i class="fas fa-location-dot"></i> {{ event.location }}</span>
             <span><i class="fas fa-users"></i> {{ event.capacity }} seats</span>
-            <span><i class="fas fa-users-viewfinder"></i> {{ event.club }}</span>
-            <span class="rating-meta" v-if="event.rating && new Date(event.date) < new Date().setHours(0,0,0,0)">
-              <i class="fas fa-star" style="color: #fcc419;"></i> 
+            <span><i class="fas fa-users-viewfinder"></i> {{ event.community_name }}</span>
+
+            <span
+              class="rating-meta"
+              v-if="event.rating && isPast(event)"
+            >
+              <i class="fas fa-star" style="color: #fcc419;"></i>
               {{ event.rating }} ({{ event.ratingCount }})
             </span>
           </div>
         </div>
 
         <div class="event-actions">
-          <button 
-            class="event-primary-btn" 
+          <button
+            class="event-primary-btn"
             @click="register(event)"
-            v-if="!isPast(event.date)"
+            v-if="!isPast(event)"
           >
             {{ event.registered ? 'Registered' : 'Register' }}
           </button>
 
-          <button v-if="isAdmin" class="event-edit-btn" type="button" @click="openModal('edit', event)">
+          <button
+            v-if="store.canEditEvent(event)"
+            class="event-edit-btn"
+            type="button"
+            @click="openModal('edit', event)"
+          >
             <i class="fas fa-pen"></i> Edit
           </button>
-          
-          <button v-if="isAdmin" class="event-delete-btn" type="button" @click="deleteEvent(event)">
+
+          <button
+            v-if="store.canEditEvent(event)"
+            class="event-delete-btn"
+            type="button"
+            @click="deleteEvent(event)"
+          >
             <i class="fas fa-trash"></i>
           </button>
         </div>
       </article>
-      
-      <div v-if="filteredEvents.length === 0" style="text-align:center; color:var(--muted); padding:20px;">
+
+      <div
+        v-if="filteredEvents.length === 0"
+        style="text-align:center; color:var(--muted); padding:20px;"
+      >
         No events found.
       </div>
     </section>
   </main>
 
   <!-- CREATE / EDIT EVENT MODAL -->
-  <div class="modal-overlay" :class="{ 'is-open': isModalOpen }" aria-hidden="true" @click.self="closeModal">
+  <div
+    class="modal-overlay"
+    :class="{ 'is-open': isModalOpen }"
+    aria-hidden="true"
+    @click.self="closeModal"
+  >
     <div class="modal-card">
       <button class="modal-close" aria-label="Close" @click="closeModal">
         <span>&times;</span>
       </button>
 
-      <h2 class="modal-title">{{ modalMode === 'create' ? 'Create Event' : 'Edit Event' }}</h2>
+      <h2 class="modal-title">
+        {{ modalMode === 'create' ? 'Create Event' : 'Edit Event' }}
+      </h2>
 
-      <div class="modal-upload-label">Upload Image</div>
-      <div class="modal-upload-box">
+        <div class="modal-upload-label">Upload Image <span style="font-weight:normal; color:#666; font-size:0.85em;">(Optional)</span></div>
+        <div class="modal-upload-box">
         <div class="upload-icon">
           <i class="fas fa-upload"></i>
         </div>
         <p class="upload-text">Max 120 MB, PNG, JPEG</p>
+
+        <!-- ✅ IMPORTANT: This input is now connected and saves a real File -->
         <label class="upload-btn">
           Browse File
-          <input type="file" hidden />
+          <input
+            type="file"
+            accept="image/png, image/jpeg"
+            hidden
+            @change="onFileChange"
+          />
         </label>
+
+        <p v-if="selectedFileName" style="margin-top: 10px; font-size: 12px; color: #475569;">
+          Selected: <b>{{ selectedFileName }}</b>
+        </p>
       </div>
 
       <form @submit.prevent="submitForm" class="modal-form">
@@ -122,19 +165,28 @@
             <input type="date" v-model="formData.date" required />
           </div>
         </div>
-
+        <div class="form-field">
+          <label>Time</label>
+          <input type="time" v-model="formData.time" required />
+        </div>
         <div class="form-row">
           <div class="form-field">
             <label>Location</label>
             <input type="text" v-model="formData.location" />
           </div>
 
+          <!-- ✅ REPLACED: no more hardcoded clubs -->
           <div class="form-field">
             <label>Club</label>
-            <select v-model="formData.club">
+            <select v-model="formData.community_id" :disabled="communitySelectLocked" required>
               <option value="">Select a club</option>
-              <option v-for="club in CLUBS" :key="club" :value="club">{{ club }}</option>
+              <option v-for="c in communityOptions" :key="c.id" :value="String(c.id)">
+                {{ c.name }}
+              </option>
             </select>
+            <small style="color: var(--muted); font-size: 11px;">
+              Admin: only your club. Super admin: all clubs.
+            </small>
           </div>
         </div>
 
@@ -159,247 +211,350 @@
       </form>
     </div>
   </div>
-  
+
   <ConfettiOverlay v-if="showCelebration" @close="showCelebration = false" />
 </template>
+
 <script setup>
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { store } from '../store.js'
 import ConfettiOverlay from '../components/ConfettiOverlay.vue'
 import { useToast } from "vue-toastification";
+import { apiFetch } from '../api' // this will include Authorization if you used my updated api.js
 
 const route = useRoute()
 const router = useRouter()
 const toast = useToast()
 const showCelebration = ref(false)
 
-const CLUBS = [
-  "Computer Science Club",
-  "Engineering Society",
-  "Alumni Association",
-  "Career Services"
-];
+/* =========================
+   ADMIN CHECK
+   ========================= */
+const isAdmin = ref(false)
 
-// Admin state
-const isAdmin = ref(false);
+/* =========================
+   COMMUNITY DROPDOWN (NEW)
+   ========================= */
+const communityOptions = ref([])              // [{id,name}]
+const communitySelectLocked = ref(false)      // admin gets only one option
+const selectedFile = ref(null)               // actual File
+const selectedFileName = ref("")
 
-// Filters
-const activeFilter = ref('upcoming');
-const searchQuery = ref('');
+const canCreateEvent = computed(() => {
+  const role = String(store.userRole || localStorage.getItem("user_role") || "").toLowerCase()
+  return role === "admin" || role === "super_admin" || role === "superadmin"
+})
 
-// Filtered events logic
-const filteredEvents = computed(() => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+// 🔥 Instantly update the event locally without reload
+const updateLocalEvent = (id, registeredState) => {
+  const target = store.events.find(e => e.id === id);
+  if (target) {
+    target.registered = registeredState; // Vue triggers re-render
+  }
+};
+
+async function loadCommunityOptions() {
+  const role = localStorage.getItem('user_role')
+  const isSuper = (role === 'super_admin' || role === 'superadmin')
   
-  let events = store.events;
+  let list = []
+  if (isSuper) {
+    // Super Admin: get ALL communities
+    const res = await apiFetch("/api/general/communities")
+    list = await res.json()
+  } else {
+    // Regular Admin: get ONLY my communities
+    const res = await apiFetch("/api/general/communities/options")
+    list = await res.json()
+  }
+  
+  communityOptions.value = Array.isArray(list) ? list : []
 
-  // 0. Filter by search query
+  // If regular admin has exactly 1 option => lock it
+  // Super admin always unlocked (unless 0 options, but that's edge case)
+  if (!isSuper && communityOptions.value.length === 1) {
+    formData.community_id = String(communityOptions.value[0].id)
+    communitySelectLocked.value = true
+  } else {
+    communitySelectLocked.value = false
+    // keep existing selection if any, else empty
+    if (!formData.community_id) formData.community_id = ""
+  }
+}
+
+function onFileChange(e) {
+  const file = e.target.files?.[0] || null
+  selectedFile.value = file
+  selectedFileName.value = file ? file.name : ""
+}
+
+/* =========================
+   FILTERS
+   ========================= */
+const activeFilter = ref('upcoming')
+const searchQuery = ref('')
+
+const filteredEvents = computed(() => {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
+  let events = store.events
+
   if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase();
+    const query = searchQuery.value.toLowerCase()
     events = events.filter(e => {
       try {
-        const name = (e.name || '').toLowerCase();
-        const desc = (e.description || '').toLowerCase();
-        const loc = (e.location || '').toLowerCase();
-        const club = (e.club || '').toLowerCase();
-        
-        return name.includes(query) || desc.includes(query) || loc.includes(query) || club.includes(query);
-      } catch (err) {
-        console.warn('Error filtering event:', e, err);
-        return false;
+        const name = (e.name || '').toLowerCase()
+        const desc = (e.description || '').toLowerCase()
+        const loc = (e.location || '').toLowerCase()
+        const club = (e.community_name || '').toLowerCase()
+        return name.includes(query) || desc.includes(query) || loc.includes(query) || club.includes(query)
+      } catch {
+        return false
       }
-    });
+    })
   }
 
-  // 1. Filter by route query "registered" if present
   if (route.query.filter === 'registered') {
-    events = events.filter(e => e.registered);
+    events = events.filter(e => e.registered)
   }
 
-  // 2. Filter by active pill (upcoming/past/all)
   return events.filter(event => {
-    const eventDate = new Date(event.date);
-    const isPast = eventDate < today;
-    
-    if (activeFilter.value === 'upcoming') return !isPast;
-    if (activeFilter.value === 'past') return isPast;
-    return true; // all
-  }).sort((a, b) => {
-    const dateA = new Date(a.date);
-    const dateB = new Date(b.date);
-    const isPastA = dateA < today;
-    const isPastB = dateB < today;
+  const dt = toEventDateTime(event)
+  const past = dt ? dt < new Date() : false
 
-    // 1. Upcoming comes before Past
-    if (!isPastA && isPastB) return -1;
-    if (isPastA && !isPastB) return 1;
+  if (activeFilter.value === 'upcoming') return !past
+  if (activeFilter.value === 'past') return past
+  return true
+}).sort((a, b) => {
+  const dtA = toEventDateTime(a)
+  const dtB = toEventDateTime(b)
+  const now = new Date()
 
-    // 2. Both Upcoming: Sort Ascending (Soonest -> Furthest)
-    if (!isPastA && !isPastB) {
-      return dateA - dateB;
-    }
+  const isPastA = dtA ? dtA < now : false
+  const isPastB = dtB ? dtB < now : false
 
-    // 3. Both Past: Sort Descending (Most Recent -> Oldest)
-    if (isPastA && isPastB) {
-      return dateB - dateA;
-    }
-    
-    return 0;
-  });
-});
+  if (!isPastA && isPastB) return -1
+  if (isPastA && !isPastB) return 1
 
-onMounted(() => {
-  if (localStorage.getItem('user_token')) {
-    const role = localStorage.getItem('user_role');
-    isAdmin.value = role === 'admin' || role === 'super_admin';
-  } else {
-    isAdmin.value = false;
-  }
+  if (!isPastA && !isPastB) return dtA - dtB
+  if (isPastA && isPastB) return dtB - dtA
+  return 0
+})
+})
+
+/* =========================
+   INITIAL LOAD
+   ========================= */
+onMounted(async () => {
+  // 0) auth sync (login -> route geçişlerinde role stale kalmasın)
+  store.refreshAuth()
+
+  // 1 communities load (edit/delete butonları için ŞART)
   
-  // Apply initial filter from route
-  if (route.query.filter === 'upcoming') {
-    activeFilter.value = 'upcoming';
-  } else if (route.query.filter === 'registered') {
-    activeFilter.value = 'all'; // Show all registered
-  }
 
-  // Apply search query
+  // 2 Events list
+  const res = await apiFetch("/api/general/events")
+  const data = await res.json()
+  store.events = data
+
+  // 3 Admin check (istersen kalsın, ama bu ref’i aslında artık kullanmıyorsun)
+  const role = String(localStorage.getItem('user_role') || "").toLowerCase()
+  isAdmin.value = role === 'admin' || role === 'super_admin' || role === 'superadmin'
+
+  // 4 route filters
+  if (route.query.filter === 'upcoming') activeFilter.value = 'upcoming'
+  else if (route.query.filter === 'registered') activeFilter.value = 'all'
+
   if (route.query.search) {
-    searchQuery.value = route.query.search;
-    activeFilter.value = 'all'; // Switch to all to show matches from past too? Or keep upcoming? Let's default to 'all' if searching.
+    searchQuery.value = route.query.search
+    activeFilter.value = 'all'
   }
-});
+})
 
 watch(() => route.query.filter, (newVal) => {
-   if (newVal === 'upcoming') {
-    activeFilter.value = 'upcoming';
-  } else if (newVal === 'registered') {
-    activeFilter.value = 'all';
-  }
-});
+  if (newVal === 'upcoming') activeFilter.value = 'upcoming'
+  else if (newVal === 'registered') activeFilter.value = 'all'
+})
 
 watch(() => route.query.search, (newVal) => {
-  searchQuery.value = newVal || '';
-  if (newVal) activeFilter.value = 'all';
-});
+  searchQuery.value = newVal || ''
+  if (newVal) activeFilter.value = 'all'
+})
 
-// Date Helpers
+const toEventDateTime = (event) => {
+  if (!event || !event.date) return null
+  const t = event.time && String(event.time).trim() ? String(event.time).trim() : "00:00"
+  const dt = new Date(`${event.date}T${t}`)
+  return isNaN(dt.getTime()) ? null : dt
+}
+
+/* =========================
+   DATE HELPERS
+   ========================= */
 const getDay = (dateStr) => {
-  const date = new Date(dateStr);
-  return date.getDate().toString().padStart(2, '0');
+  const date = new Date(dateStr)
+  return date.getDate().toString().padStart(2, '0')
 }
 
 const getMonth = (dateStr) => {
-  const date = new Date(dateStr);
-  return date.toLocaleString('default', { month: 'short' }).toUpperCase();
+  const date = new Date(dateStr)
+  return date.toLocaleString('default', { month: 'short' }).toUpperCase()
 }
 
-const isPast = (dateStr) => {
-  const date = new Date(dateStr);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return date < today;
+const isPast = (event) => {
+  const dt = toEventDateTime(event)
+  if (!dt) return false
+  return dt < new Date()
 }
 
-// Modal Logic
-const isModalOpen = ref(false);
-const modalMode = ref('create'); // 'create' or 'edit'
+/* =========================
+   MODAL LOGIC
+   ========================= */
+const isModalOpen = ref(false)
+const modalMode = ref('create')
+
 const formData = reactive({
   id: null,
   name: '',
   date: '',
+  time: '',
   location: '',
-  club: '',
+  community_id: '',   // ✅ NEW: use id not club name
   capacity: '',
   description: ''
-});
+})
 
-const openModal = (mode, event = null) => {
-  modalMode.value = mode;
+const openModal = async (mode, event = null) => {
+  modalMode.value = mode
+
+  // ✅ Always load DB communities when opening modal
+  await loadCommunityOptions()
+
   if (mode === 'edit' && event) {
-    formData.id = event.id;
-    formData.name = event.name;
-    formData.date = event.date;
-    formData.location = event.location;
-    formData.club = event.club;
-    formData.capacity = event.capacity;
-    formData.description = event.description;
+    formData.id = event.id
+    formData.name = event.name
+    formData.date = event.date
+    formData.time = event.time || ''
+    formData.location = event.location
+    formData.capacity = event.capacity
+    formData.description = event.description
+
+    // ✅ FIXED: Populate the community ID if it exists
+    formData.community_id = event.community_id ? String(event.community_id) : ""
   } else {
-    // Reset form
-    formData.id = null;
-    formData.name = '';
-    formData.date = '';
-    formData.location = '';
-    formData.club = '';
-    formData.capacity = '';
-    formData.description = '';
+    formData.id = null
+    formData.name = ''
+    formData.date = ''
+    formData.time = ''
+    formData.location = ''
+    formData.capacity = ''
+    formData.description = ''
+    // keep community_id if locked admin
+    if (!communitySelectLocked.value) formData.community_id = ''
   }
-  isModalOpen.value = true;
-  document.body.style.overflow = 'hidden';
+
+  // reset file on open
+  selectedFile.value = null
+  selectedFileName.value = ""
+
+  isModalOpen.value = true
+  document.body.style.overflow = 'hidden'
 }
 
 const closeModal = () => {
-  isModalOpen.value = false;
-  document.body.style.overflow = '';
+  isModalOpen.value = false
+  document.body.style.overflow = ''
 }
 
-const submitForm = () => {
-  if (modalMode.value === 'create') {
-    store.createEvent({
-      name: formData.name,
-      date: formData.date,
-      location: formData.location,
-      club: formData.club,
-      capacity: formData.capacity,
-      description: formData.description,
-      // Default image for now
-      image: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=800&q=80'
-    });
-  } else {
-    store.updateEvent({
-      id: formData.id,
-      name: formData.name,
-      date: formData.date,
-      location: formData.location,
-      club: formData.club,
-      capacity: formData.capacity,
-      description: formData.description
-    });
+/* =========================
+   SUBMIT (CREATE)
+   ========================= */
+const submitForm = async () => {
+  // 1. Kulüp seçili mi kontrolü
+  if (!formData.community_id) {
+    toast.error("Please select a club.");
+    return;
   }
-  closeModal();
-}
 
+  const fd = new FormData();
+  // Backend hem 'name' hem 'title' alabilsin diye ikisini de ekliyoruz
+  
+  fd.append("title", formData.name); 
+  fd.append("date", formData.date);
+  fd.append("time", formData.time);
+  fd.append("location", formData.location);
+  fd.append("capacity", formData.capacity);
+  fd.append("description", formData.description);
+  fd.append("community_id", formData.community_id);
+
+  if (selectedFile.value) {
+    fd.append("image", selectedFile.value);
+  }
+  try {
+    if (modalMode.value === 'create') {
+      // --- SADECE CREATE ---
+      const res = await apiFetch("/api/general/events/create", {
+        method: "POST",
+        body: fd
+      });
+      if (!res.ok) throw new Error("Creation failed");
+      toast.success("Event created! 🎉");
+    } else {
+      // --- SADECE EDIT ---
+      const success = await store.updateEvent(formData.id, fd);
+      if (!success) return; 
+      toast.success("Event updated! ✏️");
+    }
+
+    // Listeyi tazele ve kapat
+    const eventsRes = await apiFetch("/api/general/events");
+    store.events = await eventsRes.json();
+    closeModal();
+  } catch (err) {
+    toast.error(err.message || "Something went wrong");
+  }
+};
+
+/* =========================
+   DELETE + REGISTER
+   ========================= */
 const deleteEvent = (event) => {
   if (confirm('Are you sure you want to delete this event?')) {
-    store.deleteEvent(event.id);
+    store.deleteEvent(event.id)
   }
 }
 
-const register = (event) => {
-  // Check if user is logged in
+const register = async (event) => {
   if (!localStorage.getItem('user_token')) {
-    toast.warning('Please sign in to register.')
-    router.push('/login')
-    return
+    toast.warning('Please sign in to register.');
+    router.push('/login');
+    return;
   }
-  
-  // User is authenticated, proceed with registration
-  store.registerEvent(event);
-  
-  // If registration was successful (it toggles, so check if it's now true)
-  // Note: store.registerEvent modifies the object in place.
+
   if (event.registered) {
-    toast.success("Successfully registered for the event! 🎉")
-    showCelebration.value = true;
+    const ok = await store.unregisterEvent(event.id);
+    if (ok) {
+      updateLocalEvent(event.id, false); // 🔥 instant unregistered
+      toast.info("You have unregistered from the event.");
+    }
   } else {
-    toast.info("Unregistered from event.")
+    const ok = await store.registerEvent(event.id);
+    if (ok) {
+      updateLocalEvent(event.id, true); // 🔥 instant registered
+      toast.success("Successfully registered! 🎉");
+      showCelebration.value = true;
+    }
   }
-}
+};
+
+
 </script>
 
 <style scoped>
+/* (YOUR ORIGINAL CSS UNCHANGED BELOW) */
+
 /* ========= PAGE WRAP ========= */
 
 .page-wrap {
@@ -453,18 +608,27 @@ const register = (event) => {
 
 .filter-pill {
   border-radius: 20px;
-  border: 1px solid var(--outline);
-  background: #f7fbf8;
+  border: 1px solid #EBE8E8;
+  background: #F4F2F2;
   padding: 5px 14px;
   font-size: 12px;
   font-weight: 500;
-  color: #345243;
+  color: #372D2D;
   cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.filter-pill:hover {
+  background: #EAE6E6;
+  border-color: #DEDADA;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transform: translateY(-1px);
 }
 
 .filter-pill.is-active {
-  border-color: var(--brand);
-  background: #e1f3e3;
+  border-color: #372D2D;
+  background: #372D2D;
+  color: #ffffff;
 }
 
 /* ========= EVENT CARDS ========= */
@@ -499,13 +663,13 @@ const register = (event) => {
   width: 64px;
   height: 64px;
   border-radius: 14px;
-  background: #f0fdf4; /* Very light green */
-  border: 1px solid #dcfce7;
+  background: #F4F2F2;
+  border: 1px solid #EBE8E8;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: #15803d; /* Green-700 */
+  color: #372D2D;
   flex-shrink: 0;
 }
 
@@ -513,7 +677,7 @@ const register = (event) => {
   font-size: 20px;
   line-height: 1;
   font-weight: 800;
-  color: #166534; /* Green-800 */
+  color: #372D2D;
   margin-bottom: 2px;
 }
 
@@ -523,7 +687,7 @@ const register = (event) => {
   line-height: 1;
   text-transform: uppercase;
   font-weight: 700;
-  color: #15803d;
+  color: #372D2D;
 }
 
 /* middle */
@@ -539,17 +703,18 @@ const register = (event) => {
   font-size: 17px;
   font-weight: 800;
   line-height: 1.3;
-  color: #0f172a; /* Slate-900 */
+  color: #0f172a;
   margin: 0;
 }
 
 .event-desc {
   font-size: 14px;
-  color: #64748b; /* Slate-500 */
+  color: #64748b;
   line-height: 1.5;
   margin: 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -557,7 +722,7 @@ const register = (event) => {
 .event-meta {
   margin-top: 8px;
   font-size: 13px;
-  color: #475569; /* Slate-600 */
+  color: #4A3C3C;
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
@@ -572,7 +737,7 @@ const register = (event) => {
 }
 
 .event-meta i {
-  color: #64748b;
+  color: #4A3C3C;
   font-size: 14px;
 }
 
@@ -590,7 +755,7 @@ const register = (event) => {
 .event-primary-btn {
   border-radius: 999px;
   border: none;
-  background: #16a34a; /* Green-600 */
+  background: var(--brand);
   color: #ffffff;
   font-size: 13px;
   font-weight: 700;
@@ -602,7 +767,7 @@ const register = (event) => {
 }
 
 .event-primary-btn:hover {
-  background: #15803d;
+  background: var(--brand);
   transform: translateY(-1px);
 }
 
@@ -610,7 +775,7 @@ const register = (event) => {
   opacity: 0.8;
   cursor: default;
   transform: none;
-  background: #16a34a;
+  background: var(--brand);
 }
 
 .event-edit-btn {
@@ -670,14 +835,12 @@ const register = (event) => {
 .modal-card {
   width: 420px;
   max-width: 95%;
-  background: #fefbea;
+  background: #ffffff;
   border-radius: 18px;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2);
   padding: 20px 22px 18px;
   position: relative;
 }
-
-/* close button */
 
 .modal-close {
   position: absolute;
@@ -699,8 +862,6 @@ const register = (event) => {
   color: #f08c00;
 }
 
-/* titles */
-
 .modal-title {
   font-size: 18px;
   font-weight: 700;
@@ -713,12 +874,10 @@ const register = (event) => {
   margin-bottom: 6px;
 }
 
-/* upload box */
-
 .modal-upload-box {
   border-radius: 10px;
-  border: 1px dashed #cfd5c9;
-  background: #f8faef;
+  border: 1px dashed #e2e8f0;
+  background: #ffffff;
   padding: 24px 16px 18px;
   text-align: center;
   margin-bottom: 16px;
@@ -726,7 +885,7 @@ const register = (event) => {
 
 .upload-icon {
   font-size: 22px;
-  color: #707b82;
+  color: #111111;
   margin-bottom: 8px;
 }
 
@@ -739,14 +898,12 @@ const register = (event) => {
 .upload-btn {
   display: inline-block;
   border-radius: 20px;
-  background: #3b4450;
+  background: #111111;
   color: white;
   font-size: 12px;
   padding: 7px 22px;
   cursor: pointer;
 }
-
-/* form */
 
 .modal-form {
   font-size: 12px;
@@ -770,6 +927,7 @@ const register = (event) => {
   flex-direction: column;
   gap: 3px;
   margin-bottom: 8px;
+  min-width: 0; /* Prevents long select options from pushing the card width */
 }
 
 .form-field label {
@@ -777,11 +935,11 @@ const register = (event) => {
   color: #777f7a;
 }
 
-/* inputs + select */
-
 .modal-form input,
 .modal-form textarea,
 .modal-form select {
+  width: 100%;
+  max-width: 100%;
   border-radius: 4px;
   border: 1px solid #dadfd4;
   padding: 6px 8px;
@@ -789,6 +947,7 @@ const register = (event) => {
   font-family: inherit;
   outline: none;
   background: #ffffff;
+  box-sizing: border-box; /* Ensure padding doesn't add to width */
 }
 
 .modal-form input:focus,
@@ -796,8 +955,6 @@ const register = (event) => {
 .modal-form select:focus {
   border-color: var(--brand);
 }
-
-/* buttons */
 
 .modal-actions {
   margin-top: 10px;
@@ -834,39 +991,39 @@ const register = (event) => {
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;
   }
-  
+
   .event-card {
     display: flex;
     flex-direction: column;
     height: 100%;
   }
-  
+
   .event-main {
     flex: 1;
     margin: 10px 0;
   }
-  
+
   .event-card {
     display: grid;
     grid-template-columns: auto 1fr;
     grid-template-rows: auto auto;
     gap: 10px;
-    height: auto; /* Allow height to fit content */
+    height: auto;
     padding: 16px;
   }
-  
+
   .event-date-pill {
     grid-column: 1;
     grid-row: 1;
     margin-right: 0;
   }
-  
+
   .event-main {
     grid-column: 2;
     grid-row: 1;
     margin: 0;
   }
-  
+
   .event-actions {
     grid-column: 1 / -1;
     grid-row: 2;
