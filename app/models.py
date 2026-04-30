@@ -1,5 +1,6 @@
 from app import db
 from datetime import datetime
+from sqlalchemy import event
 
 # --- ARA TABLOLAR ---
 user_community = db.Table('user_community',
@@ -95,3 +96,15 @@ class Rating(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     __table_args__ = (db.UniqueConstraint('user_id', 'event_id', name='uq_user_event_rating'),)
+
+@event.listens_for(Community, 'after_delete')
+def update_admin_role_on_delete(mapper, connection, target):
+    """
+    Bug D-F01 Fix: Kulüp silindiğinde orphaned admin oluşmasını engeller.
+    """
+    if target.admin_id:
+        connection.execute(
+            User.__table__.update()
+            .where(User.__table__.c.id == target.admin_id)
+            .values(role='student')
+        )
