@@ -70,6 +70,7 @@ def create_app(config_class=Config):
     # Security Headers (TC_11)
     @app.after_request
     def add_security_headers(response):
+        response.headers['Strict-Transport-Security'] = 'max-age=0'
         response.headers['X-Frame-Options'] = 'SAMEORIGIN'
         response.headers['Content-Security-Policy'] = "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;"
         return response
