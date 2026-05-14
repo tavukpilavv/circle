@@ -67,6 +67,14 @@ def create_app(config_class=Config):
     # CORS Ayarı
     CORS(app, supports_credentials=True) 
 
+    # Security Headers (TC_11)
+    @app.after_request
+    def add_security_headers(response):
+        response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+        response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+        response.headers['Content-Security-Policy'] = "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;"
+        return response
+
     # Request Logger
     @app.before_request
     def log_request_info():
