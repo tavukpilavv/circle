@@ -3,7 +3,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart  # <--- BU EKSİKTİ, EKLENDİ!
 from email.header import Header
-from datetime import timedelta
+from datetime import datetime, timedelta
 from flask import Blueprint, jsonify, request, current_app
 from app import db
 from app.models import User
@@ -111,11 +111,29 @@ def login():
             or_(User.username == login_input, User.email == login_input)
         ).first()
         
-        if user and user.check_password(password):
-              if not user.is_verified:
+        if not user:
+            return jsonify({'error': 'Invalid username/email or password.'}), 401
+
+        # Kilit kontrolü
+        if user.locked_until:
+            if datetime.utcnow() < user.locked_until:
+                return jsonify({'error': 'Too many failed login attempts. Your account is temporarily locked. Please try again later.'}), 429
+            else:
+                user.failed_login_attempts = 0
+                user.locked_until = None
+                db.session.commit()
+
+        if user.check_password(password):
+            if not user.is_verified:
                 return jsonify({'error': 'Please verify your email address before logging in.'}), 403
-              access_token = create_access_token(identity=str(user.id))
-              return jsonify({
+            
+            # Başarılı girişte kilit değerlerini sıfırla
+            user.failed_login_attempts = 0
+            user.locked_until = None
+            db.session.commit()
+
+            access_token = create_access_token(identity=str(user.id))
+            return jsonify({
                 'message': 'Login successful.',
                 'access_token': access_token,
                 'user': {
@@ -131,7 +149,16 @@ def login():
                 }
             }), 200
             
-        return jsonify({'error': 'Invalid username/email or password.'}), 401
+        else:
+            # Şifre yanlışsa deneme sayısını artır
+            user.failed_login_attempts = (user.failed_login_attempts or 0) + 1
+            if user.failed_login_attempts >= 5:
+                user.locked_until = datetime.utcnow() + timedelta(minutes=15)
+                db.session.commit()
+                return jsonify({'error': 'Too many failed login attempts. Your account is temporarily locked. Please try again later.'}), 429
+                
+            db.session.commit()
+            return jsonify({'error': 'Invalid username/email or password.'}), 401
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

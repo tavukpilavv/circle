@@ -28,6 +28,10 @@ class User(db.Model):
 
     role = db.Column(db.String(20), default='student')
     avatar_url = db.Column(db.String(255))
+    
+    # Kilit mekanizması için eklendi
+    failed_login_attempts = db.Column(db.Integer, default=0)
+    locked_until = db.Column(db.DateTime, nullable=True)
 
     joined_communities = db.relationship('Community', secondary=user_community, backref=db.backref('members', lazy='dynamic'))
     registered_events = db.relationship('Event', secondary=user_event, backref=db.backref('participants', lazy='dynamic'))
