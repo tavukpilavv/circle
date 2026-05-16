@@ -686,13 +686,22 @@ def get_applications():
 @jwt_required()
 def approve_community():
     try:
+        # Yetki kontrolü — admin rolü doğrulama
+        current_user_id = get_jwt_identity()
+        current_user = User.query.get(current_user_id)
+
+        if not current_user or not (is_admin(current_user) or is_super_admin(current_user)):
+            return jsonify({"error": "Forbidden", "message": "Yetkisiz erişim."}), 403
+
+        # Yetki kontrolü — önce kullanıcıyı doğrula
         user_id = get_jwt_identity()
         user = User.query.get(user_id)
-        data = request.get_json() or {}
-        cid = data.get("id")
 
         if not user or not is_super_admin(user):
-            return jsonify({"error": "Yetkiniz yok"}), 403
+            return jsonify({"error": "Forbidden", "message": "Yetkisiz erişim."}), 403
+
+        data = request.get_json() or {}
+        cid = data.get("id")
 
         comm = Community.query.get(cid)
         if not comm:
