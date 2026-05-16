@@ -35,7 +35,7 @@ def register():
             email=data.get('email'),
             username=data.get('username'),
             major=data.get('major'),
-            is_verified=False
+            is_verified=True
         )
         user.set_password(data.get('password'))
         
@@ -124,9 +124,6 @@ def login():
                 db.session.commit()
 
         if user.check_password(password):
-            if not user.is_verified:
-                return jsonify({'error': 'Please verify your email address before logging in.'}), 403
-            
             # Başarılı girişte kilit değerlerini sıfırla
             user.failed_login_attempts = 0
             user.locked_until = None
