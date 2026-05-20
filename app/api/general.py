@@ -170,7 +170,22 @@ def create_event():
         time = request.form.get("time")
         location = request.form.get("location")
         description = request.form.get("description")
-        capacity = request.form.get("capacity")
+
+        data = request.get_json(silent=True) or {}
+        capacity = data.get("capacity") if isinstance(data, dict) else None
+        if capacity is None:
+            capacity = request.form.get("capacity")
+
+        if capacity is None or str(capacity).strip() == "":
+            return jsonify({"error": "Capacity must be at least 1"}), 400
+
+        try:
+            capacity = int(capacity)
+        except (ValueError, TypeError):
+            return jsonify({"error": "Capacity must be at least 1"}), 400
+
+        if capacity < 1:
+            return jsonify({"error": "Capacity must be at least 1"}), 400
 
         if not title:
             return jsonify({"error": "Etkinlik başlığı gereklidir."}), 400
@@ -180,7 +195,7 @@ def create_event():
             date=date,
             time=time,
             location=location,
-            capacity=int(capacity) if capacity and capacity.isdigit() else 0,
+            capacity=capacity,
             description=description,
             community_id=target_community_id,
             image_url=image_url
@@ -205,6 +220,9 @@ def register_event(id):
 
         if not user or not event:
             return jsonify({"error": "Hata"}), 404
+
+        if event.capacity is not None and event.participants.count() >= event.capacity:
+            return jsonify({"error": "Event is full"}), 400
 
         if event in user.registered_events:
             return jsonify({"message": "Zaten kayıtlısınız"}), 400
