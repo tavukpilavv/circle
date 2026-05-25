@@ -71,7 +71,7 @@ def create_app(config_class=Config):
     @app.after_request
     def add_security_headers(response):
         response.headers['Strict-Transport-Security'] = 'max-age=0'
-        response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+        response.headers['X-Frame-Options'] = 'DENY'
         response.headers['X-Content-Type-Options'] = 'nosniff'
         
         # Cache-control Directives for API paths
