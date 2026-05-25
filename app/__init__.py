@@ -65,13 +65,20 @@ def create_app(config_class=Config):
     mail.init_app(app)
 
     # CORS Ayarı
-    CORS(app, supports_credentials=True) 
+    CORS(app, supports_credentials=True, origins=[app.config.get('FRONTEND_URL', 'https://circleevent.app'), "https://www.circleevent.app", "http://localhost:5173", "http://127.0.0.1:5173"])
 
     # Security Headers (TC_11)
     @app.after_request
     def add_security_headers(response):
         response.headers['Strict-Transport-Security'] = 'max-age=0'
         response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+        response.headers['X-Content-Type-Options'] = 'nosniff'
+        
+        # Cache-control Directives for API paths
+        if request.path.startswith('/api/'):
+            response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+            response.headers['Pragma'] = 'no-cache'
+            
         return response
 
     # Request Logger
