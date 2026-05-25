@@ -65,27 +65,13 @@ def create_app(config_class=Config):
     mail.init_app(app)
 
     # CORS Ayarı
-    CORS(app, supports_credentials=True, origins=[app.config.get('FRONTEND_URL', 'http://localhost:5173'), "http://127.0.0.1:5173"])
+    CORS(app, supports_credentials=True) 
 
     # Security Headers (TC_11)
     @app.after_request
     def add_security_headers(response):
-        # Strict-Transport-Security Disabled (as requested, leaving as max-age=0)
         response.headers['Strict-Transport-Security'] = 'max-age=0'
-        # Anti-clickjacking (X-Frame-Options)
         response.headers['X-Frame-Options'] = 'SAMEORIGIN'
-        # Missing X-Content-Type-Options
-        response.headers['X-Content-Type-Options'] = 'nosniff'
-        # Content Security Policy (CSP) Header Not Set
-        response.headers['Content-Security-Policy'] = "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https: http:; img-src 'self' data: blob: https: http:; font-src 'self' data: https: http:; connect-src 'self' http://localhost:* ws://localhost:* wss://* https:; frame-ancestors 'self';"
-        
-        # Cache-control Directives
-        if request.path.startswith('/api/'):
-            response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
-            response.headers['Pragma'] = 'no-cache'
-        else:
-            response.headers['Cache-Control'] = 'no-cache, must-revalidate'
-            
         return response
 
     # Request Logger
