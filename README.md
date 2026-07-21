@@ -92,14 +92,15 @@ Database
 ### Clone repositories
 
 ```bash id="4t1z8k"
-git clone <frontend-repo-link>
-git clone <backend-repo-link>
+git clone https://github.com/malakann9/new.git
+git clone https://github.com/ezgiszr/circle.git
 ```
 
 ### Frontend
 
 ```bash id="a2k91p"
-cd frontend
+cd new
+git checkout project
 npm install
 npm run dev
 ```
@@ -107,7 +108,8 @@ npm run dev
 ### Backend
 
 ```bash id="92lxks"
-cd backend
+cd circle
+git checkout backend-development
 pip install -r requirements.txt
 flask run
 ```
